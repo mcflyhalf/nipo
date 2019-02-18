@@ -4,9 +4,12 @@ A classroom (or any other room) attendance tracker that uses facial recognition
 This is a very new project so the Readme is currently super sketchy. However, I am trying to ensure it contains the info necessary at ths point. I am huge on documentation so be sure that as it takes shape it will be documented extensively.
 
 ## Tools to install
-1. [Git]() *Sorry I am being so obvious*
-1. [Python3]()
-1. [Postgresql]() *Use pip to install this*
-1. Face_recognition () *See the module's READMe.md for installation instructions*
-1. [Virtualenv (recommended)]()
+1. [Git](https://www.atlassian.com/git/tutorials/install-git) *Sorry I am being so obvious*
+1. [Python3](https://www.python.org/downloads/)
+1. [Postgresql](https://www.postgresql.org/download/)
+1. [Virtualenv (recommended)](https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3)
+1. sqlalchemy >Terminal/cmd command *pip install sqlalchemy*
+1. Face_recognition (https://github.com/ageitgey/face_recognition) *See the module's READMe.md for installation instructions*
+
+
 
