@@ -87,3 +87,9 @@ while True:
 # Release handle to the webcam
 video_capture.release()
 cv2.destroyAllWindows()
+
+
+#Create Class to capture frame (this should work from a video source or maybe a still image)
+
+
+#Create class to recognise faces in frame
