@@ -1,5 +1,0 @@
-# import relevant libraries from sqlalchemy DB ORM
-
-#Create Connection to DB
-
-#Create lesson class (corresponds to DB table that has a list of lessons. We #expect that each lesson will in turn have qualities like start time, end time, venue, date and the class that should attend this lesson etc)
