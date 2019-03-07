@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, Integer, DateTime, MetaData, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 #from sqlalchemy.types import JSON
 
 Base = declarative_base()
@@ -22,8 +23,11 @@ class Module(Base):
 	end_date =  Column(DateTime(), nullable = False)
 	start_time =  Column(DateTime(), nullable = False)
 	end_time = Column(DateTime(), nullable = False)
-	class_days = 
-	venue_code = 	#Relate this to the venue pri key see https://overiq.com/sqlalchemy-101/defining-schema-in-sqlalchemy-orm/
+	class_days = Column(String(7))
+	venue_code = Column(String, ForeignKey("venue.code"))	#Relate this to the venue pri key see https://overiq.com/sqlalchemy-101/defining-schema-in-sqlalchemy-orm/
+	course_code = Column(String, ForeignKey("course.uid"))
+	venues = relationship("Venue", uselist=False)
+	courses = relationship("Course") 
 
 
 
@@ -35,7 +39,8 @@ class Student(Base):
 
 	id = Column(Integer, primary_key=True)
 	name = Column(String,nullable=False)
-	course_uid = 		#Relate to the course UID
+	course_uid = Column(String, ForeignKey("course.uid"), nullable=False)		#Relate to the course UID
+	course = relationship("Course", uselist=False)
 
 
 
@@ -50,8 +55,7 @@ class Course(Base):
 
 	uid = Column(String, primary_key=True)
 	name = Column(String, nullable=False)
-	modules = 
-
+	
 
 
 #Venues table. The table that holds properties of the venues where classes may be held. 
