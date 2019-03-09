@@ -27,18 +27,29 @@ class NipoConfig:
 
 
 	def create_tables(self, engine):
+		tables = Base.metadata.sorted_tables
 		#Create (but not populate all tables in the db schema)
 		logger.info("Attempting to create tables")
 		#Do stuff here using metadata from the classes in the schema
-		Base.metadata.create_all(engine)
+		for table in tables:
+			table = [table]
+			logger.info("Creating table *{}*".format(table[0].name))
+			Base.metadata.create_all(engine, tables=table)
+			logger.info("Table *{}* created successfully".format(table[0].name))
 
 		logger.info("Tables Created successfully!")
 
 	#Delete all tables (DB should have been created in advance)
 	def drop_tables(self, engine):
+		tables = Base.metadata.sorted_tables
+		tables.reverse()
 		logger.warn("Deleting all tables")
 		#Do dangerous stuff here and log as each table is deleted
-
+		for table in tables:
+			table = [table]
+			logger.warn("Deleting table *{}*".format(table[0].name))
+			Base.metadata.drop_all(engine, tables=table)
+			logger.info("Table *{}* deleted successfully".format(table[0].name))
 
 		logger.info("Tables deleted successfully!")
 
