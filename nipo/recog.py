@@ -9,6 +9,8 @@ import cv2
 # OpenCV is *not* required to use the face_recognition library. It's only required if you want to run this
 # specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
 
+#Just to reiterate, this example wont be used as is, we shall create classes to break up the various tasks that need to be performed in facial recognition
+
 # Get a reference to webcam #0 (the default one)
 video_capture = cv2.VideoCapture(0)
 
@@ -89,7 +91,14 @@ video_capture.release()
 cv2.destroyAllWindows()
 
 
-#Create Class to capture frame (this should work from a video source or maybe a still image)
 
+#The process of face recognition given a frame of video, has the following basic steps (these all need to be decoupled from each other i.e. performed by different functions/classes):
+#1. Detect faces in the image
+#2. Align faces so they are all horizontal and properly zoomed
+#Then for each face:
+#3. Compute embeddings for the detected face
+#4. Compare this embedding to the embeddings for known faces in db (These were pre-computed when the face was first added
 
-#Create class to recognise faces in frame
+#This whole process may require there to be a training directory where face images to be used for training will reside
+
+#An example implementation of this is what is above the description. A second example would be what is shown in https://www.pyimagesearch.com/2018/09/24/opencv-face-recognition/ . The second implementation has more nuts and bolts which means it is more flexible. It also allows you to do your own training so we could train with black faces as well. I suspect it will be more accurate but requires more work to implement.

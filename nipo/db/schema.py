@@ -14,6 +14,7 @@ Base = declarative_base()
 #Create Module class (corresponds to DB table that has a list of modules. We expect that each module will in turn have qualities like start date, end date, class days (are its classes on a Mon, Tue, Wed etc), start time(s), end time(s)(in case of multiple occurences of a module in a week, venue(s), start date, end date(s) and the class that should attend this lesson etc)
 #---------------------MODULE TABLE------------------------
 #module code | module name | start date | end date |class days | Start time | End time | venue code | 
+#TODO: Remove start/end date/time from this class. These options will then be fetched from Google Calendar so that they can be changed and moved around flexibly
 class Module(Base):
 	__tablename__ = "module"
 

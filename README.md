@@ -8,7 +8,7 @@ This is a very new project so the Readme is currently super sketchy. However, I 
 1. [Python3](https://www.python.org/downloads/)
 1. [Postgresql](https://www.postgresql.org/download/)
 	* Also a [Useful section on understanding roles and users in postgres](https://www.digitalocean.com/community/tutorials/how-to-use-roles-and-manage-grant-permissions-in-postgresql-on-a-vps--2#how-to-log-in-as-a-different-user-in-postgresql)
-1. [Virtualenv (recommended)](https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3)
+1. [Virtualenv ](https://help.dreamhost.com/hc/en-us/articles/115000695551-Installing-and-using-virtualenv-with-Python-3)(recommended)
 1. sqlalchemy >Terminal/cmd command *pip install sqlalchemy*
 1. Face_recognition (https://github.com/ageitgey/face_recognition) *See the module's READMe.md for installation instructions*
 
