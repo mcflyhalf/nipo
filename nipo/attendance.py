@@ -20,12 +20,15 @@ class MarkAttendance:
 		pass
 
 	def markpresent(self,timearrived):
+		#Make sure to log this action
 		pass
 
 	def markabsent(self,timearrived=None):
+		#Make sure to log this action
 		pass
 
 	def marklate(self,timearrived):
+		#Make sure to log this action
 		pass
 
 class ModuleAttendance:
@@ -38,10 +41,12 @@ class ModuleAttendance:
 
 	def createattendance(self):
 		#Create the first column of the attendance record for this module. The first column is a list of student ID's for all the students registered for this module
+		#Make sure to log this action
 		pass
 
 	def persistattendance(self,attendancerecord,engine):
 		#Pickle the attendance record and persist it to the appropriate table in the engine
+		#Make sure to log this action
 		pass
 
 	def getattendance(self,engine):
