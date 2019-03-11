@@ -9,6 +9,8 @@
 
 from nipo import get_logger, test_session 
 from nipo.db.schema import Student, Course, Module
+from datetime import datetime
+import pickle
 
 
 
@@ -25,15 +27,15 @@ class MarkAttendance:
 		'''Create a single attendance record for a student in a module'''
 		pass
 
-	def markpresent(self,timearrived):
+	def markPresent(self,timearrived):
 		#Make sure to log this action
 		pass
 
-	def markabsent(self,timearrived=None):
+	def markAbsent(self,timearrived=None):
 		#Make sure to log this action
 		pass
 
-	def marklate(self,timearrived):
+	def markLate(self,timearrived):
 		#Make sure to log this action
 		pass
 
@@ -54,33 +56,87 @@ class ModuleAttendance:
 
 		if not self.module.attendance:
 			logger.info("Creating and persisting attendance record for module >>{}<<".format(self.module.name))
-			attendance_record = self.createattendance()
+			attendance_record = self.createAttendance()
 			logger.debug("Created attendance record for module >>{}<<".format(self.module.name))
-			self.persistattendance(attendance_record, test_session)
+			self.persistAttendance(attendance_record)
 			logger.debug("Persisted attendance record for module >>{}<<".format(self.module.name))
 			logger.info("Created and persisted attendance record for module >>{}<<".format(self.module.name))
 
 	#This function breaks if a module is attached to more than one course e.g if maths2 is done by both TIE and EMT. To be fixed in version 3
-	def createattendance(self):
+	def createAttendance(self):
 		#Create the first column of the attendance record for this module. The first column is a list of student ID's for all the students registered for this module
 		#Make sure to log this action
 		modulecourse = self.module.course_code
 		modulestudents = self.session.query(Student).filter(Student.course_uid == modulecourse)
 		attendance_list = []
-		attendance_list.append("Student ID's")
+		attendance_list.append(list())
+		attendance_list[0].append("Dates\\Student ID's")
 		for student in modulestudents:
-			attendance_list.append(student.id)
+			attendance_list[0].append(student.id)
 		
 		return attendance_list
 
-	def persistattendance(self,attendancerecord,session):
+	def persistAttendance(self,attendancerecord):
 		#Pickle the attendance record and persist it to the appropriate table in the db using the session provided
 		#Make sure to log this action
-		pass
+		logger.debug("Pickling module >>{}<< attendance record".format(self.module.name))
+		pickled_attendance = pickle.dumps(attendancerecord)
+		logger.debug("Module >>{}<< attendance record sucessfully pickled".format(self.module.name))
+		self.module.attendance = pickled_attendance
+		logger.debug("Successfully attached attendance record to module >>{}<<".format(self.module.name))
+		self.session.add(self.module)
+		self.session.commit()
+		logger.info("Attendance for module >>{}<< updated".format(self.module.name))
 
-	def getattendance(self,engine):
+	def getAttendance(self):
 		#get the attendance record for this module
-		pass
+		pickled_attendance = self.module.attendance
+		unpickled_attendance = pickle.loads(pickled_attendance)
+		assert type(unpickled_attendance) is list
+		return unpickled_attendance
+
+	def createClassSession(self,sessiondate):
+		assert type(sessiondate) is datetime 
+		currentAttendance = self.getAttendance()
+
+		for record in currentAttendance:
+			if record[0] == sessiondate:
+				return	#The session already exists
+
+		currentAttendance.append(list())
+		currentAttendance[-1].append(sessiondate)
+
+		for cnt in range(len(currentAttendance[0])):
+			currentAttendance[-1].append(0)
+
+		return currentAttendance
+
+	def updateAttendance(self, studentid, sessiondate, present=False):
+		assert type(sessiondate) is datetime
+		currentAttendance = self.getAttendance()
+
+		existingDate = False
+		for record in currentAttendance:
+			if record[0] is sessiondate:
+				existingDate = True
+				dateindex = currentAttendance.index(record)
+				break
+
+		if not existingDate:
+			raise ValueError("Provided date has no class session")
+
+		#Here, check that the student with this id is part of this course: can be done in 2 ways: 1. Check that their student id appears in the coure attendance list or 2. Check the module course and confirm that the student is in the same course. Option1 is currently being implemented
+
+		if not studentid in currentAttendance[0]:
+			raise ValueError("Student with id>>{}<< not registered to module >>{}<<".format(studentid, self.module,name))
+
+		studindex = currentAttendance[0].index(studentid)
+		if present:
+			currentAttendance[dateindex][studindex] = 1
+		else:
+			currentAttendance[dateindex][studindex] = 0
+
+		return currentAttendance
 
 class StudentAttendance:
 	'''A class currently primarily for getting the attendance record of an individual student'''
@@ -91,4 +147,7 @@ class StudentAttendance:
 		pass
 
 	def get_attendance(self):
+		pass
+
+	def mark_attendance(self, modulecode, moduledate):
 		pass
