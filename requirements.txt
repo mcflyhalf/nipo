@@ -1,1 +1,10 @@
-#Populate me at some point when the project has advanced a bit
+Click==7.0
+dlib==19.16.0
+face-recognition==1.2.3
+face-recognition-models==0.3.0
+-e git+git@github.com:mcflyhalf/nipo.git@b33edf4b2d497443a59f5218032803c107f1c941#egg=nipo
+numpy==1.16.1
+Pillow==5.4.1
+psycopg2==2.7.7
+psycopg2-binary==2.7.7
+SQLAlchemy==1.2.18
