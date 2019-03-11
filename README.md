@@ -12,5 +12,10 @@ This is a very new project so the Readme is currently super sketchy. However, I 
 1. sqlalchemy >Terminal/cmd command *pip install sqlalchemy*
 1. Face_recognition (https://github.com/ageitgey/face_recognition) *See the module's READMe.md for installation instructions*
 
+## After installation
+After installing these tools, on your terminal, cd into the place where you would like your local copy of nipo to reside (you don't need to create a directory, one will be created for you) then 
+> git clone https://github.com/mcflyhalf/nipo
+This should copy all the contents of the nipo repository into a new folder called nipo on your system.
+
 
 
