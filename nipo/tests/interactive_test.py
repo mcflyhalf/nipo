@@ -52,3 +52,5 @@ for student in students:
 
 for module in modules:
 	test_session.add(module)
+
+test_session.commit()
