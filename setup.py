@@ -14,7 +14,7 @@ setup(
     packages= find_packages(),
 )
 
-logger = get_logger("nipo_log")
+logger = get_logger("nipo_setup")
 
 logger.info("Nipo python package successfuly installed")
 
