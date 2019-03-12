@@ -54,7 +54,7 @@ class ModuleAttendance:
 		if not self.module:
 			raise ValueError("The module code >>{}<< does not exist".format(self.modulecode))
 
-		if (not self.module.attendance) or (self.module.attendance == pickle.dumps(None)):
+		if not self.module.attendance:
 			logger.info("Creating and persisting attendance record for module >>{}<<".format(self.module.name))
 			attendance_record = self.createAttendance()
 			logger.debug("Created attendance record for module >>{}<<".format(self.module.name))
@@ -63,9 +63,16 @@ class ModuleAttendance:
 			logger.info("Created and persisted attendance record for module >>{}<<".format(self.module.name))
 
 	#This function breaks if a module is attached to more than one course e.g if maths2 is done by both TIE and EMT. To be fixed in version 3
-	def createAttendance(self):
+	def createAttendance(self, force=False):
 		#Create the first column of the attendance record for this module. The first column is a list of student ID's for all the students registered for this module
+		#Unless specified to force create attendance, do not do anything if module already contains an attendance record
 		#Make sure to log this action
+
+		if not force:
+			if self.module.attendance:
+				logger.debug("Skipping creation of attendance for module >>{}<< code >>{}<< since an attendance record already exist. Use Force = True to create attendance record anyway".format(self.module.name, self.module.code))
+				return	self.module.attendance   #Do not create any record since one already exists. Instead, return the existing one
+
 		modulecourse = self.module.course_code
 		modulestudents = self.session.query(Student).filter(Student.course_uid == modulecourse)
 		attendance_list = []
@@ -101,6 +108,7 @@ class ModuleAttendance:
 
 		for record in currentAttendance:
 			if record[0] == sessiondate:
+				logger.debug("Session not created, date {} already exists in attendance record for {}".format(sessiondate,self.module.name))
 				return	#The session already exists
 
 		currentAttendance.append(list())
@@ -140,16 +148,19 @@ class ModuleAttendance:
 
 class StudentAttendance:
 	'''A class currently primarily for getting the attendance record of an individual student'''
-	def __init__(self, student_id):
+	def __init__(self, student_id, session=test_session):
 		#Check whether the student id exists in the db. 
 		self.student_id = student_id
+
 
 		pass
 
 	def get_attendance(self):
+		#Get all modules that the student is a part of then get their attendance in each of them
 		pass
 
-	def mark_attendance(self, modulecode, moduledate):
+	def mark_attendance(self, modulecode, moduledate, present=False):
+		#Mark the attendance of a student in this module on this date
 		pass
 
 
