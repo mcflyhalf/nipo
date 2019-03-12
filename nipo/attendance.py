@@ -54,7 +54,7 @@ class ModuleAttendance:
 		if not self.module:
 			raise ValueError("The module code >>{}<< does not exist".format(self.modulecode))
 
-		if not self.module.attendance:
+		if (not self.module.attendance) or (self.module.attendance == pickle.dumps(None)):
 			logger.info("Creating and persisting attendance record for module >>{}<<".format(self.module.name))
 			attendance_record = self.createAttendance()
 			logger.debug("Created attendance record for module >>{}<<".format(self.module.name))
@@ -109,7 +109,7 @@ class ModuleAttendance:
 		for cnt in range(len(currentAttendance[0])):
 			currentAttendance[-1].append(0)
 
-		return currentAttendance
+		self.persistAttendance(currentAttendance)
 
 	def updateAttendance(self, studentid, sessiondate, present=False):
 		assert type(sessiondate) is datetime
@@ -117,7 +117,7 @@ class ModuleAttendance:
 
 		existingDate = False
 		for record in currentAttendance:
-			if record[0] is sessiondate:
+			if record[0] == sessiondate:
 				existingDate = True
 				dateindex = currentAttendance.index(record)
 				break
@@ -128,7 +128,7 @@ class ModuleAttendance:
 		#Here, check that the student with this id is part of this course: can be done in 2 ways: 1. Check that their student id appears in the coure attendance list or 2. Check the module course and confirm that the student is in the same course. Option1 is currently being implemented
 
 		if not studentid in currentAttendance[0]:
-			raise ValueError("Student with id>>{}<< not registered to module >>{}<<".format(studentid, self.module,name))
+			raise ValueError("Student with id>>{}<< not registered to module >>{}<<".format(studentid, self.module.name))
 
 		studindex = currentAttendance[0].index(studentid)
 		if present:
@@ -136,7 +136,7 @@ class ModuleAttendance:
 		else:
 			currentAttendance[dateindex][studindex] = 0
 
-		return currentAttendance
+		self.persistAttendance(currentAttendance)
 
 class StudentAttendance:
 	'''A class currently primarily for getting the attendance record of an individual student'''
@@ -151,3 +151,27 @@ class StudentAttendance:
 
 	def mark_attendance(self, modulecode, moduledate):
 		pass
+
+
+
+#FRom here onwards, these are tests to check that the stuff here works. They will be transferred to proper test classes later
+if __name__ == "__main__":
+	module_code = "ETI001"
+	student_id = 6
+	mod = ModuleAttendance(module_code)
+
+	print("On creation, attendance record is \n {}".format(mod.getAttendance()))
+
+	sd = datetime(2019,4,30,10,30)
+
+	mod.createClassSession(sd)
+
+	print("On creation of class session, attendance record is \n {}".format(mod.getAttendance()))
+
+	for studID in range(2,11,2):
+		mod.updateAttendance(studID, sd, present=True)
+
+	print("After marking some students present, attendance record is \n {}".format(mod.getAttendance()))
+
+
+
