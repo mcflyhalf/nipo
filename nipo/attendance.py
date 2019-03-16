@@ -22,6 +22,8 @@ logger = get_logger("nipo_attendance")
 # As an aside, the reason why the attendance record is kept as a list and not its own table in the db is for flexibility. We are assuming that we dont know all the dates for all the classes in the future. Some classes may be cancelled and others moved. If the attendance was a table in the DB, it would be very cumbersome, dangerous and complicated to continually edit the table's schema. As a list, it is trivial to add a new "column". In effect we have traded speed for flexibility.
 
 # In future, maybe consider moving to a non relational DB
+
+#Ignore this class for now. I ee no use for it. Currently use ModuleAttendance and StudentAttendance. It may be useful in some way in future though
 class MarkAttendance:
 	def __init__(self, studentid, modulecode, moduledate):
 		'''Create a single attendance record for a student in a module'''
@@ -120,6 +122,7 @@ class ModuleAttendance:
 		self.persistAttendance(currentAttendance)
 
 	def updateAttendance(self, studentid, sessiondate, present=False):
+		'''Update the attendance record for studentid on the date sessiondate to the status present'''
 		assert type(sessiondate) is datetime
 		currentAttendance = self.getAttendance()
 
@@ -156,11 +159,17 @@ class StudentAttendance:
 		pass
 
 	def get_attendance(self):
-		#Get all modules that the student is a part of then get their attendance in each of them
+		#Get all modules that the student is a part of then get their attendance in each of them. IF you can create the function mark_attendance, this will be simple
 		pass
 
 	def mark_attendance(self, modulecode, moduledate, present=False):
 		#Mark the attendance of a student in this module on this date
+		#What you will need ot do is:
+		# 1. confirm that the student and module actually exist		
+		# 2. Confirm that the student is registered for the module
+		# 3. Check that the date provided already contains a class session(lesson). IF not, raise an error and DO NOT create a new one instead as this opens us up to huge errors in future
+		# 4. Iff all these conditions are satisfied, get the attendance record from the db. Do this by creating an instance of ModuleAttendance
+		# 5. In this instance of Module Attendance, use the updateAttendance function of the instance to update the student's attendance  
 		pass
 
 
