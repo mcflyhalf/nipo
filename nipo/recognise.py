@@ -1,9 +1,10 @@
-
+from nipo import get_configs
 import face_recognition
 import cv2
 
+config = get_configs
 
-faces_folder = ""	#This should be taken to a global config file
+faces_folder = 	config['faces directory']
 
 class Face:
 	#A class that carries functions which are the different things we can do once we have an image of a face

@@ -2,6 +2,18 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import logging
 import os
+import configparser
+
+config_filename = 'nipo_config.cfg'
+
+def get_configs(defaults = True):
+	config = configparser.ConfigParser()
+	config.read(os.path.join(os.path.cwd(),'..',config_filename))
+	if defaults:
+		return config['DEFAULT']
+	else
+		return config
+
 
 def get_logger(loggerName):
 	log = logging.getLogger(loggerName)
