@@ -174,7 +174,7 @@ class StudentAttendance:
 
 
 
-#FRom here onwards, these are tests to check that the stuff here works. They will be transferred to proper test classes later
+#From here onwards, these are tests to check that the stuff here works. They will be transferred to proper test classes later
 if __name__ == "__main__":
 	module_code = "ETI001"
 	student_id = 6
@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
 	print("On creation, attendance record is \n {}".format(mod.getAttendance()))
 
-	sd = datetime(2019,4,30,10,30)
+	sd = datetime(2029,4,30,10,30)
 
 	mod.createClassSession(sd)
 
