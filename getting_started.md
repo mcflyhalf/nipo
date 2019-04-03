@@ -1,11 +1,12 @@
-#Preliminary Info
+# Preliminary Info
 This is a getting started guide for new collaborators to be able to run existing functionality and understand how the whole thing works so they can then build out more functionality.
 
 Before reading this, you should read the README to understand the purpose of this project.
 
-#Doing basic things
+# Doing basic things
 This next bit is going to cover using each of the existing bits of functionality in the project.
-##Marking module attendance
+
+## Marking module attendance
 Run the file ```attendance.py``` found in ```nipo/```.
 This file will print out some status messages to your console saying what it is doing (and you can peek into the file to see for yourself).
 After running this file, check your ```nipo_test``` database and you should find that:
@@ -14,6 +15,7 @@ After running this file, check your ```nipo_test``` database and you should find
 1. Some students have been marke as having attended this class session. (Again you can only actually see this if you unpickle the data)
 
 Now, run this file again but this time in a REPL. You can do this using `python -i attendance.py`. Then try to:
+
 0. Use `mod.getAttendance()` to see the unpickled attendance record.
 0. See whether you are able to use mod.updateAttendance to mark the student whose name is `Chumo Chacha` present for this module.
 
