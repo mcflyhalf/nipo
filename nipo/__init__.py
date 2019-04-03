@@ -11,7 +11,7 @@ def get_configs(defaults = True):
 	config.read(os.path.join(os.path.cwd(),'..',config_filename))
 	if defaults:
 		return config['DEFAULT']
-	else
+	else:
 		return config
 
 
