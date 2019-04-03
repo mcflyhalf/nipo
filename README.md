@@ -46,6 +46,7 @@ Finally, use ```pip install -e .``` within the home of the nipo project (the dir
 ### Run the test suite
 There is currently no test suite. This is part of the things that need to be built into the project. Instead, we will run a small part of the project that utilises most of the existing functionality.
  cd to the nipo/tests directory. On your terminal, run ```python3 interactive_test.py```. If there are no errors, everything worked fine. If everything did indeed work fine, you should be able to go to your favourite Postgres DBRMS and check the nipo_test database and there should be some new entries. Also, in the nipo root directory there should be a file nipo.log that logged all the things that just happened.
+ Finally, to run the actual test suite, then cd to ```nipo/tests``` and run ```python -m pytest```.
 
 At this point, you may then start working on any changes you wish to work. Just select [an issue](https://github.com/mcflyhalf/nipo/issues), assign it to yourself, ask any clarifying questions on the issue itself (As comments) and then start working. When you are done, submit a pull request.
 
