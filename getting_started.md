@@ -16,7 +16,7 @@ After running this file, check your ```nipo_test``` database and you should find
 
 Now, run this file again but this time in a REPL. You can do this using `python -i attendance.py`. Then try to:
 
-0. Use `mod.getAttendance()` to see the unpickled attendance record.
-0. See whether you are able to use mod.updateAttendance to mark the student whose name is `Chumo Chacha` present for this module.
+2. Use `>>>mod.getAttendance()` to see the unpickled attendance record.
+2. See whether you are able to use `mod.updateAttendance` to mark the student whose name is `Chumo Chacha` present for this module.
 
 If you can do this then you are ready to work on other attendance related aspects of the project. Before you do however, run the test suit again `python -m pytest` to make sure you havent broken anything in the process.

@@ -2,6 +2,19 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import logging
 import os
+import configparser
+
+CONFIG_FILENAME = 'nipo_config.cfg'
+
+def get_configs(profile = 'DEFAULT'):
+	
+	curdir = os.path.curdir
+	curdir = os.path.abspath(curdir)
+	config = configparser.ConfigParser()
+	config.read(os.path.join(curdir,'..',CONFIG_FILENAME))
+	
+	return config[profile]
+	
 
 def get_logger(loggerName):
 	log = logging.getLogger(loggerName)
