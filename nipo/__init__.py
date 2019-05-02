@@ -4,16 +4,17 @@ import logging
 import os
 import configparser
 
-config_filename = 'nipo_config.cfg'
+CONFIG_FILENAME = 'nipo_config.cfg'
 
-def get_configs(defaults = True):
+def get_configs(profile = 'DEFAULT'):
+	
+	curdir = os.path.curdir
+	curdir = os.path.abspath(curdir)
 	config = configparser.ConfigParser()
-	config.read(os.path.join(os.path.cwd(),'..',config_filename))
-	if defaults:
-		return config['DEFAULT']
-	else:
-		return config
-
+	config.read(os.path.join(curdir,'..',CONFIG_FILENAME))
+	
+	return config[profile]
+	
 
 def get_logger(loggerName):
 	log = logging.getLogger(loggerName)

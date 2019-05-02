@@ -1,6 +1,6 @@
 #Create Setup.py file to make the module installable
 from setuptools import setup, find_packages
-from nipo import get_logger, engine, test_engine, config_filename
+from nipo import get_logger, engine, test_engine, CONFIG_FILENAME
 from nipo.tests.populate import populate_testdb
 from nipo.db.schema import Base
 import configparser
