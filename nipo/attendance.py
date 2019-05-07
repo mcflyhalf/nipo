@@ -56,9 +56,9 @@ class ModuleAttendance:
 		if not self.module:
 			raise ValueError("The module code >>{}<< does not exist".format(self.modulecode))
 
-		if not self.module.attendance:
+		if (not self.module.attendance) or (pickle.loads(self.module.attendance)is None):
 			logger.info("Creating and persisting attendance record for module >>{}<<".format(self.module.name))
-			attendance_record = self.createAttendance()
+			attendance_record = self.createAttendance(force=True)
 			logger.debug("Created attendance record for module >>{}<<".format(self.module.name))
 			self.persistAttendance(attendance_record)
 			logger.debug("Persisted attendance record for module >>{}<<".format(self.module.name))
@@ -72,7 +72,7 @@ class ModuleAttendance:
 
 		if not force:
 			if self.module.attendance:
-				logger.debug("Skipping creation of attendance for module >>{}<< code >>{}<< since an attendance record already exist. Use Force = True to create attendance record anyway".format(self.module.name, self.module.code))
+				logger.debug("Skipping creation of attendance for module >>{}<< code >>{}<< since an attendance record already exists. Use Force = True to create attendance record anyway".format(self.module.name, self.module.code))
 				return	self.module.attendance   #Do not create any record since one already exists. Instead, return the existing one
 
 		modulecourse = self.module.course_code
@@ -116,9 +116,10 @@ class ModuleAttendance:
 		currentAttendance.append(list())
 		currentAttendance[-1].append(sessiondate)
 
-		for cnt in range(len(currentAttendance[0])):
+		for cnt in range(len(currentAttendance[0][1:])):
 			currentAttendance[-1].append(0)
 
+		assert len(currentAttendance[-1]) == len(currentAttendance[0])
 		self.persistAttendance(currentAttendance)
 
 	def updateAttendance(self, studentid, sessiondate, present=False):
@@ -149,30 +150,71 @@ class ModuleAttendance:
 
 		self.persistAttendance(currentAttendance)
 
+
+
 class StudentAttendance:
 	'''A class currently primarily for getting the attendance record of an individual student'''
 	def __init__(self, student_id, session=test_session):
 		#Check whether the student id exists in the db. 
-		self.student_id = student_id
+		try:
+			self.student_id = int(student_id)
+		except ValueError:
+			raise TypeError('Invalid student ID >>{}<<. The student ID must be an integer'.format(student_id) )
 
+		self.session=session
 
-		pass
+		self.student = session.query(Student).\
+							  filter(Student.id == self.student_id).\
+							  one_or_none()
 
-	def get_attendance(self):
+		if self.student is None:
+			raise ValueError('Invalid student ID >>{}<<. The student ID does not exist'.format(student_id))
+
+		
+	def get_module_attendance(self, modulecode):
+		'''Get attendance of this student for the module with modulecode. If modulecode points to a module that doesnt exist, throw a ValueError exception'''
 		#Get all modules that the student is a part of then get their attendance in each of them. IF you can create the function mark_attendance, this will be simple
-		pass
+		mod_attendance=ModuleAttendance(modulecode,session=self.session)
+		mod_attendance_record = mod_attendance.getAttendance()
 
-	def mark_attendance(self, modulecode, moduledate, present=False):
-		#Mark the attendance of a student in this module on this date
-		#What you will need ot do is:
+		return mod_attendance_record
+	
+	def get_student_modules(self, max=10):
+		'''get all modulecodes for the modules that the student is registered in. Return a list of them. Assumes a student can be registered to a max of 10 modules'''
+		course_uid = self.student.course_uid
+		student_module = self.session.query(Module).\
+								filter(Module.course_code == course_uid).\
+								limit(max).all()
+
+		return student_module
+
+	def mark_attendance(self, modulecode, sessiondate, present=False):
+		'''Update the attendance record for this student, for module with modulecode on the date sessiondate to the status present'''
+		#Mark the attendance of a student in this module on this date.
+		#If present is not False, it will be assumed to be True
+		#What you will need to do is:
 		# 1. confirm that the student and module actually exist		
 		# 2. Confirm that the student is registered for the module
 		# 3. Check that the date provided already contains a class session(lesson). IF not, raise an error and DO NOT create a new one instead as this opens us up to huge errors in future
 		# 4. Iff all these conditions are satisfied, get the attendance record from the db. Do this by creating an instance of ModuleAttendance
 		# 5. In this instance of Module Attendance, use the updateAttendance function of the instance to update the student's attendance  
-		pass
+		mod_attendance=ModuleAttendance(modulecode,session=self.session)
+		mod_attendance.updateAttendance(self.student_id, sessiondate, present)
 
 
+#Modulewide function to get the attendance of a single student given their student id and a module's unpickled attendance
+def getStudentAttendance(studentid,unpickled_attendance):
+	#get the attendance record for this module
+	assert type(unpickled_attendance) is list
+	student_index = unpickled_attendance[0].index(studentid)
+	#Transpose the module attendance list. Didn't think about this too much, basically lifted a solution from https://stackoverflow.com/questions/6473679/transpose-list-of-lists
+	mod_attendance = list(map(list,zip(*unpickled_attendance)))
+	mod_attendance[0][0] = "Student ID\\Dates"
+	stud_attendance = []
+	stud_attendance.append(mod_attendance[0])	#Sessiondates
+	stud_attendance.append(mod_attendance[student_index])	#Actual attendance
+
+	return stud_attendance
 
 #From here onwards, these are tests to check that the stuff here works. They will be transferred to proper test classes later
 if __name__ == "__main__":
@@ -192,6 +234,14 @@ if __name__ == "__main__":
 		mod.updateAttendance(studID, sd, present=True)
 
 	print("After marking some students present, attendance record is \n {}".format(mod.getAttendance()))
+
+	att = getStudentAttendance(4,mod.getAttendance())
+
+	print("The attendance for 1 Student is :\n {}".format(att))
+
+	sa = StudentAttendance(7)
+	mods = sa.get_student_modules()
+	modcodes = [mod.code for mod in mods]
 
 
 
