@@ -46,7 +46,7 @@ class Student(Base):
 	course_uid = Column(String, ForeignKey("course.uid"), nullable=False)	#Relate to the course UID
 	course = relationship("Course", uselist=False)
 
-	#face_encoding = Column(LargeBinary)
+	face_encoding = Column(LargeBinary)
 
 
 	def __repr__(self):

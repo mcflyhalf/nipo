@@ -203,6 +203,20 @@ class StudentAttendance:
 
 
 #Modulewide function to get the attendance of a single student given their student id and a module's unpickled attendance
+def get_student_from_encoding(encoding, session=test_session):
+	student = session.query(Student).\
+							  filter(Student.face_encoding == encoding).\
+							  one_or_none()
+
+	return student
+
+def get_student_from_pixels(face_pixels, session=test_session):
+	face = Face(face_pixels)
+	encoding = face.get_encoding()
+
+	return get_student_from_encoding(encoding,session=session)
+
+
 def getStudentAttendance(studentid,unpickled_attendance):
 	#get the attendance record for this module
 	assert type(unpickled_attendance) is list
