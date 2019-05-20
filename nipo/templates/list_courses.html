@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>nipo Attendance</title>
+		<link rel="stylesheet" href="{{url_for('static', filename='css/styles.css') }}">
+	</head>
+
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/login">login</a></li>
+				<li><a href="/courses">Courses</a></li>
+				<li><a href="/">Nipo</a></li>
+			</ul>
+		</nav>
+		<section>
+			<h1> Course Explorer</h1>
+		</section>
+
+		<section class="course-display">
+			{%for course in courses%}
+				<div class="course-display">
+					<a href="/module?uid={{course.uid}}">	{{course.uid}} </a>
+				</div>
+			{%endfor%}
+		</section>
+		
+	</body>
+</html>

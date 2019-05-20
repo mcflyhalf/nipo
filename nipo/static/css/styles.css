@@ -1,0 +1,48 @@
+
+body{
+	background-color: #771f37;
+}
+
+ul{
+	display: flex;
+	flex-direction: row-reverse;
+	list-style-type: none;
+
+}
+
+li{
+	padding: 5px;
+	margin: 10px;
+}
+
+h1{
+	background-color: black;
+	color: white;
+	text-align: center;
+	opacity: 0.5;
+	}
+
+section.course-display{
+	display:flex;
+	flex-direction:row;
+
+
+}
+
+div.course-display{
+	flex-wrap: wrap;
+	width: 49%;
+	margin: 2px;
+	height: 40px;;
+	background-color: #773f37;
+	display: inline-block;
+	font-size: 30px;
+
+	text-align: center;
+}
+
+
+a{
+	text-decoration: none;
+	background-color: green;
+}

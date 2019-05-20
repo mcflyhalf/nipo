@@ -4,11 +4,19 @@
 
 
 
-from nipo import test_session
+from nipo import test_session, get_logger
 from nipo.db.schema import Module, Student, Course, Venue
+from nipo.attendance import ModuleAttendance, get_student_attendance
+from datetime import datetime
+
+logger = get_logger("nipo_populate")
+session = test_session
+session_engine = session.get_bind()
+conn_details = session_engine.url
 
 def populate_testdb():
 	'''Populate the test db with test info'''
+	logger.info("Populating DB >>{}<< with dummy data for integration testing".format(conn_details))
 	venue1 = Venue(code = "H7009", name = "Hall 7 Rm 9", capacity = 20)
 	venue2 = Venue(code = "EMB101", name = "Eng MAin Building 101" , capacity = 30)
 	venue3 = Venue(code = "4A", name = "Form 4A", capacity = 60)
@@ -18,8 +26,13 @@ def populate_testdb():
 	venues = [venue1, venue2, venue3, venue4, venue5]
 
 	course1 = Course(uid = "TIE18", name = "Telecommunications and Information Engineering 2018")
+	course2 = Course(uid = "EMT18", name = "Mechatronic Engineering 2018")
+	course3 = Course(uid = "EPE17", name = "Electrical Power Systems Engineering 2018")
+	course4 = Course(uid = "CSS17", name = "Computer Science 2018")
 
-	courses = [course1]
+
+
+	courses = [course1, course2, course3, course4]
 
 	student1 = Student(name = "Amondi Auma", course_uid ="TIE18" )
 	student2 = Student(name = "Bob Bwanda", course_uid ="TIE18" )
@@ -43,16 +56,43 @@ def populate_testdb():
 
 	modules = [module1, module2, module3, module4, module5]
 
+	logger.debug("Created dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))
+
 	for venue in venues:
-		test_session.add(venue)
+		session.add(venue)
 
 	for course in courses:
-		test_session.add(course)
+		session.add(course)
 
 	for student in students:
-		test_session.add(student)
+		session.add(student)
 
 	for module in modules:
-		test_session.add(module)
+		session.add(module)
 
-	test_session.commit()
+	session.commit()
+	logger.info("Persisted dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
+
+	module_code = "ETI001"
+	student_id = 6
+	logger.info("Creating dummy attendance record for module >>{}<<".format(module_code))
+	mod = ModuleAttendance(module_code)
+
+	logger.debug("On creation, attendance record for {} is \n {}".format(module_code,mod.getAttendance()))
+
+	sd = datetime(2029,4,30,10,30)
+
+	mod.createClassSession(sd)
+
+	logger.debug("On creation of class session, attendance record for {} is \n {}".format(module_code ,mod.getAttendance()))
+
+	for studID in range(2,11,2):
+		mod.updateAttendance(studID, sd, present=True)
+
+	logger.debug("After marking some students present, attendance record is \n {}".format(mod.getAttendance()))
+
+	att = get_student_attendance(4,mod.getAttendance())
+
+	logger.debug("The attendance for 1 Student is :\n {}".format(att))
+
+	logger.info("Created dummy attendance record for module >>{}<<".format(module_code))
