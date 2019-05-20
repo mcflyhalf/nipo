@@ -217,7 +217,7 @@ def get_student_from_pixels(face_pixels, session=test_session):
 	return get_student_from_encoding(encoding,session=session)
 
 
-def getStudentAttendance(studentid,unpickled_attendance):
+def get_student_attendance(studentid,unpickled_attendance):
 	#get the attendance record for this module
 	assert type(unpickled_attendance) is list
 	student_index = unpickled_attendance[0].index(studentid)
@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
 	print("After marking some students present, attendance record is \n {}".format(mod.getAttendance()))
 
-	att = getStudentAttendance(4,mod.getAttendance())
+	att = get_student_attendance(4,mod.getAttendance())
 
 	print("The attendance for 1 Student is :\n {}".format(att))
 

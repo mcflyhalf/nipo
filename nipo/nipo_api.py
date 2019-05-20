@@ -1,9 +1,11 @@
 #import Flask and create api functions here
 from nipo.attendance import ModuleAttendance
-from nipo import attendance, production_session, test_session
+from nipo import attendance, production_session, test_session, db
+from flask import Flask, request, render_template
 
 session = test_session	#Change to production_session in the production environment. This would then utilise production data(bases) 
 
+app = Flask(__name__)
 
 def get_attendance_module(modulecode):
 	try:
@@ -36,7 +38,7 @@ def get_attendance_student(studentID):
 def get_attendance_student_module(studentID,modulecode):
 	unpickled_attendance = get_attendance_module(modulecode)
 
-	return attendance.getStudentAttendance(studentID, unpickled_attendance)
+	return attendance.get_student_attendance(studentID, unpickled_attendance)
 
 def update_attendance_student_module(studentID, modulecode, sessiondate, present=False):
 	#Check for exceptions thrown in case of non-existent student and invalid session date. then catch them as appropriate
@@ -68,3 +70,53 @@ def get_student_from_encoding(encoding):
 
 def get_student_from_face_pixels(face_pixels):
 	return attendance.get_student_from_pixels(face_pixels, session)
+
+#Probably want to move this method elsewhere
+def get_course_list(session):
+	courses = session.query(db.schema.Course).\
+							limit(10).\
+							all()
+
+	return courses
+
+
+#Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
+@app.route('/')
+@app.route('/index/')
+def landing():
+	'''get Course list and display it using a template'''
+	courses = get_course_list(session)
+	return render_template('list_courses.html', courses = courses)
+
+under_cons_msg = "OOPS! This part of the website is still under construction"
+
+# Return a list of the modules that a student is taking
+@app.route('/modules')
+def mishmash1():
+	return under_cons_msg
+
+# Return attendance record for the module
+@app.route('/module', methods = ['GET','POST'])
+def mishmash2():
+	return under_cons_msg
+
+# Return the modules a student is enrolled in with summary attendance (Dashboard)
+@app.route('/student', methods = ['GET','POST'])
+def mishmash3():
+	return under_cons_msg
+
+
+# Return attendance for a student for a module 
+@app.route('/student/module', methods = ['GET','POST'])
+def mishmash4():
+	return under_cons_msg
+
+#Return the list of students in a module
+@app.route('/students', methods = ['POST'])
+def mishmash5():
+	return under_cons_msg
+
+
+app.debug = True
+if __name__ == '__main__':
+	app.run(debug = True)
