@@ -55,7 +55,7 @@ def mark_attendance_students_module(stud_attendances, modulecode, sessiondate):
 
 def recognise_student(studentID=None, encoding=None, face_pixels=None, session=session):
 	if studentID is not None:
-		student = StudentAttendance(studentID)
+		student = attendance.StudentAttendance(studentID, session)
 	elif encoding is not None:
 		student = get_student_from_encoding(encoding)
 	elif face_pixels is not None:
@@ -95,26 +95,59 @@ under_cons_msg = "OOPS! This part of the website is still under construction"
 def mishmash1():
 	return under_cons_msg
 
-# Return attendance record for the module
-@app.route('/module', methods = ['GET','POST'])
-def mishmash2():
-	return under_cons_msg
+#Not working at the moment
+# Return attendance record for the student logged in
+@app.route('/module/attendance', methods = ['GET','POST'])
+def get_student_module_attendance():
+	if request.method == 'POST':
+		studentID = request.form.get('studentID')
+		modulecode = request.form.get('modulecode')
+
+		student_attendance = get_attendance_student_module(studentID,modulecode)
+
+		return student_attendance 	#TODO: Have this returned by a pretty template
+	return under_cons_msg + 'for a Get request'
 
 # Return the modules a student is enrolled in with summary attendance (Dashboard)
 @app.route('/student', methods = ['GET','POST'])
-def mishmash3():
-	return under_cons_msg
+def get_student_attendance():	#For all modules
+	if request.method == 'POST':
+		studentID = request.form.get('studentID')
+		student = attendance.StudentAttendance(studentID,session)
+		student_modules = student.modules
+
+		student_attendance = dict()
+
+		for module in student_modules:
+			student_attendance[module.code] = student.get_module_attendance(module.code)
+
+		return str(student_attendance) 	#TODO: Have this returned by a pretty  dashboard-like template
+	return under_cons_msg + 'for a Get request'
 
 
 # Return attendance for a student for a module 
 @app.route('/student/module', methods = ['GET','POST'])
-def mishmash4():
-	return under_cons_msg
+def mishmash4():	#Not Yet implemented
+	if request.method == 'POST':
+		studentID = request.form.get('studentID')
+		modulecode = request.form.get('modulecode')
+
+		student_attendance = get_attendance_student_module(studentID,modulecode)
+
+		return student_attendance 	#TODO: Have this returned by a pretty template
+	return under_cons_msg + 'for a Get request'
 
 #Return the list of students in a module
 @app.route('/students', methods = ['POST'])
-def mishmash5():
-	return under_cons_msg
+def mishmash5():		#Not Yet implemented
+	if request.method == 'POST':
+		studentID = request.form.get('studentID')
+		modulecode = request.form.get('modulecode')
+
+		student_attendance = get_attendance_student_module(studentID,modulecode)
+
+		return student_attendance 	#TODO: Have this returned by a pretty template
+	return under_cons_msg + 'for a Get request'
 
 
 app.debug = True

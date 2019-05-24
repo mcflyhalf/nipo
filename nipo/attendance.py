@@ -173,20 +173,22 @@ class StudentAttendance:
 		
 	def get_module_attendance(self, modulecode):
 		'''Get attendance of this student for the module with modulecode. If modulecode points to a module that doesnt exist, throw a ValueError exception'''
-		#Get all modules that the student is a part of then get their attendance in each of them. IF you can create the function mark_attendance, this will be simple
 		mod_attendance=ModuleAttendance(modulecode,session=self.session)
 		mod_attendance_record = mod_attendance.getAttendance()
 
-		return mod_attendance_record
+		stud_attendance = get_student_attendance(self.student_id, mod_attendance_record)
+
+		return stud_attendance
 	
-	def get_student_modules(self, max=10):
-		'''get all modulecodes for the modules that the student is registered in. Return a list of them. Assumes a student can be registered to a max of 10 modules'''
+	@property
+	def modules(self, max=10):
+		'''get all the modules that the student is registered in. Return a list of the module objects. Assumes a student can be registered to a max of 10 modules'''
 		course_uid = self.student.course_uid
-		student_module = self.session.query(Module).\
+		student_modules = self.session.query(Module).\
 								filter(Module.course_code == course_uid).\
 								limit(max).all()
 
-		return student_module
+		return student_modules
 
 	def mark_attendance(self, modulecode, sessiondate, present=False):
 		'''Update the attendance record for this student, for module with modulecode on the date sessiondate to the status present'''
@@ -202,7 +204,7 @@ class StudentAttendance:
 		mod_attendance.updateAttendance(self.student_id, sessiondate, present)
 
 
-#Modulewide function to get the attendance of a single student given their student id and a module's unpickled attendance
+
 def get_student_from_encoding(encoding, session=test_session):
 	student = session.query(Student).\
 							  filter(Student.face_encoding == encoding).\
@@ -216,7 +218,7 @@ def get_student_from_pixels(face_pixels, session=test_session):
 
 	return get_student_from_encoding(encoding,session=session)
 
-
+#Modulewide function to get the attendance of a single student given their student id and a module's unpickled attendance
 def get_student_attendance(studentid,unpickled_attendance):
 	#get the attendance record for this module
 	assert type(unpickled_attendance) is list
