@@ -49,7 +49,7 @@ class ModuleAttendance:
 		self.modulecode = str(modulecode)
 		self.session=session
 
-		self.module = session.query(Module).\
+		self.module = self.session.query(Module).\
 							  filter(Module.code == self.modulecode).\
 							  one_or_none()
 
@@ -59,7 +59,7 @@ class ModuleAttendance:
 		if (not self.module.attendance) or (pickle.loads(self.module.attendance)is None):
 			logger.info("Creating and persisting attendance record for module >>{}<<".format(self.module.name))
 			attendance_record = self.createAttendance(force=True)
-			logger.debug("Created attendance record for module >>{}<<".format(self.module.name))
+			logger.debug("Created attendance record for module >>{}<< with force option".format(self.module.name))
 			self.persistAttendance(attendance_record)
 			logger.debug("Persisted attendance record for module >>{}<<".format(self.module.name))
 			logger.info("Created and persisted attendance record for module >>{}<<".format(self.module.name))
@@ -125,6 +125,8 @@ class ModuleAttendance:
 	def updateAttendance(self, studentid, sessiondate, present=False):
 		'''Update the attendance record for studentid on the date sessiondate to the status present'''
 		assert type(sessiondate) is datetime
+		assert type(int(studentid)) is int
+
 		currentAttendance = self.getAttendance()
 
 		existingDate = False
@@ -137,10 +139,10 @@ class ModuleAttendance:
 		if not existingDate:
 			raise ValueError("Provided date has no class session")
 
-		#Here, check that the student with this id is part of this course: can be done in 2 ways: 1. Check that their student id appears in the coure attendance list or 2. Check the module course and confirm that the student is in the same course. Option1 is currently being implemented
+		#Here, check that the student with this id is part of this course: can be done in 2 ways: 1. Check that their student id appears in the course attendance list or 2. Check the module course and confirm that the student is in the same course. Option1 is currently being implemented
 
-		if not studentid in currentAttendance[0]:
-			raise ValueError("Student with id>>{}<< not registered to module >>{}<<".format(studentid, self.module.name))
+		if not int(studentid) in currentAttendance[0]:
+			raise ValueError("Student with id>>{}<< not registered to module >>{}-{}<<".format(studentid,self.module.code, self.module.name))
 
 		studindex = currentAttendance[0].index(studentid)
 		if present:
@@ -149,6 +151,17 @@ class ModuleAttendance:
 			currentAttendance[dateindex][studindex] = 0
 
 		self.persistAttendance(currentAttendance)
+
+	@property
+	def students(self):
+		'''Return a list of students in this module. Limited to max 400 students'''
+		module_course = self.module.course_code
+		module_students = self.session.query(Student).\
+							  filter(Student.course_uid== module_course).\
+							  limit(400).all()
+
+		return module_students
+
 
 
 
@@ -218,6 +231,8 @@ def get_student_from_pixels(face_pixels, session=test_session):
 
 	return get_student_from_encoding(encoding,session=session)
 
+
+#We probably want to deprecate this function. We shouldnt be exposing anyone outside this module to pickling
 #Modulewide function to get the attendance of a single student given their student id and a module's unpickled attendance
 def get_student_attendance(studentid,unpickled_attendance):
 	#get the attendance record for this module
@@ -256,7 +271,7 @@ if __name__ == "__main__":
 	print("The attendance for 1 Student is :\n {}".format(att))
 
 	sa = StudentAttendance(7)
-	mods = sa.get_student_modules()
+	mods = sa.modules
 	modcodes = [mod.code for mod in mods]
 
 
