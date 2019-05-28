@@ -1,1 +1,1 @@
-curl -d @urldata.examplelocalhost:5000/student
+curl -d @urldata.example localhost:5000/student
