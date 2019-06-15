@@ -1,6 +1,6 @@
 #Create Setup.py file to make the module installable
 from setuptools import setup, find_packages
-from nipo import get_logger, engine, test_engine, CONFIG_FILENAME
+from nipo import get_logger, production_engine, test_engine, CONFIG_FILENAME
 from nipo.tests.populate import populate_testdb
 from nipo.db.schema import Base
 import configparser
@@ -9,7 +9,7 @@ import os
 
 setup(
     name = "nipo",
-    version = "0.2",
+    version = "0.3",
     author = "Mcflyhalf",
     author_email = "mcflyhalf@live.com",
     description = ("An application of facial recognition in classroom attendance monitoring"),
@@ -23,7 +23,7 @@ logger.info("Nipo python package successfuly installed")
 
 
 class NipoConfig:
-	#Create tables (DB needs to have been created in advance)
+	#Create tables (DB needs to have been created in advance outside of python)
 
 	def __init__(self,engine):
 		self.newconfig(engine)
@@ -64,7 +64,7 @@ class NipoConfig:
 		pass
 
 #Create your db for actual work and test db for integration tests
-NipoConfig(engine)
+NipoConfig(production_engine)
 NipoConfig(test_engine)
 
 populate_testdb()		#Put some data into the test db to be used for integration tests
@@ -76,10 +76,10 @@ default = config['DEFAULT']
 
 default['Install Location'] = str(os.getcwd())	#Base install directory
 default['Faces directory'] = os.path.join(config['DEFAULT']['Install Location'],  'nipo', 'faces') 		#face images relative to the base install directory
-default['config_file'] = os.path.join(os.getcwd(), config_filename)
+default['config_file'] = os.path.join(os.getcwd(), CONFIG_FILENAME)
 
 
 #Create config file
-with open(config_filename, 'w') as configfile:
+with open(CONFIG_FILENAME, 'w') as configfile:
 	config.write(configfile)
 

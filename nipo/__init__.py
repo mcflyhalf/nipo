@@ -37,15 +37,15 @@ def get_logger(loggerName):
 
 #create sqlalchemy engine (for actual use), test engine(for testing db connection) and session (only for the engine)
 
-engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
+production_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
 	dbuser = os.environ['POSTGRES_USER'] ,
 	passwd = os.environ['POSTGRES_PASS'],
 	host = 'localhost',
 	port = os.environ['POSTGRES_PORT'],
 	dbname = os.environ['POSTGRES_NIPO_DBNAME']))
 
-Session = sessionmaker(bind=engine)
-session = Session()
+Session = sessionmaker(bind=production_engine)
+production_session = Session()
 
 test_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
 	dbuser = os.environ['POSTGRES_USER'] ,

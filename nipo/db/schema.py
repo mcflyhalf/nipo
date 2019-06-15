@@ -46,7 +46,7 @@ class Student(Base):
 	course_uid = Column(String, ForeignKey("course.uid"), nullable=False)	#Relate to the course UID
 	course = relationship("Course", uselist=False)
 
-	#face_encoding = Column(LargeBinary)
+	face_encoding = Column(LargeBinary)
 
 
 	def __repr__(self):
@@ -56,7 +56,7 @@ class Student(Base):
 
 
 
-#Course Class. A course is like (Form 1, Form 2, Engineering y1, CS y3 etc). Calling this a class, which is more natural, would be confused with the programming Class structure. Consider referring to it as a course. A course has a UID, modules and Name only. Also, each student belongs to at least(usually only) one class
+#Course Class. A course is like (Form 1, Form 2, Engineering y1, CS y3 etc). Calling this a class, which is more natural, would be confused with the programming Class structure. Consider referring to it as a course. A course has a UID, modules and Name only. Also, each student belongs to at least(usually only) one course
 #-----------------------COURSE TABLE-------------------------
 #Course UID | Course Name | Course Modules
 
