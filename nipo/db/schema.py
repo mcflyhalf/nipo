@@ -86,5 +86,3 @@ class Venue(Base):
 	def __repr__(self):
 		return "The venue {}. It can hold {} students".format(self.name, self .capacity)
 
-
-#These are all the tables I can currently think of

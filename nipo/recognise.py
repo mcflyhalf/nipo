@@ -1,6 +1,6 @@
 from nipo import get_configs
 import face_recognition
-import cv2
+#import cv2
 
 config = get_configs()
 
@@ -81,10 +81,11 @@ class Frame:
 		return faces_found
 
 
-
+#Commenting out all instances of cv2 as they are not required for L1A
 	def compress_frame(self, frame):
 		#Resize the frame of video to 1/4 size for faster processing later
-		smaller_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+		#smaller_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+		smaller_frame = frame
 		return smaller_frame
 
 class Stream:

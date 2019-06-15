@@ -80,6 +80,7 @@ def get_course_list(session):
 
 	return courses
 
+under_cons_msg = "OOPS! This part of the website is still under construction"
 
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
@@ -89,7 +90,6 @@ def landing():
 	courses = get_course_list(session)
 	return render_template('list_courses.html', courses = courses)
 
-under_cons_msg = "OOPS! This part of the website is still under construction"
 
 # Return a list of the modules that a student is taking
 @app.route('/modules', methods = ['GET','POST'])
@@ -106,9 +106,7 @@ def get_student_module_attendance():
 		student_attendance = get_attendance_student_module(studentID,modulecode)
 		resp = dict()
 		resp['Student ID'] = studentID
-		resp['Module Code'] = "Module Name not yet Implemented"	#To Do
-		resp['Student Name'] = "student Name not yet implemented"	#To Do
-		resp['Module Name'] = modulecode 
+		resp['Module Code'] = modulecode	#To Do
 		resp['Student attendance'] = student_attendance
 
 		return jsonify(resp) 	#TODO: Have this returned by a pretty template
@@ -194,6 +192,6 @@ def set_student_module_attendance():
 	return under_cons_msg + 'for a Get request'
 
 
-app.debug = True
-if __name__ == '__main__':
-	app.run(debug = True)
+# app.debug = True
+# if __name__ == '__main__':
+# 	app.run(debug = True)
