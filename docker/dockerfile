@@ -1,0 +1,44 @@
+# nipo-test contains postgres-python3-flask 
+
+FROM postgres:10.8
+LABEL maintainer="mcflyhalf@live.com"
+
+# Install Python and postgresql
+# Then prep nipo directory
+RUN apt-get update; \
+	apt-get install -y python3-pip git curl cmake; \
+	mkdir -p /src;
+
+# Download nipo source from github and checkout the correct brach	
+RUN	cd /src; \
+	git clone --depth 1 -b L1A  https://github.com/mcflyhalf/nipo.git; \
+	cd /src/nipo; \
+	git checkout -b nipo-challenge_L1A; \
+	pip3 install --no-cache-dir -r /src/nipo/requirements.txt;
+
+
+# Setup postgresql env variables
+ENV POSTGRES_USER neema
+ENV POSTGRES_PASSWORD swordfish
+ENV POSTGRES_PASS swordfish
+ENV POSTGRES_PORT 5432
+ENV POSTGRES_DB nipo_test
+ENV PGDATA "/var/lib/postgresql/data"
+ENV POSTGRES_NIPO_DBNAME nipo
+ENV POSTGRES_NIPO_TEST_DBNAME nipo_test
+ENV FLASK_APP nipo_api.py
+ENV FLASK_ENV development
+
+
+
+# Entrypoint script
+COPY start_psql.sh /usr/local/bin
+
+# Clean up and attempt to reduce image size
+RUN chmod +x /usr/local/bin/start_psql.sh; \
+	rm -rf /var/lib/apt/lists/* ;
+
+#Start postgres server as postgres User and create users and vars
+ENTRYPOINT ["start_psql.sh"]
+
+

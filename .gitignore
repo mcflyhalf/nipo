@@ -1,0 +1,26 @@
+*.pyc
+
+#Files that aren't currently required. This might change in future though
+include/*
+lib/*
+
+#Secret information
+*environ*
+
+#information that isnt required by collaborators
+bin*
+dist*
+*egg-info*
+local*
+share*
+*.log
+*.jpg
+*.JPG
+*.pdf
+*tryzex*
+*blog*
+#Information that applies only to my machine
+*.cfg
+
+#Example information to share (unignore)
+!*example*
