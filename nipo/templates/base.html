@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="{{url_for('static', filename='css/styles.css') }}">
+        {% if title %}
+        <title>{{ title }} | Nipo</title>
+        {% else %}
+        <title>Nipo Attendance</title>
+        {% endif %}
+    </head>
+    <body>
+        <div>
+            <nav>
+                <ul>
+                    Nipo:
+                    <li><a href="{{ url_for('landing') }}">Home</a></li>
+                    {% if current_user.is_anonymous %}
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+        <div>
+            Generic Footer for Nipo
+        </div>
+    </body>
+</html>

@@ -1,11 +1,26 @@
 import datetime
+import os
 from nipo.attendance import ModuleAttendance
 from nipo import attendance, production_session, test_session, db
-from flask import Flask, request, render_template, jsonify, redirect, url_for
+from flask import Flask, flash, request, render_template, jsonify, redirect, url_for
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+from nipo.db import schema
+session = test_session		#Change to production_session in the production environment. This would then utilise production data(bases) 
 
-session = test_session	#Change to production_session in the production environment. This would then utilise production data(bases) 
+#The nipo.forms import requires the session var so it is done after session's creation.
+from nipo.forms import LoginForm, RegistrationForm
+
+
+#TODO: Add login required to relevant routes
+
 
 app = Flask(__name__)
+app.secret_key = os.environ['FLASK_SECRET_KEY']
+login_manager = LoginManager(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return session.query(schema.User).filter(id==int(user_id))
 
 def get_attendance_module(modulecode):
 	try:
@@ -88,6 +103,50 @@ def landing():
 	'''get Course list and display it using a template'''
 	courses = get_course_list(session)
 	return render_template('list_courses.html', courses = courses)
+
+
+@app.route('/logout')
+def logout():
+	logout_user()
+	return redirect(url_for('landing'))
+
+@app.route('/login', methods = ['GET','POST'])
+def login():
+	if current_user.is_authenticated:
+		return redirect(url_for('landing'))
+	form = LoginForm()
+	if form.validate_on_submit():
+		username = form.username.data
+		password = form.password.data
+		user = session.query(schema.User).\
+					  filter(schema.User.username == username.lower()).\
+									  one_or_none()
+
+		if user is None or not user.check_password(password):
+			flash('Invalid username or password')
+			return redirect(url_for('login'))
+		
+		flash('Login successful')
+		login_user(user, remember=form.remember_me.data)
+		next_page = request.args.get('next')
+		if not next_page or url_parse(next_page).netloc != '':
+			next_page = url_for('landing')
+		return redirect(next_page)
+	return render_template('login.html', title='Sign In', form=form)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+	if current_user.is_authenticated:
+		return redirect(url_for('index'))
+	form = RegistrationForm()
+	if form.validate_on_submit():
+		user = schema.User(username=form.username.data, email=form.email.data)
+		user.set_password(form.password.data)
+		session.add(user)
+		session.commit()
+		flash('Congratulations, you are now a registered user!')
+		return redirect(url_for('login'))
+	return render_template('register.html', title='Register', form=form)
 
 under_cons_msg = "OOPS! This part of the website is still under construction"
 
