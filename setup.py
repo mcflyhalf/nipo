@@ -9,7 +9,7 @@ import os
 
 setup(
     name = "nipo",
-    version = "0.3",
+    version = "0.4",
     author = "Mcflyhalf",
     author_email = "mcflyhalf@live.com",
     description = ("An application of facial recognition in classroom attendance monitoring"),
