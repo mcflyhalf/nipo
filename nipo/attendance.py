@@ -43,7 +43,7 @@ class MarkAttendance:
 
 class ModuleAttendance:
 	'''A class that manipulates the structure of any module's attendance record (Think of this like creating an attendance sheet for the module and adding students who are registered to this module into that sheet)'''
-	def __init__(self, modulecode, session=test_session):
+	def __init__(self, modulecode, session):
 		#Check if the module code exists, if it doesnt, throw an exception.
 		#Then check whether the attendance record exists for this module, if not then create it. Otherwise, do nothing
 		self.modulecode = str(modulecode)
