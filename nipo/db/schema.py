@@ -1,9 +1,13 @@
-from sqlalchemy import Column, String, Integer, DateTime, LargeBinary, MetaData, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, LargeBinary, MetaData, ForeignKey, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from werkzeug.security import generate_password_hash, check_password_hash
+import enum
 #from sqlalchemy.types import JSON
 
 Base = declarative_base()
+
+
 
 
 
@@ -87,4 +91,43 @@ class Venue(Base):
 		return "The venue {}. It can hold {} students".format(self.name, self .capacity)
 
 
+
+#Privilege leves are an enum that will be used in the user table
+
+class PrivilegeLevel(enum.Enum):
+	student = 0
+	staff = 1
+	admin = 2
+
+#User table. This is the users of the system (who don't necessarily need to be students). These would be administrators and people who actually mark attendance. Students would be users who can only check their attendance and can't modify it.
+#------------------------USER TABLE----------------------------
+class User(Base):
+	__tablename__ = "user"
+	#Think of a way to link a user to a student
+	id = Column(Integer, primary_key=True, nullable=True)
+	username =  Column(String(20),nullable=False,unique=True)	#Always Lowercase
+	email = Column(String(50),nullable=False)
+	privilege = Column(String(15), Enum(PrivilegeLevel, validate_strings=True, default=PrivilegeLevel.student))#Must be enum student,staff, admin
+	password_hash = Column(String, nullable=False)
+	student_id = Column(Integer, ForeignKey("student.id"),nullable=True)		#This is going to be null when the user is not a student but has a Student.id foreign key constraint otherwise
+	is_authenticated = True
+	is_active = True
+	is_annonymous = False
+
+
+
+
+	def check_password(self,password):
+		cred_check = False
+		cred_check = check_password_hash(self.password_hash, str(password))
+		return cred_check
+
+	def get_id(self):
+		return str(self.id)
+
+	def set_password(self,raw_password):
+		self.password_hash = generate_password_hash(str(raw_password))
+
 #These are all the tables I can currently think of
+
+
