@@ -4,6 +4,7 @@ from nipo.attendance import ModuleAttendance
 from nipo import attendance, production_session, test_session, db
 from flask import Flask, flash, request, render_template, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+from werkzeug.urls import url_parse
 from nipo.db import schema
 session = test_session		#Change to production_session in the production environment. This would then utilise production data(bases) 
 
@@ -20,7 +21,9 @@ login_manager = LoginManager(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return session.query(schema.User).filter(id==int(user_id))
+    return session.query(schema.User).filter(id==int(user_id)).one_or_none()
+
+login_manager.login_view = 'login'
 
 def get_attendance_module(modulecode):
 	try:
@@ -99,6 +102,7 @@ def get_course_list(session):
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
+#@login_required
 def landing():
 	'''get Course list and display it using a template'''
 	courses = get_course_list(session)
@@ -106,6 +110,7 @@ def landing():
 
 
 @app.route('/logout')
+@login_required
 def logout():
 	logout_user()
 	return redirect(url_for('landing'))
@@ -131,13 +136,15 @@ def login():
 		next_page = request.args.get('next')
 		if not next_page or url_parse(next_page).netloc != '':
 			next_page = url_for('landing')
+		#print ("Next Page is >>>>>>{}".format(user.is_authenticated))
 		return redirect(next_page)
 	return render_template('login.html', title='Sign In', form=form)
 
+#This route will need to be hidden in future/require login because student wouldnt register themselves. Only an admin should register students. We probably also want to be able to register students in bulk using a csv or excel file
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 	if current_user.is_authenticated:
-		return redirect(url_for('index'))
+		return redirect(url_for('landing'))
 	form = RegistrationForm()
 	if form.validate_on_submit():
 		user = schema.User(username=form.username.data, email=form.email.data)

@@ -100,6 +100,7 @@ class PrivilegeLevel(enum.Enum):
 	admin = 2
 
 #User table. This is the users of the system (who don't necessarily need to be students). These would be administrators and people who actually mark attendance. Students would be users who can only check their attendance and can't modify it.
+#It was a mistake to name this table user since, that is a reserved word in psql (I did not know this at the time of creation). It can still work but is not recommended. The only work-around I can think of is to change the table-name (to users) but there is currently no capacity for that so will do that later.
 #------------------------USER TABLE----------------------------
 class User(Base):
 	__tablename__ = "user"
@@ -110,7 +111,7 @@ class User(Base):
 	privilege = Column(String(15), Enum(PrivilegeLevel, validate_strings=True, default=PrivilegeLevel.student))#Must be enum student,staff, admin
 	password_hash = Column(String, nullable=False)
 	student_id = Column(Integer, ForeignKey("student.id"),nullable=True)		#This is going to be null when the user is not a student but has a Student.id foreign key constraint otherwise
-	is_authenticated = True
+	is_authenticated = False
 	is_active = True
 	is_annonymous = False
 
@@ -118,9 +119,8 @@ class User(Base):
 
 
 	def check_password(self,password):
-		cred_check = False
-		cred_check = check_password_hash(self.password_hash, str(password))
-		return cred_check
+		self.is_authenticated = check_password_hash(self.password_hash, str(password))
+		return self.is_authenticated
 
 	def get_id(self):
 		return str(self.id)
