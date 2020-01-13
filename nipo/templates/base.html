@@ -9,19 +9,21 @@
         {% endif %}
     </head>
     <body>
-        <div>
-            <nav>
-                <ul>
-                    Nipo:
-                    <li><a href="{{ url_for('landing') }}">Home</a></li>
-                    {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                    {% else %}
-                    <li><a href="{{ url_for('login') }}">Login</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+        <section class = "header">
+            <div>
+                <nav>
+                    <ul>
+                        Nipo:
+                        <li><a href="{{ url_for('landing') }}">Home</a></li>
+                        {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('logout') }}">Logout {{current_user.username}}</a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </section>
         <hr>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -32,9 +34,14 @@
         </ul>
         {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
-        <div>
-            Generic Footer for Nipo
-        </div>
+        <section class= "main">
+        {% block content %} {% endblock %}
+        </section>
+        <hr>
+        <section class="footer">
+            <div>
+                Generic Footer for Nipo
+            </div>
+        </section>
     </body>
 </html>

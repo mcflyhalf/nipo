@@ -1,6 +1,7 @@
 
 body{
-	background-color: #771f37;
+/*	background-color: #771f37;*/
+	background-color: #d26e20;
 }
 
 ul{
@@ -12,7 +13,6 @@ ul{
 
 li{
 	padding: 5px;
-	margin: 10px;
 }
 
 h1{
@@ -21,6 +21,10 @@ h1{
 	text-align: center;
 	opacity: 0.5;
 	}
+
+section{
+	padding: 10px 5px;
+}
 
 section.course-display{
 	display:flex;
@@ -41,6 +45,10 @@ div.course-display{
 	text-align: center;
 }
 
+section.main{
+	box-sizing: border-box;
+	min-height: 75vh;
+	}
 
 a{
 	text-decoration: none;

@@ -56,7 +56,7 @@ def populate_testdb():
 
 	modules = [module1, module2, module3, module4, module5]
 
-	logger.debug("Created dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))
+	logger.debug("Created dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))	#conn_details gives too much info. reduce to only give dbname
 
 	for venue in venues:
 		session.add(venue)
@@ -76,7 +76,7 @@ def populate_testdb():
 	module_code = "ETI001"
 	student_id = 6
 	logger.info("Creating dummy attendance record for module >>{}<<".format(module_code))
-	mod = ModuleAttendance(module_code)
+	mod = ModuleAttendance(module_code,session)
 
 	logger.debug("On creation, attendance record for {} is \n {}".format(module_code,mod.getAttendance()))
 

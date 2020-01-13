@@ -1,29 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<head>
-	<title>Courses</title>
-	<link rel="stylesheet" href="{{url_for('static', filename='css/styles.css') }}">
-</head>
 
-<body>
-	<nav>
-		<ul>
-			<li><a href="/courses">Courses</a></li>
-			<li><a href="/">Nipo</a></li>
-		</ul>
-	</nav>
-	<section>
-		<h1> Course Explorer</h1>
-	</section>
+<nav>
+	<ul>
+		<li><a href="/courses">Courses</a></li>
+		<li><a href="/">Nipo</a></li>
+	</ul>
+</nav>
+<div>
+	<h1> Course Explorer</h1>
+</div>
 
-	<section class="course-display">
-		{%for course in courses%}
-			<div class="course-display">
-				<a href="/module?uid={{course.uid}}">	{{course.uid}} </a>
-			</div>
-		{%endfor%}
-	</section>
+<section class="course-display">
+	{%for course in courses%}
+		<div class="course-display">
+			<a href="/module?uid={{course.uid}}">	{{course.uid}} </a>
+		</div>
+	{%endfor%}
 	
-</body>
+</section>
+	
 {% endblock %}

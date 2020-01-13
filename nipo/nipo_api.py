@@ -18,12 +18,14 @@ from nipo.forms import LoginForm, RegistrationForm
 app = Flask(__name__)
 app.secret_key = os.environ['FLASK_SECRET_KEY']
 login_manager = LoginManager(app)
+login_manager.init_app(app)
+
+login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return session.query(schema.User).filter(id==int(user_id)).one_or_none()
+    return session.query(schema.User).filter(schema.User.id==int(user_id)).one_or_none()
 
-login_manager.login_view = 'login'
 
 def get_attendance_module(modulecode):
 	try:
@@ -113,6 +115,7 @@ def landing():
 @login_required
 def logout():
 	logout_user()
+	session.commit()
 	return redirect(url_for('landing'))
 
 @app.route('/login', methods = ['GET','POST'])
@@ -131,8 +134,9 @@ def login():
 			flash('Invalid username or password')
 			return redirect(url_for('login'))
 		
-		flash('Login successful')
 		login_user(user, remember=form.remember_me.data)
+		session.add(user)
+		session.commit()		#Not sure if it is necessary to commit/persist after every login
 		next_page = request.args.get('next')
 		if not next_page or url_parse(next_page).netloc != '':
 			next_page = url_for('landing')
@@ -140,17 +144,17 @@ def login():
 		return redirect(next_page)
 	return render_template('login.html', title='Sign In', form=form)
 
-#This route will need to be hidden in future/require login because student wouldnt register themselves. Only an admin should register students. We probably also want to be able to register students in bulk using a csv or excel file
+#This route will need to be hidden in future/require login because students wouldnt register themselves. Only an admin should register students. We probably also want to be able to register students in bulk using a csv or excel file
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 	if current_user.is_authenticated:
 		return redirect(url_for('landing'))
 	form = RegistrationForm()
 	if form.validate_on_submit():
-		user = schema.User(username=form.username.data, email=form.email.data)
+		user = schema.User(username=form.username.data.lower(), email=form.email.data,authenticated=False,active=True)
 		user.set_password(form.password.data)
 		session.add(user)
-		session.commit()
+		session.commit()		
 		flash('Congratulations, you are now a registered user!')
 		return redirect(url_for('login'))
 	return render_template('register.html', title='Register', form=form)
@@ -261,5 +265,6 @@ def set_student_module_attendance():
 
 
 app.debug = True
-if __name__ == '__main__':
-	app.run(debug = True)
+# if __name__ == '__main__':
+# 	app.run(debug = True)
+#Because of this final comment, the only way to run the flask app is to `flask run` on cmd

@@ -52,7 +52,8 @@ test_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbnam
 	passwd = os.environ['POSTGRES_PASS'],
 	host = 'localhost',
 	port = os.environ['POSTGRES_PORT'],
-	dbname = os.environ['POSTGRES_NIPO_TEST_DBNAME']))
+	dbname = os.environ['POSTGRES_NIPO_TEST_DBNAME']),
+	echo = False)
 
 TestSession = sessionmaker(bind=test_engine)
 test_session = TestSession()

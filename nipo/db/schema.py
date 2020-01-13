@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, LargeBinary, MetaData, ForeignKey, Enum
+from sqlalchemy import Column, String, Integer, DateTime, LargeBinary, MetaData, ForeignKey, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -103,30 +103,41 @@ class PrivilegeLevel(enum.Enum):
 #It was a mistake to name this table user since, that is a reserved word in psql (I did not know this at the time of creation). It can still work but is not recommended. The only work-around I can think of is to change the table-name (to users) but there is currently no capacity for that so will do that later.
 #------------------------USER TABLE----------------------------
 class User(Base):
+	#This is a tricky tablename to use. In psql, when you attemp SELECT * from user; , it gives you the current username. Remember to SELECT * FROM public.user instead
 	__tablename__ = "user"
+
 	#Think of a way to link a user to a student
-	id = Column(Integer, primary_key=True, nullable=True)
+	id = Column(Integer, primary_key=True)
 	username =  Column(String(20),nullable=False,unique=True)	#Always Lowercase
 	email = Column(String(50),nullable=False)
 	privilege = Column(String(15), Enum(PrivilegeLevel, validate_strings=True, default=PrivilegeLevel.student))#Must be enum student,staff, admin
 	password_hash = Column(String, nullable=False)
+	authenticated = Column(Boolean, nullable=False)
+	active = Column(Boolean, nullable=False)
 	student_id = Column(Integer, ForeignKey("student.id"),nullable=True)		#This is going to be null when the user is not a student but has a Student.id foreign key constraint otherwise
-	is_authenticated = False
-	is_active = True
-	is_annonymous = False
 
+	annonymous = False
 
+# See comment at https://realpython.com/using-flask-login-for-user-management-with-flask/ about login and logout
+	def is_authenticated(self):
+		return self.authenticated
 
+	def is_active(self):
+		return self.active
+
+	def is_annonymous(self):
+		return self.annonymous
 
 	def check_password(self,password):
-		self.is_authenticated = check_password_hash(self.password_hash, str(password))
-		return self.is_authenticated
+		self.authenticated = check_password_hash(self.password_hash, str(password))
+		return self.is_authenticated()
 
 	def get_id(self):
 		return str(self.id)
 
 	def set_password(self,raw_password):
 		self.password_hash = generate_password_hash(str(raw_password))
+
 
 #These are all the tables I can currently think of
 

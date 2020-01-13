@@ -35,10 +35,9 @@ class NipoConfig:
 		logger.info("Attempting to create tables")
 		#Do stuff here using metadata from the classes in the schema
 		for table in tables:
-			table = [table]
-			logger.info("Creating table *{}*".format(table[0].name))
-			Base.metadata.create_all(engine, tables=table)
-			logger.info("Table *{}* created successfully".format(table[0].name))
+			logger.info("Creating table *{}*".format(table.name))
+			Base.metadata.create_all(engine, tables=[table])
+			logger.info("Table *{}* created successfully".format(table.name))
 
 		logger.info("Tables Created successfully!")
 
@@ -49,10 +48,9 @@ class NipoConfig:
 		logger.warn("Deleting all tables")
 		#Do dangerous stuff here and log as each table is deleted
 		for table in tables:
-			table = [table]
-			logger.warn("Deleting table *{}*".format(table[0].name))
-			Base.metadata.drop_all(engine, tables=table)
-			logger.info("Table *{}* deleted successfully".format(table[0].name))
+			logger.warn("Deleting table *{}*".format(table.name))
+			Base.metadata.drop_all(engine, tables=[table])
+			logger.info("Table *{}* deleted successfully".format(table.name))
 
 		logger.info("Tables deleted successfully!")
 
