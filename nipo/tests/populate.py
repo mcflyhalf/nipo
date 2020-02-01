@@ -5,7 +5,7 @@
 
 
 from nipo import test_session, get_logger
-from nipo.db.schema import Module, Student, Course, Venue, User
+from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
 from nipo.attendance import ModuleAttendance, get_student_attendance
 from datetime import datetime
 
@@ -56,9 +56,9 @@ def populate_testdb():
 
 	modules = [module1, module2, module3, module4, module5]
 
-	test_user = User(username = "mcflyhalf", email = 'dev@mail.com', password_hash='2bchanged', authenticated= False, active = True)
+	test_user = User(username = "mcflyhalf", email = 'dev@mail.com', name= 'Mark Flyhalf', password_hash='2bchanged', authenticated= False, active = True)
 	test_user.set_password('Dev123')
-	logger.debug("Created dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))	#conn_details gives too much info. reduce to only give dbname
+	logger.debug("Created most dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))	#conn_details gives too much info. reduce to only give dbname
 
 	for venue in venues:
 		session.add(venue)
@@ -75,7 +75,34 @@ def populate_testdb():
 	session.add(test_user)
 
 	session.commit()
-	logger.info("Persisted dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
+	logger.info("Persisted most dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
+
+	logger.debug("Creating user dummy data for DB >>{}<< for integration testing.".format(conn_details))
+	students = session.query(Student).limit(20).all()
+	users = []
+
+	for student in students:
+		stud_fname = student.name.split()[0].lower()
+		stud_lname = student.name.split()[1].lower()
+		stud_username = stud_fname[0]+stud_lname
+		stud_email = stud_username + '@nipo.com'
+		stud_privilege = PrivilegeLevel.student.name
+
+		stud_user = User(username= stud_username,\
+						 email= stud_email,\
+						 name= student.name,\
+						 privilege= stud_privilege,
+						 active= True,\
+						 authenticated= False,\
+						 student_id= student.id)
+
+		stud_user.set_password('Stud123')
+		session.add(stud_user)
+
+	logger.debug("Created user dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))
+	session.commit()
+	logger.info("Persisted all dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
+
 
 	module_code = "ETI001"
 	student_id = 6
