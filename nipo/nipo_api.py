@@ -106,6 +106,13 @@ def get_course_list(session):
 
 	return courses
 
+def get_module_list(session):
+	modules = session.query(db.schema.Module).\
+							limit(10).\
+							all()
+
+	return modules
+
 
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
@@ -113,6 +120,15 @@ def get_course_list(session):
 #@login_required
 def landing():
 	'''get Course list and display it using a template'''
+	#TODO: if not logged in, display landing page (with option to register)
+	#Elif student return student dashboard
+	#Elif instructor return instructor dashboard
+	#elif admin return admin dashboard
+
+	#if student_loggedin
+	modules = get_module_list(session)
+	return render_template('student_dashboard.html',modules = modules)
+
 	courses = get_course_list(session)
 	return render_template('list_courses.html', courses = courses)
 

@@ -109,6 +109,7 @@ class User(Base):
 	#Think of a way to link a user to a student
 	id = Column(Integer, primary_key=True)
 	username =  Column(String(20),nullable=False,unique=True)	#Always Lowercase
+	name = Column(String,nullable=False)
 	email = Column(String(50),nullable=False)
 	privilege = Column(String(15), Enum(PrivilegeLevel, validate_strings=True, default=PrivilegeLevel.student))#Must be enum student,staff, admin
 	password_hash = Column(String, nullable=False)

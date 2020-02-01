@@ -37,12 +37,90 @@ div.course-display{
 	flex-wrap: wrap;
 	width: 49%;
 	margin: 2px;
-	height: 40px;;
+	height: 40px;
 	background-color: #773f37;
 	display: inline-block;
 	font-size: 30px;
 
 	text-align: center;
+}
+
+
+section.dashboard{
+	background-color: #262682;
+	display: flex;
+	flex-direction: row;
+
+}
+
+div.dashboard{
+	background-color: #E2AE80;
+	width: 50%;
+	margin: 5px;
+	max-height: 302px;
+	border-radius: 2px;
+	font-family: 'Roboto', 'sans-serif';
+
+
+}
+div.dashboard>*{
+	left: 10px;
+	position: relative;
+}
+
+div.stud-info{
+	position: relative;
+}
+
+div.stud-info::after {
+	content: '>';
+	font: 17px "Roboto";
+	color: #8C8C8C;
+	-webkit-transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-ms-transform: rotate(90deg);
+	transform: rotate(90deg);
+	right: 11px;
+
+	/*Position of the select arrow. Very hacky*/
+	top: 74%;
+	right: 21%;
+	padding: 0 0 2px;
+
+	/*left line */
+	/*border-bottom: 1px solid red;*/
+
+	position: absolute;
+	pointer-events: none;
+}
+
+
+span.stud-info{
+
+	font-size: 37px;
+	color: white;
+}
+
+span.message{
+	font-size: 20px;
+	color: black;	
+}
+
+select.courseSelect{
+	/*Remove the defult button*/
+	-webkit-appearance: none;
+	-moz-appearance: none;
+ 	appearance: none;
+
+ 	/*Styling*/
+	width: 80%;
+	height: 53px;
+	background-color: #CFD8DC;
+	border-radius: 5px;
+	text-align: center;
+	border-color: #D26E20;
+	border-width: 2px;
+	font-size: 1.2em;
 }
 
 section.main{

@@ -1,0 +1,34 @@
+<!-- Design of this from https://www.fluidui.com/editor/live/ -->
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<div>
+	<h1> Student attendance Summary</h1>
+</div>
+
+<section class="dashboard main">
+	<div class="dashboard stud-info">
+		<span class="stud-info">
+			<p> {{current_user.name}} <br> ID: ABC12345{{current_user.student_id}}<br></p>
+		</span>
+		<span class="message">
+			<p> Dynamic Course selector (javascript??) </p>
+		</span>
+		<select class="courseSelect">
+				<option value= "all_modules">All Modules</option>
+			{%for module in modules%}
+				<option value= "{{module.code}}">{{module.code}} {{module.name}}</option>
+			{%endfor%}
+		</select>
+	</div>
+	<div class="dashboard stud-data">
+		<p> Put the pie chart here</p>
+		<p> Attendance summary</p>
+	</div>
+
+	
+</section>
+	
+{% endblock %}
