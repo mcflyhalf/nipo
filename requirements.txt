@@ -17,8 +17,6 @@ itsdangerous==1.1.0
 Jinja2==2.10.1
 Markdown==3.1.1
 MarkupSafe==1.1.1
-more-itertools==6.0.0
--e git+git@github.com:mcflyhalf/nipo.git@bcd153ce03fda851d9dad7fdb6b8828f88b842f4#egg=nipo
 numpy==1.16.1
 opencv-python==4.0.0.21
 path-and-address==2.0.1

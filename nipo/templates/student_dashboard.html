@@ -25,10 +25,14 @@
 	</div>
 	<div class="dashboard stud-data">
 		<p> Put the pie chart here</p>
-		<p> Attendance summary</p>
+		<div class="attendance-summary">
+			<p> Present: 7/12 &nbsp &nbsp &nbsp Late:2/12 &nbsp &nbsp &nbsp Absent3/12</p>
+		</div>
+		<p>  </p>
 	</div>
 
 	
 </section>
+<script src="{{url_for('static',filename='javascript/calcAttendance.js')}}"></script>
 	
 {% endblock %}

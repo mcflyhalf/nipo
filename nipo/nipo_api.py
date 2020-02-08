@@ -182,6 +182,22 @@ def register():
 
 under_cons_msg = "OOPS! This part of the website is still under construction"
 
+@app.route('/userdetails')
+@login_required
+def get_user_details():
+	'''Get Student's Name and ID'''
+	user_detail = {}
+	if current_user.privilege == 'student':
+		user_detail['name'] = current_user.name
+		user_detail['student_id'] = current_user.student_id
+		user_detail['status'] = 0	#TODO: Determine status codes for Nipo
+
+	else:
+		user_detail['status'] = 1	#TODO: Determine status codes for Nipo
+	
+	return jsonify(user_detail)
+
+
 # Return a list of the modules that a student is taking
 @app.route('/modules', methods = ['GET','POST'])
 def get_student_modules():
@@ -197,9 +213,9 @@ def get_student_module_attendance():
 		student_attendance = get_attendance_student_module(studentID,modulecode)
 		resp = dict()
 		resp['Student ID'] = studentID
-		resp['Module Code'] = "Module Name not yet Implemented"	#To Do
+		resp['Module Name'] = "Module Name not yet Implemented"	#To Do
 		resp['Student Name'] = "student Name not yet implemented"	#To Do
-		resp['Module Name'] = modulecode 
+		resp['Module Code'] = modulecode 
 		resp['Student attendance'] = student_attendance
 
 		return jsonify(resp) 	#TODO: Have this returned by a pretty template

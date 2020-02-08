@@ -54,6 +54,7 @@ section.dashboard{
 }
 
 div.dashboard{
+	position: relative;
 	background-color: #E2AE80;
 	width: 50%;
 	margin: 5px;
@@ -68,10 +69,6 @@ div.dashboard>*{
 	position: relative;
 }
 
-div.stud-info{
-	position: relative;
-}
-
 div.stud-info::after {
 	content: '>';
 	font: 17px "Roboto";
@@ -83,8 +80,8 @@ div.stud-info::after {
 	right: 11px;
 
 	/*Position of the select arrow. Very hacky*/
-	top: 74%;
-	right: 21%;
+	top: 85%;
+	right: 5%;
 	padding: 0 0 2px;
 
 	/*left line */
@@ -102,8 +99,27 @@ span.stud-info{
 }
 
 span.message{
+	position: relative;
+	top: 12%;
 	font-size: 20px;
 	color: black;	
+}
+
+div.attendance-summary,select.courseSelect{
+	background-color: #CFD8DC;
+	position: absolute;
+	margin: auto;
+	border-top-style: solid;
+	border-top-width: 3px;
+	border-top-color: #D26E20;
+	border-radius: 5px;
+	bottom: 3px;
+	height:20%;
+	text-align: center;
+	font-size: 1.2em;
+	width:97%;
+	box-sizing: border-box;
+
 }
 
 select.courseSelect{
@@ -112,16 +128,11 @@ select.courseSelect{
 	-moz-appearance: none;
  	appearance: none;
 
- 	/*Styling*/
-	width: 80%;
-	height: 53px;
-	background-color: #CFD8DC;
-	border-radius: 5px;
-	text-align: center;
-	border-color: #D26E20;
-	border-width: 2px;
-	font-size: 1.2em;
+	/*border-color: #D26E20;*/
+
 }
+
+
 
 section.main{
 	box-sizing: border-box;
