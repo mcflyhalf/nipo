@@ -5,7 +5,7 @@
 
 
 from nipo import test_session, get_logger
-from nipo.db.schema import Module, Student, Course, Venue
+from nipo.db.schema import Module, Student, Course, Venue, User
 from nipo.attendance import ModuleAttendance, get_student_attendance
 from datetime import datetime
 
@@ -13,6 +13,7 @@ logger = get_logger("nipo_populate")
 session = test_session
 session_engine = session.get_bind()
 conn_details = session_engine.url
+sd = datetime(2029,4,30,10,30)
 
 def populate_testdb():
 	'''Populate the test db with test info'''
@@ -56,6 +57,8 @@ def populate_testdb():
 
 	modules = [module1, module2, module3, module4, module5]
 
+	test_user = User(username = "mcflyhalf", email = 'dev@mail.com', password_hash='2bchanged', authenticated= False, active = True)
+	test_user.set_password('Dev123')
 	logger.debug("Created dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))	#conn_details gives too much info. reduce to only give dbname
 
 	for venue in venues:
@@ -70,6 +73,8 @@ def populate_testdb():
 	for module in modules:
 		session.add(module)
 
+	session.add(test_user)
+
 	session.commit()
 	logger.info("Persisted dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
 
@@ -80,7 +85,7 @@ def populate_testdb():
 
 	logger.debug("On creation, attendance record for {} is \n {}".format(module_code,mod.getAttendance()))
 
-	sd = datetime(2029,4,30,10,30)
+	# sd = datetime(2029,4,30,10,30)
 
 	mod.createClassSession(sd)
 

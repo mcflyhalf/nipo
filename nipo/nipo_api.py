@@ -13,6 +13,12 @@ from nipo.forms import LoginForm, RegistrationForm
 
 
 #TODO: Add login required to relevant routes
+#TODOs:
+# 0. Modify populate.py so that it creates a default user
+# 1. Create landing page that doesn't depend on student data(for guest users)
+# 2. Create view to check individual attendance
+# 3. Use pandas dataframe to store attendance data
+#
 
 
 app = Flask(__name__)
@@ -135,8 +141,7 @@ def login():
 			return redirect(url_for('login'))
 		
 		login_user(user, remember=form.remember_me.data)
-		session.add(user)
-		session.commit()		#Not sure if it is necessary to commit/persist after every login
+		#Not sure if it is necessary to commit/persist after every login
 		next_page = request.args.get('next')
 		if not next_page or url_parse(next_page).netloc != '':
 			next_page = url_for('landing')
