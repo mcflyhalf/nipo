@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import configparser
 
@@ -19,7 +20,8 @@ def get_configs(profile = 'DEFAULT'):
 def get_logger(loggerName):
 	log = logging.getLogger(loggerName)
 	# File handler which logs even debug messages
-	fh = logging.FileHandler('nipo.log')
+	# To atttempt compression of old log files, try https://docs.python.org/3/howto/logging-cookbook.html#using-a-rotator-and-namer-to-customize-log-rotation-processing
+	fh = RotatingFileHandler('log/nipo.log', mode='a', maxBytes=1*1024*1024,backupCount=10, encoding=None, delay=0)
 	fh.setLevel(logging.DEBUG)
 	# Console handler that logs warnings or higher
 	ch = logging.StreamHandler()
