@@ -13,6 +13,7 @@ logger = get_logger("nipo_populate")
 session = test_session
 session_engine = session.get_bind()
 conn_details = session_engine.url
+sd = datetime(2029,4,30,10,30)
 
 def populate_testdb():
 	'''Populate the test db with test info'''
@@ -111,7 +112,7 @@ def populate_testdb():
 
 	logger.debug("On creation, attendance record for {} is \n {}".format(module_code,mod.getAttendance()))
 
-	sd = datetime(2029,4,30,10,30)
+	# sd = datetime(2029,4,30,10,30)
 
 	mod.createClassSession(sd)
 
