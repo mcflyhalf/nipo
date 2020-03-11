@@ -4,7 +4,8 @@ import cv2
 
 config = get_configs()
 
-faces_folder = 	config['faces directory']
+#Commented out because it brings a seemingly simple problem that we are currently unable to fix
+faces_folder = config['Faces directory']
 
 
 #TODO: Submit pull request in face_recognition module so that the comparison functions are not so sensitive about the input data type and type check to give useful warnings. Also just update docs to include the types of expected inputs e.g the functions compare_faces and face_encodings
@@ -88,7 +89,7 @@ class Frame:
 		return smaller_frame
 
 class Stream:
-	'''A class for checking a stream of video (A few successive frames) and reporting whether the stream is blurred or not. I intend to make the first version simply an implementation of https://github.com/AntiAegis/Face-Attendance-System'''
+	'''A class for checking a stream of video (A few successive frames) and reporting whether the stream is blurred or not. We intend to make the first version simply an implementation of https://github.com/AntiAegis/Face-Attendance-System'''
 
 	pass
 

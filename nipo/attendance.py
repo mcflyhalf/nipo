@@ -10,6 +10,7 @@
 from nipo import get_logger, test_session 
 from nipo.db.schema import Student, Course, Module
 from datetime import datetime
+import pandas as pd
 import pickle
 
 
@@ -23,7 +24,7 @@ logger = get_logger("nipo_attendance")
 
 # In future, maybe consider moving to a non relational DB
 
-#Ignore this class for now. I ee no use for it. Currently use ModuleAttendance and StudentAttendance. It may be useful in some way in future though
+#Ignore this class for now. I see no use for it. Currently use ModuleAttendance and StudentAttendance. It may be useful in some way in future though
 class MarkAttendance:
 	def __init__(self, studentid, modulecode, moduledate):
 		'''Create a single attendance record for a student in a module'''
@@ -77,13 +78,22 @@ class ModuleAttendance:
 
 		modulecourse = self.module.course_code
 		modulestudents = self.session.query(Student).filter(Student.course_uid == modulecourse)
-		attendance_list = []
-		attendance_list.append(list())
-		attendance_list[0].append("Dates\\Student ID's")
+		student_ids = []
+
+		#---Old Implementation, To be deleted---#
+		# attendance_list = []
+		# attendance_list.append(list())
+		# attendance_list[0].append("Dates\\Student ID's")	# Old implementation. To be deprecated in V1.3
+		# for student in modulestudents:
+		# 	attendance_list[0].append(student.id)
+
 		for student in modulestudents:
-			attendance_list[0].append(student.id)
+			student_ids.append(student.id)
+
+		stud_data = {"Student_ID":pd.Series(student_ids)}
+		attendance_sheet = pd.DataFrame(stud_data)
 		
-		return attendance_list
+		return attendance_sheet
 
 	def persistAttendance(self,attendancerecord):
 		#Pickle the attendance record and persist it to the appropriate table in the db using the session provided
@@ -101,25 +111,20 @@ class ModuleAttendance:
 		#get the attendance record for this module
 		pickled_attendance = self.module.attendance
 		unpickled_attendance = pickle.loads(pickled_attendance)
-		assert type(unpickled_attendance) is list
+		#assert type(unpickled_attendance) is pd.DataFrame	>> Moved to test_suite
 		return unpickled_attendance
 
 	def createClassSession(self,sessiondate):
 		assert type(sessiondate) is datetime 
 		currentAttendance = self.getAttendance()
 
-		for record in currentAttendance:
-			if record[0] == sessiondate:
-				logger.debug("Session not created, date {} already exists in attendance record for {}".format(sessiondate,self.module.name))
-				return	#The session already exists
+		if sessiondate in currentAttendance.columns:
+			logger.debug("Session not created, date {} already exists in attendance record for {}".format(sessiondate,self.module.name))
+			return	#The session already exists
 
-		currentAttendance.append(list())
-		currentAttendance[-1].append(sessiondate)
+		currentAttendance[sessiondate] = 0
 
-		for cnt in range(len(currentAttendance[0][1:])):
-			currentAttendance[-1].append(0)
-
-		assert len(currentAttendance[-1]) == len(currentAttendance[0])
+		assert len(currentAttendance[sessiondate]) == len(currentAttendance['Student_ID'])		#TODO: Move this to the test suite
 		self.persistAttendance(currentAttendance)
 
 	def updateAttendance(self, studentid, sessiondate, present=False):
@@ -129,26 +134,21 @@ class ModuleAttendance:
 
 		currentAttendance = self.getAttendance()
 
-		existingDate = False
-		for record in currentAttendance:
-			if record[0] == sessiondate:
-				existingDate = True
-				dateindex = currentAttendance.index(record)
-				break
+		existingDate = sessiondate in currentAttendance.columns
 
 		if not existingDate:
 			raise ValueError("Provided date has no class session")
 
 		#Here, check that the student with this id is part of this course: can be done in 2 ways: 1. Check that their student id appears in the course attendance list or 2. Check the module course and confirm that the student is in the same course. Option1 is currently being implemented
 
-		if not int(studentid) in currentAttendance[0]:
+		if not int(studentid) in currentAttendance["Student_ID"].values:
 			raise ValueError("Student with id>>{}<< not registered to module >>{}-{}<<".format(studentid,self.module.code, self.module.name))
 
-		studindex = currentAttendance[0].index(studentid)
 		if present:
-			currentAttendance[dateindex][studindex] = 1
+			#Column sessiondate in currentAttendance where the student_ID value is studentid. See https://pandas.pydata.org/docs/user_guide/indexing.html#the-where-method-and-masking
+			currentAttendance[sessiondate][currentAttendance.Student_ID == studentid] = 1
 		else:
-			currentAttendance[dateindex][studindex] = 0
+			currentAttendance[sessiondate][currentAttendance.Student_ID == studentid] = 0
 
 		self.persistAttendance(currentAttendance)
 
@@ -164,7 +164,7 @@ class ModuleAttendance:
 
 
 
-
+#### TEST PANDASIFICATION HERE, probably a good time to create unit tests for these things ########
 class StudentAttendance:
 	'''A class currently primarily for getting the attendance record of an individual student'''
 	def __init__(self, student_id, session=test_session):
@@ -192,6 +192,11 @@ class StudentAttendance:
 		stud_attendance = get_student_attendance(self.student_id, mod_attendance_record)
 
 		return stud_attendance
+
+		#TODO
+	def get_session_attendance(self, modulecode, sessiondate):
+		'''get a present/absent record for a student for a particular session'''
+		pass
 	
 	@property
 	def modules(self, max=10):
@@ -234,45 +239,13 @@ def get_student_from_pixels(face_pixels, session=test_session):
 
 #We probably want to deprecate this function. We shouldnt be exposing anyone outside this module to pickling
 #Modulewide function to get the attendance of a single student given their student id and a module's unpickled attendance
-def get_student_attendance(studentid,unpickled_attendance):
+def get_student_attendance(studentid,unpickled_attendance,sessiondate=None):
 	#get the attendance record for this module
-	assert type(unpickled_attendance) is list
-	student_index = unpickled_attendance[0].index(studentid)
-	#Transpose the module attendance list. Didn't think about this too much, basically lifted a solution from https://stackoverflow.com/questions/6473679/transpose-list-of-lists
-	mod_attendance = list(map(list,zip(*unpickled_attendance)))
-	mod_attendance[0][0] = "Student ID\\Dates"
-	stud_attendance = []
-	stud_attendance.append(mod_attendance[0])	#Sessiondates
-	stud_attendance.append(mod_attendance[student_index])	#Actual attendance
+	assert type(unpickled_attendance) is pd.DataFrame
 
-	return stud_attendance
+	if sessiondate is None:
+		return unpickled_attendance[unpickled_attendance.Student_ID == studentid]	#Entire record for all sessions
 
-#From here onwards, these are tests to check that the stuff here works. They will be transferred to proper test classes later
-if __name__ == "__main__":
-	module_code = "ETI001"
-	student_id = 6
-	mod = ModuleAttendance(module_code)
-
-	print("On creation, attendance record is \n {}".format(mod.getAttendance()))
-
-	sd = datetime(2029,4,30,10,30)
-
-	mod.createClassSession(sd)
-
-	print("On creation of class session, attendance record is \n {}".format(mod.getAttendance()))
-
-	for studID in range(2,11,2):
-		mod.updateAttendance(studID, sd, present=True)
-
-	print("After marking some students present, attendance record is \n {}".format(mod.getAttendance()))
-
-	att = get_student_attendance(4,mod.getAttendance())
-
-	print("The attendance for 1 Student is :\n {}".format(att))
-
-	sa = StudentAttendance(7)
-	mods = sa.modules
-	modcodes = [mod.code for mod in mods]
-
-
+	else:
+		return unpickled_attendance[unpickled_attendance.Student_ID == studentid][sessiondate].values		#Were they present or absent on that single session?
 
