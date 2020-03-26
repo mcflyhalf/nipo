@@ -64,7 +64,24 @@ def get_attendance_student(studentID):
 def get_attendance_student_module(studentID,modulecode):
 
 	stud = attendance.StudentAttendance(studentID, session)
-	return stud.get_module_attendance(modulecode)
+	stud_att = stud.get_module_attendance(modulecode)
+	att = stud_att['attendance']
+	tot_present = 0
+	tot_sesh = len(att)
+
+	if tot_sesh <= 0:
+		stud_att['Present_pc'] = 100
+		
+
+	else:
+		for sesh in att:
+			tot_present += int(att[sesh])
+
+		stud_att['Present_pc'] =  int(tot_present/tot_sesh *100)
+
+
+	stud_att['Absent_pc'] = 100-stud_att['Present_pc']
+	return stud_att
 
 
 def update_attendance_student_module(studentID, modulecode, sessiondate, present=False):
@@ -117,7 +134,7 @@ def get_module_list(session):
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
-#@login_required
+@login_required
 def landing():
 	'''get Course list and display it using a template'''
 	#TODO: if not logged in, display landing page (with option to register)
@@ -198,6 +215,13 @@ def get_user_details():
 	return jsonify(user_detail)
 
 
+
+#Will need to rething these routes. 
+	# Currently thinking of them as separate pages.
+	# They should however exist as part of a single page that calls javascript to get data.
+	# The page then evolves as appropriate
+	# The routes would thus mostly return json data. Rarely ever an HTML template
+
 # Return a list of the modules that a student is taking
 @app.route('/modules', methods = ['GET','POST'])
 def get_student_modules():
@@ -207,16 +231,11 @@ def get_student_modules():
 @app.route('/module/attendance', methods = ['GET','POST'])
 def get_student_module_attendance():
 	if request.method == 'POST':
-		studentID = request.form.get('studentID')
-		modulecode = request.form.get('modulecode')
-
+		req = request.get_json()
+		studentID = req['studentID']
+		modulecode = req['modulecode']
 		student_attendance = get_attendance_student_module(studentID,modulecode)
-		resp = dict()
-		resp['Student ID'] = studentID
-		resp['Module Name'] = "Module Name not yet Implemented"	#To Do
-		resp['Student Name'] = "student Name not yet implemented"	#To Do
-		resp['Module Code'] = modulecode 
-		resp['Student attendance'] = student_attendance
+		resp = student_attendance
 
 		return jsonify(resp) 	#TODO: Have this returned by a pretty template
 	return under_cons_msg + 'for a Get request'

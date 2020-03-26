@@ -16,7 +16,7 @@
 		<span class="message">
 			<p> Dynamic Course selector (javascript??) </p>
 		</span>
-		<select class="courseSelect">
+		<select class="courseSelect" id="courseList">
 				<option value= "all_modules">All Modules</option>
 			{%for module in modules%}
 				<option value= "{{module.code}}">{{module.code}} {{module.name}}</option>
@@ -24,7 +24,12 @@
 		</select>
 	</div>
 	<div class="dashboard stud-data">
-		<p> Put the pie chart here</p>
+		<p><br></p>
+		<!-- <p> Put the pie chart here</p> -->
+		<div id="attSum">
+			<!-- The actual Pie Chart -->
+			
+		</div>
 		<div class="attendance-summary">
 			<p> Present: 7/12 &nbsp &nbsp &nbsp Late:2/12 &nbsp &nbsp &nbsp Absent3/12</p>
 		</div>

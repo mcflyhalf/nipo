@@ -189,7 +189,20 @@ class StudentAttendance:
 		mod_attendance=ModuleAttendance(modulecode,session=self.session)
 		mod_attendance_record = mod_attendance.getAttendance()
 
-		stud_attendance = get_student_attendance(self.student_id, mod_attendance_record)
+		stud_att = get_student_attendance(self.student_id, mod_attendance_record)
+
+		stud_attendance = {}
+		stud_attendance['student_name'] = self.student.name
+		stud_attendance['student_id'] = self.student.id
+		stud_attendance['module_name'] = mod_attendance.module.name
+		stud_attendance['module_code'] = mod_attendance.module.code
+
+		#assert len(stud_att) == 1	>> Do this in tests
+		att = {str(key):int(stud_att[key].values) for key in stud_att.keys()}
+		att.pop('Student_ID')	#This may print out random stud_ID's to stdout
+
+
+		stud_attendance['attendance'] =  att
 
 		return stud_attendance
 

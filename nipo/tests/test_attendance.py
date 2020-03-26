@@ -6,6 +6,7 @@ from nipo.tests.populate import sd as test_date
 import pandas as pd
 import random
 
+test_date=test_date[0]
 
 module_code = ["ETI001","ETI002","ETI003","ETI004","ETI005"]
 

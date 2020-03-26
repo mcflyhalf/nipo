@@ -8,12 +8,18 @@ from nipo import test_session, get_logger
 from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
 from nipo.attendance import ModuleAttendance, get_student_attendance
 from datetime import datetime
+import random
 
 logger = get_logger("nipo_populate")
 session = test_session
 session_engine = session.get_bind()
 conn_details = session_engine.url
-sd = datetime(2029,4,30,10,30)
+sd = [datetime(2029,4,30,10,30)]
+sd.append(datetime(2029,5,7,10,30))
+sd.append(datetime(2029,5,8,10,30))
+sd.append(datetime(2029,5,9,10,30))
+sd.append(datetime(2029,5,10,10,30))
+sd.append(datetime(2029,5,11,10,30))
 
 def populate_testdb():
 	'''Populate the test db with test info'''
@@ -112,14 +118,15 @@ def populate_testdb():
 
 	logger.debug("On creation, attendance record for {} is \n {}".format(module_code,mod.getAttendance()))
 
-	# sd = datetime(2029,4,30,10,30)
 
-	mod.createClassSession(sd)
+	for d in sd:
+		mod.createClassSession(d)
 
 	logger.debug("On creation of class session, attendance record for {} is \n {}".format(module_code ,mod.getAttendance()))
 
-	for studID in range(2,11,2):
-		mod.updateAttendance(studID, sd, present=True)
+	for d in sd:
+		for studID in range(len(students)):
+			mod.updateAttendance(studID+1, d, present=random.choice([True,True,False,True,True,True]))	#Skew attendance towards presence
 
 	logger.debug("After marking some students present, attendance record is \n {}".format(mod.getAttendance()))
 

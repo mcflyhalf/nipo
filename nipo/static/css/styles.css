@@ -58,7 +58,7 @@ div.dashboard{
 	background-color: #E2AE80;
 	width: 50%;
 	margin: 5px;
-	max-height: 302px;
+	max-height: 402px; /*302 px*/
 	border-radius: 2px;
 	font-family: 'Roboto', 'sans-serif';
 
@@ -132,7 +132,9 @@ select.courseSelect{
 
 }
 
-
+#attSum{
+	
+}
 
 section.main{
 	box-sizing: border-box;
