@@ -3,41 +3,44 @@
 
 {% block content %}
 
-
-<div>
-	<h1> Student attendance Summary</h1>
+<div class="level has-background-link">
+	<h1 class="title level-item"> Student attendance Summary</h1>
 </div>
-
-<section class="dashboard main">
-	<div class="dashboard stud-info">
-		<span class="stud-info">
-			<p> {{current_user.name}} <br> ID: ABC12345{{current_user.student_id}}<br></p>
-		</span>
-		<span class="message">
+<div class="wrapper has-background-success main">
+	<div class="wrapped wrapper stud-info has-background-warning">
+		<div class="stud-details">
+			<p class="is-size-1 has-text-light"> 
+				{{current_user.name}} <br> 
+				ID: ABC12345{{current_user.student_id}}<br>
+			</p>
+		</div>
+		<div class="to-bottom">
 			<p> Dynamic Course selector (javascript??) </p>
-		</span>
-		<select class="courseSelect" id="courseList">
-				<option value= "all_modules">All Modules</option>
-			{%for module in modules%}
-				<option value= "{{module.code}}">{{module.code}} {{module.name}}</option>
-			{%endfor%}
-		</select>
+			<div class="select is-link">
+				<select id="courseList">
+						<!-- <option value= "all_modules">All Modules</option> -->
+					{%for module in modules%}
+						<option value= "{{module.code}}">{{module.code}} {{module.name}}</option>
+					{%endfor%}
+				</select>
+			</div>
+		</div>
 	</div>
-	<div class="dashboard stud-data">
-		<p><br></p>
-		<!-- <p> Put the pie chart here</p> -->
+
+	<div class="wrapped wrapper chart-container has-background-grey">
+		<!-- <p> Text before pieChart</p> -->
 		<div id="attSum">
 			<!-- The actual Pie Chart -->
 			
 		</div>
-		<div class="attendance-summary">
-			<p> Present: 7/12 &nbsp &nbsp &nbsp Late:2/12 &nbsp &nbsp &nbsp Absent3/12</p>
-		</div>
-		<p>  </p>
-	</div>
 
-	
-</section>
+		<div class="to-bottom has-text-centered has-background-grey-light">
+			<p class="is-size-5 has-text-light"> Present: 7/12 &nbsp &nbsp &nbsp Late:2/12 &nbsp &nbsp &nbsp Absent3/12</p>
+		</div>
+	</div>
+</div>
+
+
 <script src="{{url_for('static',filename='javascript/calcAttendance.js')}}"></script>
 	
 {% endblock %}

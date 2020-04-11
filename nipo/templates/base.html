@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto&display=swap" > 
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+        <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
         <link rel="stylesheet" href="{{url_for('static', filename='css/styles.css') }}">
         {% if title %}
         <title>{{ title }} | Nipo</title>
@@ -10,32 +14,49 @@
         {% endif %}
     </head>
     <body>
-        <section class = "header">
-            <div>
-                <nav>
-                    <ul>
-                        Nipo:
-                        <li><a href="{{ url_for('landing') }}">Home</a></li>
-                        {% if current_user.is_authenticated %}
-                        <li><a href="{{ url_for('logout') }}">Logout {{current_user.username}}</a></li>
-                        {% else %}
-                        <li><a href="{{ url_for('login') }}">Login</a></li>
-                        {% endif %}
-                    </ul>
+        <section class = "header hero is-primary">
+            <div class="hero-head">            
+                <nav class = "navbar">
+                    <div class="container">
+                        <div class="navbar-brand">
+                            <a href="{{ url_for('landing') }}" class="navbar-item is-inverted">
+                                Nipo
+                            </a>
+                            <span class="navbar-burger burger" data-target="navbarMenuHeroA">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            </span>
+                        </div>
+                        <div id="navbarMenuHeroA" class="navbar-menu">
+                            <div class="navbar-end">
+                                <a class="navbar-item" href="{{ url_for('landing') }}">Home</a>
+                                {% if current_user.is_authenticated %}
+                                <a class="navbar-item" href="{{ url_for('logout') }}">Logout {{current_user.username}}</a>
+                                {% else %}
+                                <a class="navbar-item" href="{{ url_for('login') }}">Login</a>
+                                {% endif %}                            
+                            </div>
+                        </div>
+                    </div>
                 </nav>
             </div>
         </section>
         <hr>
         {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
+            {% if messages %}
+                <div class="container">
+                    <div class="notification">
+                        <ul>
+                            {% for message in messages %}
+                            <li>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
         {% endif %}
         {% endwith %}
-        <section class= "main">
+        <section class= "section main">
         {% block content %} {% endblock %}
         </section>
         <hr>

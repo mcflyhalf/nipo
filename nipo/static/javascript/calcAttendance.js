@@ -1,8 +1,4 @@
-//alert(1);
 
-//console.log(document.all)
-
-//studinfo = document.querySelectorAll("span.stud-info")
 function getAttendance(){
 	
 	const url = '/module/attendance'
@@ -25,7 +21,7 @@ function getAttendance(){
 	console.log(options);
 	fetch(url,options)
 		.then(res => res.json())
-		.then(res => drawBar(res));
+		.then(res => drawPie(res));
 
 }
 
@@ -91,101 +87,30 @@ function drawPie(att_data){
 	}];
 
 	var layout = {
-	  height: 200,
-	  width: 250
+	  width: '85%',
+	  height: '80%' //Height doesnt matter. Aspect ratio to be set using width
 	};
 
 
 	Plotly.newPlot('attSum', data, layout);
 
 }
+
+// Add Plotly lib to HTML
 pltly = document.createElement('script');
 pltly.setAttribute('src','https://cdn.plot.ly/plotly-latest.min.js');
 document.head.appendChild(pltly);
 
 
-let pie_chart_canvas = document.getElementById('attSum')
-let course_select = document.getElementById('courseList')
+let pie_chart_canvas = document.getElementById('attSum');
+let course_select = document.getElementById('courseList');
+let body = document.body;
 
 var user_details;
 fetch('/userdetails')
 .then((resp) => resp.json())
 .then(function(data){ user_details = data});
 
-// console.log(user_details)
 
-course_select.addEventListener("change", getAttendance)
-
-//---------------HTML---------------
-// <head>
-// 	<!-- Load plotly.js into the DOM -->
-// 	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-// </head>
-
-// <body>
-// 	<div id='pieChart'><!-- Plotly chart will be drawn inside this DIV --></div>
-// </body>
-
-
-
-// //----------------JS---------------------------
-
-//--------HTML-------
-// <head>
-// 	<!-- Load plotly.js into the DOM -->
-// 	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-// </head>
-
-// <body>
-// 	<div id='attSum'><!-- Plotly chart will be drawn inside this DIV --></div>
-// </body>
-
-
-
-
-//---------JS-----------
-// var present = {
-//   x: [70, 90, 85],
-//   y: ['mod1', 'mod2', 'mod3'],
-//   name: 'Present',
-//   orientation: 'h',
-//   marker: {
-//     color: 'rgba(55,128,191,0.6)',
-//     width: 1
-//   },
-//   type: 'bar'
-// };
-
-// var absent = {
-//   x: [30, 10, 15],
-//   y: ['mod1', 'mod2', 'mod3'],
-//   name: 'Absent',
-//   orientation: 'h',
-//   type: 'bar',
-//   marker: {
-//     color: 'rgba(255,153,51,0.6)',
-//     width: 1
-//   }
-// };
-
-// var data = [present, absent];
-
-// var layout = {
-//   title: 'All Module attendance summary',
-//   barmode: 'stack'
-// };
-
-// Plotly.newPlot('attSum', data, layout);
-
-// var data = [{
-//   values: [85,15],
-//   labels: ['Present', 'Absent'],
-//   type: 'pie'
-// }];
-
-// var layout = {
-//   height: 400,
-//   width: 500
-// };
-
-// Plotly.newPlot('myDiv', data, layout);
+course_select.addEventListener("change", getAttendance);
+//body.addEventListener("load", getAttendance);

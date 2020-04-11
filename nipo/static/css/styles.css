@@ -1,7 +1,8 @@
-
+/*bulma - https://bulma.io/documentation/layout/tiles/*/
 body{
 /*	background-color: #771f37;*/
-	background-color: #d26e20;
+	/*background-color: #d26e20;*/
+
 }
 
 ul{
@@ -53,45 +54,6 @@ section.dashboard{
 
 }
 
-div.dashboard{
-	position: relative;
-	background-color: #E2AE80;
-	width: 50%;
-	margin: 5px;
-	max-height: 402px; /*302 px*/
-	border-radius: 2px;
-	font-family: 'Roboto', 'sans-serif';
-
-
-}
-div.dashboard>*{
-	left: 10px;
-	position: relative;
-}
-
-div.stud-info::after {
-	content: '>';
-	font: 17px "Roboto";
-	color: #8C8C8C;
-	-webkit-transform: rotate(90deg);
-	-moz-transform: rotate(90deg);
-	-ms-transform: rotate(90deg);
-	transform: rotate(90deg);
-	right: 11px;
-
-	/*Position of the select arrow. Very hacky*/
-	top: 85%;
-	right: 5%;
-	padding: 0 0 2px;
-
-	/*left line */
-	/*border-bottom: 1px solid red;*/
-
-	position: absolute;
-	pointer-events: none;
-}
-
-
 span.stud-info{
 
 	font-size: 37px;
@@ -122,26 +84,68 @@ div.attendance-summary,select.courseSelect{
 
 }
 
-select.courseSelect{
-	/*Remove the defult button*/
-	-webkit-appearance: none;
-	-moz-appearance: none;
- 	appearance: none;
-
-	/*border-color: #D26E20;*/
+div.js-plotly-plot{
+	/*This is essentially #att-sum*/
+	width: 70%;
+	/*padding-top: 100%;	Set1:1 aspect ratio*/
 
 }
 
-#attSum{
-	
+#att-sum{
+	padding-top: 0; /*Overides div.js-plotly-plot but dont remove the other one*/
 }
 
 section.main{
 	box-sizing: border-box;
 	min-height: 75vh;
+	padding-top: 15px;
 	}
 
-a{
-	text-decoration: none;
-	background-color: green;
+div.main{
+	min-height: 75vh;
+	}
+
+hr{
+	margin: 5px;
 }
+
+.wrapper{
+	display: grid;
+	grid-gap: 20px;
+}
+
+div.main{
+	grid-template-columns: 1fr 1fr;
+}
+
+.to-bottom{
+	align-self: end;
+	justify-self: center;
+	padding-bottom: 10px;
+	width:100%;
+
+}
+
+/*Modify Plotly presentation*/
+
+/*Important here overides plotly defaults*/
+
+.svg-container{
+	height: unset !important;
+	padding-top: 80% !important;
+}
+
+.main-svg{
+	background: unset !important;
+}
+div.chart-container{
+	grid-template-rows: 1fr
+}
+
+.infolayer{
+	position:relative;
+	right: 100px;
+	bottom: 10px;
+}
+
+
