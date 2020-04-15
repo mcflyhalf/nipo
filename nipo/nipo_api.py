@@ -10,6 +10,7 @@ session = test_session		#Change to production_session in the production environm
 
 #The nipo.forms import requires the session var so it is done after session's creation.
 from nipo.forms import LoginForm, RegistrationForm
+import random
 
 
 #TODO: Add login required to relevant routes
@@ -115,7 +116,7 @@ def get_student_from_encoding(encoding):
 def get_student_from_face_pixels(face_pixels):
 	return attendance.get_student_from_pixels(face_pixels, session)
 
-#Probably want to move this method elsewhere
+#TODO: move next 3 methods elsewhere. They shouldnt exist here. Only for dev
 def get_course_list(session):
 	courses = session.query(db.schema.Course).\
 							limit(10).\
@@ -131,19 +132,35 @@ def get_module_list(session):
 	return modules
 
 
+def get_student_list(session):
+	students = session.query(db.schema.Student).\
+							limit(10).\
+							all()
+
+	return students
+
+
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
-@login_required
+# @login_required
 def landing():
 	'''get Course list and display it using a template'''
 	#TODO: if not logged in, display landing page (with option to register)
 	#Elif student return student dashboard
-	#Elif instructor return instructor dashboard
+	#Elif instructor return syaff dashboard
 	#elif admin return admin dashboard
 
-	#if student_loggedin
+	#if staff logged in
 	modules = get_module_list(session)
+	dates = ['1st April','3rd April','15th March','21st September']	#mock dates
+	students = get_student_list(session)
+	for student in students:
+		student.status=random.choice(["student-absent","student-present"])
+	return render_template('staff_dashboard.html',dates=dates,students=students,modules=modules ) 
+
+	#if student_loggedin
+	modules = get_module_list(session)	#TODO: This function currently gets all modules in the system. Need to modify so that it only gets the modules a student is enrolled to. Nipo challenge??
 	return render_template('student_dashboard.html',modules = modules)
 
 	courses = get_course_list(session)
