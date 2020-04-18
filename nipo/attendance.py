@@ -144,6 +144,7 @@ class ModuleAttendance:
 		if not int(studentid) in currentAttendance["Student_ID"].values:
 			raise ValueError("Student with id>>{}<< not registered to module >>{}-{}<<".format(studentid,self.module.code, self.module.name))
 
+		#TODO: Log this action
 		if present:
 			#Column sessiondate in currentAttendance where the student_ID value is studentid. See https://pandas.pydata.org/docs/user_guide/indexing.html#the-where-method-and-masking
 			currentAttendance[sessiondate][currentAttendance.Student_ID == studentid] = 1
@@ -162,9 +163,16 @@ class ModuleAttendance:
 
 		return module_students
 
+	@property
+	def dates(self):
+		'''Return a list of all dates where module has a session. Returns a list of datetime objects.'''
+		current_attendance = self.getAttendance()
+		module_dates = current_attendance.columns.to_list()
+
+		module_dates = [date for date in module_dates if type(date) is datetime]
+		return module_dates
 
 
-#### TEST PANDASIFICATION HERE, probably a good time to create unit tests for these things ########
 class StudentAttendance:
 	'''A class currently primarily for getting the attendance record of an individual student'''
 	def __init__(self, student_id, session=test_session):

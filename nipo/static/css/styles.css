@@ -230,14 +230,6 @@ ul.side-panel-menu{
 	padding: 1.5rem 1rem;
 }
 
-/*.student-absent{
-	background-color: var(--primary-absent);
-}
-
-.student-present{
-	background-color: var(--primary-present);
-}*/
-
 .fa-user{
 	grid-area: usr-img;
 }
@@ -249,11 +241,6 @@ ul.side-panel-menu{
 .student-present .fa-user{
 	color: var(--primary-present);
 }
-
-/*This svg comes from fontawesome. */
-/*.tile-card svg{
-	grid-area: usr-img;
-}*/
 
 .tile-card h4{
 	grid-area: stud-name;
@@ -279,7 +266,7 @@ button.present-btn{
 
 button:hover{
 	background: var(--dark);
-	color: white;
+	color: white;	
 }
 
 .tile-card .present-btn{
@@ -292,10 +279,16 @@ button:hover{
 
 .student-absent .absent-btn{
 	opacity: var(--disabled-button-opacity);
-	cursor: not-allowed:;
+}
+
+.student-absent .absent-btn:hover{
+	cursor: not-allowed;
 }
 
 .student-present .present-btn{
-	opacity:var(--disabled-button-opacity);
-	cursor: not-allowed:;
+	opacity:var(--disabled-button-opacity);	
+}
+
+.student-present .present-btn:hover{
+	cursor: not-allowed;
 }

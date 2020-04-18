@@ -29,7 +29,7 @@
 		<div class="small-container-a small-container select is-link">
 			<select>
 				{%for date in dates%}
-					<option value= "{{date}}">{{date}}</option>
+					<option value= "{{date["iso format"]}}">{{date["human friendly format"]}}</option>
 				{%endfor%}
 			</select>			
 		</div>
@@ -56,6 +56,6 @@
 
 
 
-<!-- <script src="{{url_for('static',filename='javascript/markAttendance.js')}}"></script>
- -->	
+<script src="{{url_for('static',filename='javascript/markAttendance.js')}}"></script>
+	
 {% endblock %}

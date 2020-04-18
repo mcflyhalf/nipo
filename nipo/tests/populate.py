@@ -1,8 +1,6 @@
 #This file will eventually be removed. It is here to test functionality that interfaces with objects that havent been created or functionality that requires a populated DB (for this we use nipo_test which is a mirror of nipo but whose contents are used for testing purposes)
 
-#Documentation for creating an instance of the mapped classes is very well done herehttps://docs.sqlalchemy.org/en/latest/orm/tutorial.html#create-an-instance-of-the-mapped-class
-
-
+#Documentation for creating an instance of the mapped classes is very well done at https://docs.sqlalchemy.org/en/latest/orm/tutorial.html#create-an-instance-of-the-mapped-class
 
 from nipo import test_session, get_logger
 from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
@@ -63,9 +61,9 @@ def populate_testdb():
 
 	modules = [module1, module2, module3, module4, module5]
 
-	test_user = User(username = "mcflyhalf", email = 'dev@mail.com', name= 'Mark Flyhalf', password_hash='2bchanged', authenticated= False, active = True)
-	test_user.set_password('Dev123')
-	logger.debug("Created most dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))	#conn_details gives too much info. reduce to only give dbname
+	admin_user = User(username = "mcflyhalf", email = 'dev@mail.com', name= 'Mark Flyhalf', password_hash='2bchanged', authenticated= False, active = True, privilege=PrivilegeLevel.admin.name)
+	admin_user.set_password('Admin123')
+	logger.debug("Created most dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))	#TODO:conn_details gives too much info. reduce to only give dbname
 
 	for venue in venues:
 		session.add(venue)
@@ -79,12 +77,14 @@ def populate_testdb():
 	for module in modules:
 		session.add(module)
 
-	session.add(test_user)
+	session.add(admin_user)
 
 	session.commit()
 	logger.info("Persisted most dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
 
-	logger.debug("Creating user dummy data for DB >>{}<< for integration testing.".format(conn_details))
+	#------------------STUDENT USER CREATION------------------#
+
+	logger.debug("Creating student user dummy data for DB >>{}<< for integration testing.".format(conn_details))
 	students = session.query(Student).limit(20).all()
 	users = []
 
@@ -107,6 +107,31 @@ def populate_testdb():
 		session.add(stud_user)
 
 	logger.debug("Created user dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))
+	session.commit()
+	logger.info("Persisted all dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
+
+	
+	#------------------STAFF USER CREATION------------------#
+
+	logger.debug("Creating staff users for DB >>{}<< for integration testing.".format(conn_details))
+		
+	staff_users = []
+
+	staff_user = User(username = "stafflyhalf", email = 'staff1@mail.com', name= 'Staff Flyhalf', password_hash='2bchanged', authenticated= False, active = True, privilege=PrivilegeLevel.staff.name)
+	staff_user.set_password('Staff123')
+	staff_users.append(staff_user)
+
+	staff_user = User(username = "starflyhalf", email = 'staff2@mail.com', name= 'Star Flyhalf', password_hash='2bchanged', authenticated= False, active = True, privilege=PrivilegeLevel.staff.name)
+	staff_user.set_password('Staff123')
+	staff_users.append(staff_user)
+
+	for user in staff_users:
+		session.add(user)
+
+	session.commit()
+
+	
+	logger.debug("Created staff users dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))
 	session.commit()
 	logger.info("Persisted all dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
 
