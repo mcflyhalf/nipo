@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="wrapper staff-db-wrapper">
+	<div class="side-panel">
+		<nav class="side-menu">
+			<ul class ="side-panel-menu wrapper-f">
+				<li>
+					<a href="#"><i class="fas fa-book-open"></i>
+								Module</a>
+				</li>
+				<li>
+					<a href="#"><i class="fas fa-cogs"></i>
+								Settings</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-user-cog"></i>
+								Change Password</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-phone"></i>
+								Contact support</a>
+				</li>
+			</ul>
+		</nav>
+		
+	</div>
+	<div class="main-page wrapper">
+		<div class="small-container-a small-container select is-link">
+			<select>
+				{%for date in dates%}
+					<option value= "{{date["iso format"]}}">{{date["human friendly format"]}}</option>
+				{%endfor%}
+			</select>			
+		</div>
+		<div class="small-container-b small-container select is-link">
+			<select>
+				{%for module in modules%}
+					<option value= "{{module.code}}">{{module.code}} {{module.name}}</option>
+				{%endfor%}
+			</select>			
+		</div>
+		<div class="wrapper tiles">
+			{%for student in students%}
+				<div class="tile-card wrapper {{student.status}}" id="{{student.id}}">
+					<i class="user-image fas fa-user fa-4x"></i>
+					<h4>{{student.name}}</h4>
+					<button class= "present-btn" type="button">Present</button>
+					<button class= "absent-btn" type="button">Absent</button>
+				</div>
+			{%endfor%}
+		</div>
+		
+	</div>
+</div>
+
+
+
+<script src="{{url_for('static',filename='javascript/markAttendance.js')}}"></script>
+	
+{% endblock %}

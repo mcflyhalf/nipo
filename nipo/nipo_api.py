@@ -10,6 +10,7 @@ session = test_session		#Change to production_session in the production environm
 
 #The nipo.forms import requires the session var so it is done after session's creation.
 from nipo.forms import LoginForm, RegistrationForm
+import random
 
 
 #TODO: Add login required to relevant routes
@@ -115,7 +116,7 @@ def get_student_from_encoding(encoding):
 def get_student_from_face_pixels(face_pixels):
 	return attendance.get_student_from_pixels(face_pixels, session)
 
-#Probably want to move this method elsewhere
+#TODO: move next 3 methods elsewhere. They shouldnt exist here. Only for dev
 def get_course_list(session):
 	courses = session.query(db.schema.Course).\
 							limit(10).\
@@ -131,24 +132,56 @@ def get_module_list(session):
 	return modules
 
 
+def get_student_list(session):
+	students = session.query(db.schema.Student).\
+							limit(10).\
+							all()
+
+	return students
+
+
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
 @login_required
 def landing():
-	'''get Course list and display it using a template'''
-	#TODO: if not logged in, display landing page (with option to register)
+	'''Display landing page for student, staff(instructor) or admin'''
 	#Elif student return student dashboard
-	#Elif instructor return instructor dashboard
+	#Elif instructor return syaff dashboard
 	#elif admin return admin dashboard
 
-	#if student_loggedin
-	modules = get_module_list(session)
-	return render_template('student_dashboard.html',modules = modules)
+	if current_user.privilege == schema.PrivilegeLevel.student.name:
+		modules = get_module_list(session)	#TODO: This function currently gets all modules in the system. Need to modify so that it only gets the modules a student is enrolled to. Nipo challenge??
+		return render_template('student_dashboard.html',modules = modules)
 
-	courses = get_course_list(session)
-	return render_template('list_courses.html', courses = courses)
+		courses = get_course_list(session)
+		return render_template('list_courses.html', courses = courses)
 
+	elif current_user.privilege == schema.PrivilegeLevel.staff.name:
+		#TODO: Only show modules staff member is registered to. For each module, only show valid dates.
+		modules = get_module_list(session)
+		dates = []
+		formatted_dates = []
+		for module in modules:
+			dates += ModuleAttendance(module.code, session).dates
+
+		for date in dates:
+			human_friendly_format = date.strftime('%a %d %b %H:%M')
+			iso_format = date.strftime('%Y-%m-%dT%H:%M')
+			combined_format = {"human friendly format": human_friendly_format,
+								"iso format": iso_format}
+
+			formatted_dates.append(combined_format)
+
+		students = get_student_list(session)
+		for student in students:
+			student.status=random.choice(["student-absent","student-present"])
+		return render_template('staff_dashboard.html',dates=formatted_dates,students=students,modules=modules)
+
+	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
+		return "Hello Administrator. There seems to be nothing for you here"
+
+	
 
 @app.route('/logout')
 @login_required
@@ -237,7 +270,7 @@ def get_student_module_attendance():
 		student_attendance = get_attendance_student_module(studentID,modulecode)
 		resp = student_attendance
 
-		return jsonify(resp) 	#TODO: Have this returned by a pretty template
+		return jsonify(resp) 	#TODO: Have this returned by a pretty render_template TODO: MAke the datetime in this response ISO8601 format
 	return under_cons_msg + 'for a Get request'
 
 # Return the modules a student is enrolled in with summary attendance (Dashboard)
@@ -289,10 +322,11 @@ def get_module_students():		#Not Yet implemented
 @app.route('/module/attendance/mark', methods = ['GET','POST'])
 def set_student_module_attendance():
 	if request.method == 'POST':
-		studentID = request.form.get('studentID')
-		modulecode = request.form.get('modulecode')
-		status = request.form.get('status')
-		sess_date = request.form.get('SessionDate')	#Expects YYYY-MM-DDTHH:MM Format (Iso 8601)
+		req = request.get_json()
+		studentID = req['studentID']
+		modulecode = req['modulecode']
+		status = req['status']
+		sess_date = req['SessionDate']	#Expects YYYY-MM-DDTHH:MM Format (Iso 8601)
 		try:
 			studentID = int(studentID)
 		except ValueError:
@@ -309,7 +343,7 @@ def set_student_module_attendance():
 
 		mod_attendance = attendance.ModuleAttendance(modulecode, session)
 
-		mod_attendance.updateAttendance(studentID,sess_date, present=status)
+		# mod_attendance.updateAttendance(studentID,sess_date, present=status)
 		try:
 			mod_attendance.updateAttendance(studentID,sess_date, present=status)			
 		except ValueError:

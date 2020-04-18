@@ -9,10 +9,10 @@ import os
 
 setup(
     name = "nipo",
-    version = "0.6",
+    version = "0.6.1",
     author = "Mcflyhalf",
     author_email = "mcflyhalf@live.com",
-    description = ("An application of facial recognition in classroom attendance monitoring"),
+    description = ("An implementation of classroom attendance monitoring"),
     keywords = "facial recognition classroom attendance",
     packages= find_packages(),
 )

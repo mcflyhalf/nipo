@@ -139,7 +139,4 @@ class User(Base):
 	def set_password(self,raw_password):
 		self.password_hash = generate_password_hash(str(raw_password))
 
-
 #These are all the tables I can currently think of
-
-

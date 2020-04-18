@@ -1,4 +1,21 @@
 /*bulma - https://bulma.io/documentation/layout/tiles/*/
+
+/*CSS Variables*/
+:root{
+	--primary: #ddd;
+	--dark: #333;
+	--primary-present:#6fb964 ;
+	/*--secondary-present: ;*/
+	--primary-absent: #ff00009c;
+	/*--secondary-absent: ; */
+	--light: lightslategrey;
+	/*--lighter: ;*/
+	--shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+	--disabled-button-opacity: 0.3;
+	--bulma-primary: #00d1b2;
+}
+
+
 body{
 /*	background-color: #771f37;*/
 	/*background-color: #d26e20;*/
@@ -25,6 +42,11 @@ h1{
 
 section{
 	padding: 10px 5px;
+}
+
+section.footer{
+	padding: 10px 0;
+	text-align: center;
 }
 
 section.course-display{
@@ -114,6 +136,10 @@ hr{
 	grid-gap: 20px;
 }
 
+.wrapper-f{
+	display: flex;
+}
+
 div.main{
 	grid-template-columns: 1fr 1fr;
 }
@@ -139,7 +165,7 @@ div.main{
 	background: unset !important;
 }
 div.chart-container{
-	grid-template-rows: 1fr
+	grid-template-rows: 1fr;
 }
 
 .infolayer{
@@ -149,3 +175,120 @@ div.chart-container{
 }
 
 
+/*Staff Dashboard styles*/
+.staff-db-wrapper{
+	grid-template-columns: 200px auto; /* Use minmax here??*/
+}
+
+
+/*side-panel*/
+div.side-panel{
+	background-color: var(--primary);
+}
+
+ul.side-panel-menu{
+	flex-direction: column;
+	align-items: left;
+}
+
+
+
+/*main page*/
+
+.staff-db-wrapper .main-page{
+	grid-template-areas: 
+	"small-container-a small-container-b"
+	". ."
+	"tile-container tile-container";
+}
+
+.small-container-a{
+	grid-area: small-container-a;
+	justify-self: left; 
+}
+
+.small-container-b{
+	grid-area: small-container-b;
+	justify-self: right;
+}
+
+.tiles{
+	grid-area: tile-container;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.tile-card{
+	grid-template-areas: 
+		"usr-img usr-img"
+		"usr-img usr-img"
+		"stud-name stud-name"
+		"btn-present btn-absent";
+		justify-items: center;
+
+	background: var(--primary);
+	box-shadow: var(--shadow);
+	padding: 1.5rem 1rem;
+}
+
+.fa-user{
+	grid-area: usr-img;
+}
+
+.student-absent .fa-user{
+	color: var(--primary-absent);
+}
+
+.student-present .fa-user{
+	color: var(--primary-present);
+}
+
+.tile-card h4{
+	grid-area: stud-name;
+}
+
+.tile-card button{
+	border: none;
+	color: white;
+	padding: 2px 12px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 12px;
+}
+
+button.absent-btn{
+	background-color: var(--primary-absent);
+}
+
+button.present-btn{
+	background-color: var(--primary-present);
+}
+
+button:hover{
+	background: var(--dark);
+	color: white;	
+}
+
+.tile-card .present-btn{
+	grid-area: btn-present;
+}
+
+.tile-card .absent-btn{
+	grid-area: btn-absent;
+}
+
+.student-absent .absent-btn{
+	opacity: var(--disabled-button-opacity);
+}
+
+.student-absent .absent-btn:hover{
+	cursor: not-allowed;
+}
+
+.student-present .present-btn{
+	opacity:var(--disabled-button-opacity);	
+}
+
+.student-present .present-btn:hover{
+	cursor: not-allowed;
+}
