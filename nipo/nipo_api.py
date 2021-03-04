@@ -353,6 +353,9 @@ def set_student_module_attendance():
 		return redirect(url_for('get_student_module_attendance'), code=307)
 	return under_cons_msg + 'for a Get request'
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 app.debug = True
 # if __name__ == '__main__':
