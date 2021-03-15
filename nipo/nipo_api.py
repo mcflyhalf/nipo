@@ -13,12 +13,9 @@ from nipo.forms import LoginForm, RegistrationForm
 import random
 
 
-#TODO: Add login required to relevant routes
 #TODOs:
-# 0. Modify populate.py so that it creates a default user
-# 1. Create landing page that doesn't depend on student data(for guest users)
+# 1. Make provision to scale (celery workers, multithreading?).
 # 2. Create view to check individual attendance
-# 3. Use pandas dataframe to store attendance data
 #
 
 
@@ -143,13 +140,12 @@ def get_student_list(session):
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
-@login_required
+#@login_required
 def landing():
 	'''Display landing page for student, staff(instructor) or admin'''
-	#Elif student return student dashboard
-	#Elif instructor return syaff dashboard
-	#elif admin return admin dashboard
 
+	return render_template('admin_dashboard.html')
+	
 	if current_user.privilege == schema.PrivilegeLevel.student.name:
 		modules = get_module_list(session)	#TODO: This function currently gets all modules in the system. Need to modify so that it only gets the modules a student is enrolled to. Nipo challenge??
 		return render_template('student_dashboard.html',modules = modules)
@@ -158,7 +154,7 @@ def landing():
 		return render_template('list_courses.html', courses = courses)
 
 	elif current_user.privilege == schema.PrivilegeLevel.staff.name:
-		#TODO: Only show modules staff member is registered to. For each module, only show valid dates.
+		#TODO: Only show modules staff member is registered to. For each module, only show valid dates. Nipo challenge?
 		modules = get_module_list(session)
 		dates = []
 		formatted_dates = []
@@ -354,7 +350,7 @@ def set_student_module_attendance():
 	return under_cons_msg + 'for a Get request'
 
 
-app.debug = True
+# app.debug = True
 # if __name__ == '__main__':
 # 	app.run(debug = True)
 #Because of this final comment, the only way to run the flask app is to `flask run` on cmd

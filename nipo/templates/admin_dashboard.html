@@ -1,0 +1,113 @@
+<!-- Notes -->
+<!-- Dashboard Sections
+==================
+* Students
+	* Add Studs (via file)
+	* View Studs (per course)
+		* Add stud to module
+		* Download list
+	* Remove studs( via file)
+
+* Users
+	* Add users (via file)
+	* View Users (various filters e.g. students, admins, instructors)
+		* Change user permissions
+		* Reset p/w
+	* Remove users
+
+* Venues
+	* View venues
+	* Add/remove venues
+	* Edit venue details
+
+* Modules
+	* Add, delete or archive modules
+	* View module attendance (download)
+
+* Courses
+	* View/edit courses
+	* Add/Delete
+	* View course students 
+Inspiration for this page came from https://youtu.be/3FJgGw_ESEc?t=6
+Pause the video at 6 seconds
+-->
+
+{% extends "base.html" %}
+
+{% block content %}
+This is the admin dashboard!!!
+<div class="wrapper admin-db-wrapper">
+	<div class="side-panel">
+		<nav class="side-menu">
+			<ul class ="side-panel-menu admin-db-side-panel wrapper-f">
+				<li>
+					<a href="#"><i class="fas fa-graduation-cap"></i>
+								Students</a>
+				</li>
+				<li>
+					<a href="#"><i class="fas fa-book-open"></i>
+								Modules</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-user-cog"></i>
+								Users</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-home"></i>
+								Venues</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-university"></i>
+								Courses</a>
+				</li>
+			</ul>
+		</nav>		
+	</div>
+	<div class="main-page admin-main-page wrapper-f">
+		<div class="main-heading">
+			<span class ="heading">
+				Overview
+			</span>			
+		</div>
+		<div class="wrapper tiles summary-tiles">
+			{%for i in range(5)%}
+				<div class="tile-card wrapper">
+					<h2>Total Students</h2>
+					<h4>42</h4>
+					<a href="#">View Students</a>
+					<a href="#">Add Student</a>
+					<button class= "present-btn" type="button">Present</button>
+					<button class= "absent-btn" type="button">Absent</button>
+				</div>
+			{%endfor%}
+		</div>
+		<div class="search-area wrapper-f">
+			<div class="search-bar-wrapper wrapper-f">
+				<a href="#"><i class="fas fa-search"></i></a>
+				<div class="search-bar">
+					<input class="search-bar" type="text" 
+					placeholder="Search">
+				</div>
+			</div>
+			<div class="search-field-selector select">
+				<select>
+				{%for letter in "ABCDEF"%}
+					<option value= "{{letter}}">{{letter}}</option>
+				{%endfor%}
+				</select>
+			</div>
+		</div>
+		<div class="info-table">
+			<span class ="heading">
+				Large table
+			</span>			
+		</div>
+		
+	</div>
+</div>
+
+
+<script src="{{url_for('static',filename='javascript/markAttendance.js')}}"></script>
+
+	
+{% endblock %}
