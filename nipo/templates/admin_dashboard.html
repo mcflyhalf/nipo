@@ -35,7 +35,6 @@ Pause the video at 6 seconds
 {% extends "base.html" %}
 
 {% block content %}
-This is the admin dashboard!!!
 <div class="wrapper admin-db-wrapper">
 	<div class="side-panel">
 		<nav class="side-menu">
@@ -65,32 +64,35 @@ This is the admin dashboard!!!
 	</div>
 	<div class="main-page admin-main-page wrapper-f">
 		<div class="main-heading">
-			<span class ="heading">
-				Overview
+			<span class ="title is-3 heading">
+				Summary
 			</span>			
 		</div>
 		<div class="wrapper tiles summary-tiles">
-			{%for i in range(5)%}
+			{%for tableName in tables%}
 				<div class=" card wrapper">
 					<div class="card-header">
-						<h2>Total Students</h2>
+						<h2>Total {{tables[tableName]['name']}}s</h2>
 					</div>
 					<div class="card-content summary-number">
 						<h4>42</h4>
 					</div>
 					<div class="card-footer">
-						<a class= "card-footer-item summary-action-a" href="#">View Students</a>
-						<a class= "card-footer-item summary-action-b" href="#">Add Student</a>
+						<a id= view-{{tables[tableName]['name']}} class= "viewer card-footer-item summary-action-a" href="javascript:void(0);">View {{tables[tableName]['name']}}s</a>
+						<a class= "adder card-footer-item summary-action-b" href="#">Add {{tables[tableName]['name']}}</a>
 					</div>
 				</div>
 			{%endfor%}
 		</div>
 		<div class="search-area wrapper-f">
 			<div class="search-bar-wrapper wrapper-f">
-				<a href="#"><i class="fas fa-search"></i></a>
 				<div class="search-bar">
-					<input class="search-bar" type="text" 
-					placeholder="Search">
+					<p class="control has-icons-left">
+						<input class="input" type="text" placeholder="Search">
+						<span class="icon is-left">
+							<i class="fas fa-search" aria-hidden="true"></i>
+						</span>
+					</p>
 				</div>
 			</div>
 			<div class="search-field-selector select">
@@ -102,9 +104,7 @@ This is the admin dashboard!!!
 			</div>
 		</div>
 		<div class="info-table">
-			<span class ="heading">
-				Large table
-			</span>	
+			
 			{%for tableName in tables%}
 			<table id="{{tables[tableName]['name']}}" class="table is-striped is-hoverable">
 				<tr>

@@ -13,6 +13,7 @@
 	--shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
 	--disabled-button-opacity: 0.3;
 	--bulma-primary: #00d1b2;
+	--blue: #3575dc;
 }
 
 
@@ -328,6 +329,10 @@ button:hover{
 
 .admin-db-wrapper > .main-page > .search-area{
 	height: 50px;
+}
+
+.admin-db-wrapper .fa-search{
+	color: var(--blue);
 }
 
 .admin-db-wrapper > .main-page > .info-table{
