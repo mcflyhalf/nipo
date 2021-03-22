@@ -103,7 +103,7 @@ class PrivilegeLevel(enum.Enum):
 #It was a mistake to name this table user since, that is a reserved word in psql (I did not know this at the time of creation). It can still work but is not recommended. The only work-around I can think of is to change the table-name (to users) but there is currently no capacity for that so will do that later.
 #------------------------USER TABLE----------------------------
 class User(Base):
-	#This is a tricky tablename to use. In psql, when you attemp SELECT * from user; , it gives you the current username. Remember to SELECT * FROM public.user instead
+	#This is a tricky tablename to use. In psql, when you attempt SELECT * from user; , it gives you the current username. Remember to SELECT * FROM public.user instead or SELECT * from 'user';
 	__tablename__ = "user"
 
 	#Think of a way to link a user to a student
@@ -112,10 +112,10 @@ class User(Base):
 	name = Column(String,nullable=False)
 	email = Column(String(50),nullable=False)
 	privilege = Column(String(15), Enum(PrivilegeLevel, validate_strings=True, default=PrivilegeLevel.student))#Must be enum student,staff, admin
-	password_hash = Column(String, nullable=False)
 	authenticated = Column(Boolean, nullable=False)
 	active = Column(Boolean, nullable=False)
 	student_id = Column(Integer, ForeignKey("student.id"),nullable=True)		#This is going to be null when the user is not a student but has a Student.id foreign key constraint otherwise
+	password_hash = Column(String, nullable=False)
 
 	annonymous = False
 

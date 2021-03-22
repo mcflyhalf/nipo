@@ -1,0 +1,133 @@
+<!-- Notes -->
+<!-- Dashboard Sections
+==================
+* Students
+	* Add Studs (via file)
+	* View Studs (per course)
+		* Add stud to module
+		* Download list
+	* Remove studs( via file)
+
+* Users
+	* Add users (via file)
+	* View Users (various filters e.g. students, admins, instructors)
+		* Change user permissions
+		* Reset p/w
+	* Remove users
+
+* Venues
+	* View venues
+	* Add/remove venues
+	* Edit venue details
+
+* Modules
+	* Add, delete or archive modules
+	* View module attendance (download)
+
+* Courses
+	* View/edit courses
+	* Add/Delete
+	* View course students 
+Inspiration for this page came from https://youtu.be/3FJgGw_ESEc?t=6
+Pause the video at 6 seconds
+-->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="wrapper admin-db-wrapper">
+	<div class="side-panel">
+		<nav class="side-menu">
+			<ul class ="side-panel-menu admin-db-side-panel wrapper-f">
+				<li>
+					<a href="#"><i class="fas fa-graduation-cap"></i>
+								Students</a>
+				</li>
+				<li>
+					<a href="#"><i class="fas fa-book-open"></i>
+								Modules</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-user-cog"></i>
+								Users</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-home"></i>
+								Venues</a>
+				</li>
+				<li>
+					<a href="#"><i class="user-image fas fa-university"></i>
+								Courses</a>
+				</li>
+			</ul>
+		</nav>		
+	</div>
+	<div class="main-page admin-main-page wrapper-f">
+		<div class="main-heading">
+			<span class ="title is-3 heading">
+				Summary
+			</span>			
+		</div>
+		<div class="wrapper tiles summary-tiles">
+			{%for tableName in tables%}
+				<div class=" card wrapper">
+					<div class="card-header">
+						<h2>Total {{tables[tableName]['name']}}s</h2>
+					</div>
+					<div class="card-content summary-number">
+						<h4>42</h4>
+					</div>
+					<div class="card-footer">
+						<a id= view-{{tables[tableName]['name']}} class= "viewer card-footer-item summary-action-a" href="javascript:void(0);">View {{tables[tableName]['name']}}s</a>
+						<a class= "adder card-footer-item summary-action-b" href="#">Add {{tables[tableName]['name']}}</a>
+					</div>
+				</div>
+			{%endfor%}
+		</div>
+		<div class="search-area wrapper-f">
+			<div class="search-bar-wrapper wrapper-f">
+				<div class="search-bar">
+					<p class="control has-icons-left">
+						<input class="input" type="text" placeholder="Search">
+						<span class="icon is-left">
+							<i class="fas fa-search" aria-hidden="true"></i>
+						</span>
+					</p>
+				</div>
+			</div>
+			<div class="search-field-selector select">
+				<select>
+				{%for letter in "ABCDEF"%}
+					<option value= "{{letter}}">{{letter}}</option>
+				{%endfor%}
+				</select>
+			</div>
+		</div>
+		<div class="info-table">
+			
+			{%for tableName in tables%}
+			<table id="{{tables[tableName]['name']}}" class="table is-striped is-hoverable">
+				<tr>
+					{%for column in tables[tableName]['headers']%}
+						<th>{{column}}</th>
+					{%endfor%}
+				</tr>
+				{%for row in tables[tableName]['data']%}
+					<tr>
+						{%for cell in row%}
+						<td>{{cell}}</td>
+						{%endfor%}	
+					</tr>
+				{%endfor%}
+			</table>
+			{%endfor%}
+		</div>
+		
+	</div>
+</div>
+
+
+<script src="{{url_for('static',filename='javascript/admin_dashboard/showTable.js')}}"></script>
+
+	
+{% endblock %}

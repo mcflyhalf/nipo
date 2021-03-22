@@ -13,6 +13,7 @@
 	--shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
 	--disabled-button-opacity: 0.3;
 	--bulma-primary: #00d1b2;
+	--blue: #3575dc;
 }
 
 
@@ -175,13 +176,13 @@ div.chart-container{
 }
 
 
-/*Staff Dashboard styles*/
-.staff-db-wrapper{
-	grid-template-columns: 200px auto; /* Use minmax here??*/
+/*Staff and Admin Dashboard styles*/
+.staff-db-wrapper, .admin-db-wrapper{
+	grid-template-columns: 15vw 80vw; /* Use minmax here??*/
 }
 
 
-/*side-panel*/
+/*side-panels*/
 div.side-panel{
 	background-color: var(--primary);
 }
@@ -193,6 +194,7 @@ ul.side-panel-menu{
 
 
 
+/*Staff Dashboard styles*/
 /*main page*/
 
 .staff-db-wrapper .main-page{
@@ -217,7 +219,7 @@ ul.side-panel-menu{
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-.tile-card{
+.staff-db-wrapper .tile-card{
 	grid-template-areas: 
 		"usr-img usr-img"
 		"usr-img usr-img"
@@ -291,4 +293,112 @@ button:hover{
 
 .student-present .present-btn:hover{
 	cursor: not-allowed;
+}
+
+
+/*Admin Dashboard styles*/
+/*main page*/
+
+.admin-db-wrapper .main-page{
+	/*
+		main-heading (50px)
+		Summary-tiles (auto)
+		Search-area (50px)
+		info-table (auto)
+	*/
+	/*Seems like flex doesnt have 
+	a convenient way to set sizes 
+	of children*/	
+	flex-direction: column;
+
+}
+
+.admin-main-page>div{
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+.admin-db-wrapper > .main-page > .main-heading{
+	height: 50px;
+	width: 74vw;	/*Very hacky solution*/
+}
+
+.admin-db-wrapper > .main-page > .summary-tiles{
+	height: auto;
+}
+
+.admin-db-wrapper > .main-page > .search-area{
+	height: 50px;
+}
+
+.admin-db-wrapper .fa-search{
+	color: var(--blue);
+}
+
+.admin-db-wrapper > .main-page > .info-table{
+	height: auto;
+}
+
+
+/*Search area styles*/
+.search-area{
+	justify-content: center;
+}
+
+.search-area>div{
+	margin-left: 10px;
+}
+
+div.search-bar-wrapper{
+	width: auto;
+}
+
+.search-bar-wrapper>a{
+	padding-top: 4px;
+	padding-right: 4px;
+}
+
+div.search-field-selector{
+	width: 120px;	/*This width must be the same as .search-area select*/
+}
+
+.search-area select{
+	width: 120px; 	/*This width must be the same as div.search-field-selector*/
+}
+
+/* Table area styles*/
+/* Important overrides bulma table properties*/
+table{
+	width: auto;
+	max-width: 90%;
+	margin-left: 8px;
+}
+
+table, th, td{
+	border: 1px solid var(--bulma-primary) !important;
+}
+
+
+/*Add supplementary (to Bulma) styles to the summary cards*/
+.admin-db-wrapper .card{
+	justify-items: center;
+
+	background: var(--primary);
+	box-shadow: var(--shadow);
+	padding: 0.3rem;
+}
+
+.admin-db-wrapper .card-header{
+	justify-content: center;
+}
+
+.admin-db-wrapper .card-footer{
+	font-size: 0.7em;
+}
+
+.admin-db-wrapper .card-content{
+	font-size: 2em;
+	padding: 0.2rem;
+	color: red;
+	background-color: whitesmoke;
 }

@@ -5,7 +5,7 @@ from nipo import attendance, production_session, test_session, db
 from flask import Flask, flash, request, render_template, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
-from nipo.db import schema
+from nipo.db import schema, get_student_list, get_module_list, get_course_list
 session = test_session		#Change to production_session in the production environment. This would then utilise production data(bases) 
 
 #The nipo.forms import requires the session var so it is done after session's creation.
@@ -13,12 +13,9 @@ from nipo.forms import LoginForm, RegistrationForm
 import random
 
 
-#TODO: Add login required to relevant routes
 #TODOs:
-# 0. Modify populate.py so that it creates a default user
-# 1. Create landing page that doesn't depend on student data(for guest users)
+# 1. Make provision to scale (celery workers, multithreading?).
 # 2. Create view to check individual attendance
-# 3. Use pandas dataframe to store attendance data
 #
 
 
@@ -34,111 +31,6 @@ def load_user(user_id):
     return session.query(schema.User).filter(schema.User.id==int(user_id)).one_or_none()
 
 
-def get_attendance_module(modulecode):
-	try:
-		mod_attendance = ModuleAttendance(modulecode)
-
-	except ValueError:
-		#Handle this error better
-		return "Invalid module code >>{}<<".format(modulecode)
-
-	return mod_attendance.getAttendance()
-
-
-
-
-def get_attendance_student(studentID):
-	stud_attendance = attendance.StudentAttendance(studentID, session=session)
-	modules = stud_attendance.get_student_modules()
-	modulecodes = [mod.code for mod in modules]
-
-	student_attendance = {}
-
-	for modulecode in modulecodes:
-		student_attendance[str(modulecode)]=stud_attendance.\
-											get_module_attendance(modulecode)
-
-	return student_attendance
-
-
-
-def get_attendance_student_module(studentID,modulecode):
-
-	stud = attendance.StudentAttendance(studentID, session)
-	stud_att = stud.get_module_attendance(modulecode)
-	att = stud_att['attendance']
-	tot_present = 0
-	tot_sesh = len(att)
-
-	if tot_sesh <= 0:
-		stud_att['Present_pc'] = 100
-		
-
-	else:
-		for sesh in att:
-			tot_present += int(att[sesh])
-
-		stud_att['Present_pc'] =  int(tot_present/tot_sesh *100)
-
-
-	stud_att['Absent_pc'] = 100-stud_att['Present_pc']
-	return stud_att
-
-
-def update_attendance_student_module(studentID, modulecode, sessiondate, present=False):
-	#Check for exceptions thrown in case of non-existent student and invalid session date. then catch them as appropriate
-	mod_attendance = ModuleAttendance(modulecode, session)
-	mod_attendance.updateAttendance(studentID,sessiondate,present=present)
-
-def mark_attendance_students_module(stud_attendances, modulecode, sessiondate):
-	'''Accept a dictionary of key:value pairs where the keys are student ID's and the values are True or False for present and absent for each respective student'''
-	assert type(stud_attendances) is dict
-	mod_attendance = ModuleAttendance(modulecode, session)
-
-	for ID in stud_attendances:
-		mod_attendance.updateAttendance(ID, sessiondate,present=stud_attendances[ID])
-
-def recognise_student(studentID=None, encoding=None, face_pixels=None, session=session):
-	if studentID is not None:
-		student = attendance.StudentAttendance(studentID, session)
-	elif encoding is not None:
-		student = get_student_from_encoding(encoding)
-	elif face_pixels is not None:
-		student = get_student_from_face_pixels(face_pixels)
-	else:
-		raise ValueError("No student ID, face encoding or face pixels provided")
-	return student
-
-
-def get_student_from_encoding(encoding):
-	return attendance.get_student_from_encoding(encoding, session)
-
-def get_student_from_face_pixels(face_pixels):
-	return attendance.get_student_from_pixels(face_pixels, session)
-
-#TODO: move next 3 methods elsewhere. They shouldnt exist here. Only for dev
-def get_course_list(session):
-	courses = session.query(db.schema.Course).\
-							limit(10).\
-							all()
-
-	return courses
-
-def get_module_list(session):
-	modules = session.query(db.schema.Module).\
-							limit(10).\
-							all()
-
-	return modules
-
-
-def get_student_list(session):
-	students = session.query(db.schema.Student).\
-							limit(10).\
-							all()
-
-	return students
-
 
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
@@ -146,9 +38,6 @@ def get_student_list(session):
 @login_required
 def landing():
 	'''Display landing page for student, staff(instructor) or admin'''
-	#Elif student return student dashboard
-	#Elif instructor return syaff dashboard
-	#elif admin return admin dashboard
 
 	if current_user.privilege == schema.PrivilegeLevel.student.name:
 		modules = get_module_list(session)	#TODO: This function currently gets all modules in the system. Need to modify so that it only gets the modules a student is enrolled to. Nipo challenge??
@@ -158,7 +47,7 @@ def landing():
 		return render_template('list_courses.html', courses = courses)
 
 	elif current_user.privilege == schema.PrivilegeLevel.staff.name:
-		#TODO: Only show modules staff member is registered to. For each module, only show valid dates.
+		#TODO: Only show modules staff member is registered to. For each module, only show valid dates. Nipo challenge?
 		modules = get_module_list(session)
 		dates = []
 		formatted_dates = []
@@ -179,7 +68,8 @@ def landing():
 		return render_template('staff_dashboard.html',dates=formatted_dates,students=students,modules=modules)
 
 	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
-		return "Hello Administrator. There seems to be nothing for you here"
+		tables = db.get_tables_data(session)
+		return render_template('admin_dashboard.html', tables=tables)
 
 	
 
@@ -187,7 +77,7 @@ def landing():
 @login_required
 def logout():
 	logout_user()
-	session.commit()
+	session.commit()	#Is this necessary??
 	return redirect(url_for('landing'))
 
 @app.route('/login', methods = ['GET','POST'])
@@ -354,7 +244,7 @@ def set_student_module_attendance():
 	return under_cons_msg + 'for a Get request'
 
 
-app.debug = True
+# app.debug = True
 # if __name__ == '__main__':
 # 	app.run(debug = True)
 #Because of this final comment, the only way to run the flask app is to `flask run` on cmd
