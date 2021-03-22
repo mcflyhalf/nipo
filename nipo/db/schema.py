@@ -112,10 +112,10 @@ class User(Base):
 	name = Column(String,nullable=False)
 	email = Column(String(50),nullable=False)
 	privilege = Column(String(15), Enum(PrivilegeLevel, validate_strings=True, default=PrivilegeLevel.student))#Must be enum student,staff, admin
-	password_hash = Column(String, nullable=False)
 	authenticated = Column(Boolean, nullable=False)
 	active = Column(Boolean, nullable=False)
 	student_id = Column(Integer, ForeignKey("student.id"),nullable=True)		#This is going to be null when the user is not a student but has a Student.id foreign key constraint otherwise
+	password_hash = Column(String, nullable=False)
 
 	annonymous = False
 

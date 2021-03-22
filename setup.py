@@ -2,6 +2,7 @@
 from setuptools import setup, find_packages
 from nipo import get_logger, production_engine, test_engine, CONFIG_FILENAME
 from nipo.tests.populate import populate_testdb
+from nipo.db import get_tables_metadata
 from nipo.db.schema import Base
 import configparser
 import os
@@ -26,11 +27,14 @@ class NipoConfig:
 	#Create tables (DB needs to have been created in advance outside of python)
 
 	def __init__(self,engine):
+		#Probably not a good idea to drop all tables 
+		#while doing a new configuration
+		#TODO: Consider applying a migration to account for schema changes
 		self.newconfig(engine)
 
 
 	def create_tables(self, engine):
-		tables = Base.metadata.sorted_tables
+		tables = get_tables_metadata()
 		#Create (but not populate all tables in the db schema)
 		logger.info("Attempting to create tables")
 		#Do stuff here using metadata from the classes in the schema
@@ -43,12 +47,14 @@ class NipoConfig:
 
 	#Delete all tables (DB should have been created in advance)
 	def drop_tables(self, engine):
-		tables = Base.metadata.sorted_tables
+		tables = get_tables_metadata()
 		tables.reverse()
 		logger.warn("Deleting all tables")
 		#Do dangerous stuff here and log as each table is deleted
 		for table in tables:
 			logger.warn("Deleting table *{}*".format(table.name))
+			#TODO: Move use of Base away from here to somewhere in nipo.db
+			#EXample like get_tables()
 			Base.metadata.drop_all(engine, tables=[table])
 			logger.info("Table *{}* deleted successfully".format(table.name))
 

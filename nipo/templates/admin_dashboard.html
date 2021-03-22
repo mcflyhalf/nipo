@@ -71,13 +71,17 @@ This is the admin dashboard!!!
 		</div>
 		<div class="wrapper tiles summary-tiles">
 			{%for i in range(5)%}
-				<div class="tile-card wrapper">
-					<h2>Total Students</h2>
-					<h4>42</h4>
-					<a href="#">View Students</a>
-					<a href="#">Add Student</a>
-					<button class= "present-btn" type="button">Present</button>
-					<button class= "absent-btn" type="button">Absent</button>
+				<div class=" card wrapper">
+					<div class="card-header">
+						<h2>Total Students</h2>
+					</div>
+					<div class="card-content summary-number">
+						<h4>42</h4>
+					</div>
+					<div class="card-footer">
+						<a class= "card-footer-item summary-action-a" href="#">View Students</a>
+						<a class= "card-footer-item summary-action-b" href="#">Add Student</a>
+					</div>
 				</div>
 			{%endfor%}
 		</div>
@@ -100,14 +104,30 @@ This is the admin dashboard!!!
 		<div class="info-table">
 			<span class ="heading">
 				Large table
-			</span>			
+			</span>	
+			{%for tableName in tables%}
+			<table id="{{tables[tableName]['name']}}" class="table is-striped is-hoverable">
+				<tr>
+					{%for column in tables[tableName]['headers']%}
+						<th>{{column}}</th>
+					{%endfor%}
+				</tr>
+				{%for row in tables[tableName]['data']%}
+					<tr>
+						{%for cell in row%}
+						<td>{{cell}}</td>
+						{%endfor%}	
+					</tr>
+				{%endfor%}
+			</table>
+			{%endfor%}
 		</div>
 		
 	</div>
 </div>
 
 
-<script src="{{url_for('static',filename='javascript/markAttendance.js')}}"></script>
+<script src="{{url_for('static',filename='javascript/admin_dashboard/showTable.js')}}"></script>
 
 	
 {% endblock %}

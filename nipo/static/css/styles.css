@@ -177,7 +177,7 @@ div.chart-container{
 
 /*Staff and Admin Dashboard styles*/
 .staff-db-wrapper, .admin-db-wrapper{
-	grid-template-columns: 200px auto; /* Use minmax here??*/
+	grid-template-columns: 15vw 80vw; /* Use minmax here??*/
 }
 
 
@@ -218,7 +218,7 @@ ul.side-panel-menu{
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-.tile-card{
+.staff-db-wrapper .tile-card{
 	grid-template-areas: 
 		"usr-img usr-img"
 		"usr-img usr-img"
@@ -319,6 +319,7 @@ button:hover{
 
 .admin-db-wrapper > .main-page > .main-heading{
 	height: 50px;
+	width: 74vw;	/*Very hacky solution*/
 }
 
 .admin-db-wrapper > .main-page > .summary-tiles{
@@ -358,4 +359,41 @@ div.search-field-selector{
 
 .search-area select{
 	width: 120px; 	/*This width must be the same as div.search-field-selector*/
+}
+
+/* Table area styles*/
+/* Important overrides bulma table properties*/
+table{
+	width: auto;
+	max-width: 90%;
+	margin-left: 8px;
+}
+
+table, th, td{
+	border: 1px solid var(--bulma-primary) !important;
+}
+
+
+/*Add supplementary (to Bulma) styles to the summary cards*/
+.admin-db-wrapper .card{
+	justify-items: center;
+
+	background: var(--primary);
+	box-shadow: var(--shadow);
+	padding: 0.3rem;
+}
+
+.admin-db-wrapper .card-header{
+	justify-content: center;
+}
+
+.admin-db-wrapper .card-footer{
+	font-size: 0.7em;
+}
+
+.admin-db-wrapper .card-content{
+	font-size: 2em;
+	padding: 0.2rem;
+	color: red;
+	background-color: whitesmoke;
 }
