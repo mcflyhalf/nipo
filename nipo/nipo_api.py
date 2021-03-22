@@ -35,7 +35,7 @@ def load_user(user_id):
 #Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
-#@login_required
+@login_required
 def landing():
 	'''Display landing page for student, staff(instructor) or admin'''
 
