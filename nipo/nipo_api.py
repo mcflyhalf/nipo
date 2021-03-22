@@ -39,9 +39,6 @@ def load_user(user_id):
 def landing():
 	'''Display landing page for student, staff(instructor) or admin'''
 
-	tables = db.get_tables_data(session)
-	return render_template('admin_dashboard.html', tables=tables)
-	
 	if current_user.privilege == schema.PrivilegeLevel.student.name:
 		modules = get_module_list(session)	#TODO: This function currently gets all modules in the system. Need to modify so that it only gets the modules a student is enrolled to. Nipo challenge??
 		return render_template('student_dashboard.html',modules = modules)
@@ -71,7 +68,8 @@ def landing():
 		return render_template('staff_dashboard.html',dates=formatted_dates,students=students,modules=modules)
 
 	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
-		return "Hello Administrator. There seems to be nothing for you here"
+		tables = db.get_tables_data(session)
+		return render_template('admin_dashboard.html', tables=tables)
 
 	
 
