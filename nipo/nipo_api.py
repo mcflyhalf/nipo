@@ -9,7 +9,9 @@ from nipo.db import schema, get_student_list, get_module_list, get_course_list
 session = test_session		#Change to production_session in the production environment. This would then utilise production data(bases) 
 
 #The nipo.forms import requires the session var so it is done after session's creation.
-from nipo.forms import LoginForm, RegistrationForm
+from nipo.forms import LoginForm, RegistrationForm, AddCourseForm
+#Bad practice coming up
+from nipo.forms import *
 import random
 
 
@@ -69,9 +71,13 @@ def landing():
 
 	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
 		tables = db.get_tables_data(session)
-		return render_template('admin_dashboard.html', tables=tables)
-
-	
+		form = {}
+		form['course'] = AddCourseForm()
+		form['venue'] = AddVenueForm()
+		form['user'] = AddUserForm()
+		form['student'] = AddStudentForm()
+		form['module'] = AddModuleForm()
+		return render_template('admin_dashboard.html', tables=tables, form=form)
 
 @app.route('/logout')
 @login_required
@@ -105,7 +111,9 @@ def login():
 		return redirect(next_page)
 	return render_template('login.html', title='Sign In', form=form)
 
-#This route will need to be hidden in future/require login because students wouldnt register themselves. Only an admin should register students. We probably also want to be able to register students in bulk using a csv or excel file
+#This route will need to be hidden in future/require login because students wouldnt register themselves. 
+#Only an admin should register students. 
+#We probably also want to be able to register students in bulk using a csv or excel file
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 	if current_user.is_authenticated:
