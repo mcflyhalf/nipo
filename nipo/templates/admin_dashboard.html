@@ -91,6 +91,7 @@ Pause the video at 6 seconds
 						</header>
 						<section class="modal-card-body">
 							<form action="" method="post" novalidate>
+							<input name="csrf_token" type="hidden" value={{form[tableName]._fields['csrf_token'].current_token}}>
 							{%for field in form[tableName]%}
 							{%if field != form[tableName]._fields['csrf_token']%}
 								{{ form[tableName].hidden_tag() }}
