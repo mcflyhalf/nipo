@@ -6,7 +6,12 @@ from flask import Flask, flash, request, render_template, jsonify, redirect, url
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from nipo.db import schema, get_student_list, get_module_list, get_course_list
-session = test_session		#Change to production_session in the production environment. This would then utilise production data(bases) 
+
+#Need to find a way to remove following config out of code and into a separate file
+if os.environ['FLASK_ENV'] == 'production':		
+	session = production_session
+else:
+	session = test_session		 
 
 #The nipo.forms import requires the session var so it is done after session's creation.
 from nipo.forms import LoginForm, RegistrationForm, AddCourseForm
@@ -23,6 +28,7 @@ import random
 
 app = Flask(__name__)
 app.secret_key = os.environ['FLASK_SECRET_KEY']
+app.config['db_session'] = session #iss this ever used?
 login_manager = LoginManager(app)
 login_manager.init_app(app)
 

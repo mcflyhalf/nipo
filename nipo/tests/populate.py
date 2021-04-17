@@ -85,6 +85,11 @@ def populate_testdb():
 	#------------------STUDENT USER CREATION------------------#
 
 	logger.debug("Creating student user dummy data for DB >>{}<< for integration testing.".format(conn_details))
+	
+	#TODO remove this query and use the fact that sqlalchemy adds the
+	#primary key from the backend RDBMS to the object when session.commit() happens
+	# see https://stackoverflow.com/questions/1316952/sqlalchemy-flush-and-get-inserted-id
+	#Not the best source but a start 
 	students = session.query(Student).limit(20).all()
 	users = []
 
