@@ -6,7 +6,7 @@ from flask import Flask, flash, request, render_template, jsonify, redirect, url
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from nipo.db import schema, get_student_list, get_module_list, get_course_list
-
+from nipo.task_manager import celery_app 
 #Need to find a way to remove following config out of code and into a separate file
 if os.environ['FLASK_ENV'] == 'production':		
 	session = production_session
@@ -153,7 +153,7 @@ def get_user_details():
 
 
 
-#Will need to rething these routes. 
+#Will need to rethink these routes. 
 	# Currently thinking of them as separate pages.
 	# They should however exist as part of a single page that calls javascript to get data.
 	# The page then evolves as appropriate
