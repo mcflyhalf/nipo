@@ -1,3 +1,13 @@
+// If you are looking at this file because you tried to mark 
+// a student present or absent and it didnt work, 
+// it is most probably because the session date chosen has 
+// no class sessions.
+// This will be fixed when only existing dates of the selected
+// class session are returned in the HTML i.e. this is a backend
+// matter with an existing issue that will be fixed eventually
+// Let's hope we then remember to remove this comment
+
+
 function getCurrentSessionDate(){
 	let session_date = document.querySelectorAll(".small-container-a select");
 	session_date = session_date[0].selectedOptions;
@@ -23,7 +33,7 @@ function markStudent(stud_id, status){
 		SessionDate: session_date
 	};
 
-	//fetch request options
+	//POST request options
 	const options = {
 		method: 'POST',
 		body: JSON.stringify(attendance),
@@ -40,11 +50,13 @@ function markStudent(stud_id, status){
 }
 
 function setAttendanceAppearance(attData, stud_id){
-	// This function receives the current appearance of the tile and sets the appropriate css class. Note that it doesnt actually change the status in the db. That is done by markPresent and markAbsent
+	// This function receives the current appearance of the tile and sets the appropriate css class. 
+	// Note that it doesnt actually change the status in the db. That is done by markPresent and markAbsent
 
 	let attendance_data = attData.attendance;
 	let session_date = getCurrentSessionDate();
-	// TODO: Rework this dangerous string manipulation. Should be done in python
+	// TODO: Rework this dangerous string manipulation. 
+	// Should be done in python
 	session_date = session_date.replace("T", " ");
 	session_date += ":00"
 	
