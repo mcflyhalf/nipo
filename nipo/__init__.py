@@ -61,6 +61,11 @@ test_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbnam
 
 TestSession = sessionmaker(bind=test_engine)
 test_session = TestSession()
+if os.environ['FLASK_ENV'] == 'production':		
+	session = production_session
+else:
+	session = test_session		 
+
 
 #-------------START FRONTEND API FUNCTIONS--------------#
 ## These helper functions are used in the frontend mostly

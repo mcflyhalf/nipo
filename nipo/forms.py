@@ -4,6 +4,17 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Le
 from nipo.db import schema
 from nipo.nipo_api import session
 
+class DictForm(FlaskForm):
+    '''
+    Custom FlaskForm whose instances can be converted to a dict
+    with an .asDict() method. Intentionally not using __iter__
+    as it is already implemented for sth else
+    '''
+    def asDict(self):
+        resDict = {}
+        for field in self:
+            resDict[field.name]= str(field.raw_data[0]) #regretable hack
+        return resDict
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -37,28 +48,28 @@ class RegistrationForm(FlaskForm):
 ## Generator looks at schema and determines the required fields in the form
 ## To be Done in the far future or by a mega rockstar!
 
-class AddCourseForm(FlaskForm):
+class AddCourseForm(DictForm):
     uid = StringField('Course UID')
     name = StringField('Course name', validators=[DataRequired()])
 
-class AddVenueForm(FlaskForm):
+class AddVenueForm(DictForm):
     code = StringField('Venue Code')
     name = StringField('Venue name', validators=[DataRequired()]) 
     capacity = IntegerField('capacity')
 
-class AddModuleForm(FlaskForm):
+class AddModuleForm(DictForm):
     code = StringField('Module Code')
     name = StringField('Module name', validators=[DataRequired()])
     course_code = StringField('Course UID')
 
-class AddUserForm(FlaskForm):
+class AddUserForm(DictForm):
     username = StringField('Course name', validators=[DataRequired()])
     name = StringField('Course name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     privilege = IntegerField('Privilege')
     student_id = StringField('Student ID')
 
-class AddStudentForm(FlaskForm):
+class AddStudentForm(DictForm):
     name = StringField('Course name', validators=[DataRequired()])
     course_uid = StringField('Course ID')
     course = StringField('Course name', validators=[DataRequired()])

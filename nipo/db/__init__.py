@@ -1,3 +1,8 @@
+from nipo.db.schema import User, Venue, Course, Student, Module
+from nipo.celery import celery_app
+from nipo import session
+
+
 def get_course_list(session):
 	courses = session.query(schema.Course).\
 							limit(10).\
@@ -83,6 +88,29 @@ def get_tables_data(session):
 
 	return table
 
+tableName2ORMClass = {}
+tableName2ORMClass['student'] = Student
+tableName2ORMClass['module'] = Module
+tableName2ORMClass['venue'] = Venue
+tableName2ORMClass['course'] = Course
+tableName2ORMClass['user'] = User
 
+@celery_app.task
+def add_entity(entity_dict, tablename):
+	ORM_cls = tableName2ORMClass[tablename]
+	ORM_obj = ORM_cls(**entity_dict)
+	result = {}
+	try:
+		session.add(ORM_obj)
+		session.commit()
+	except:
+		result['status'] = 'Error'
+		print('>>celery worker Failed to add entity.')
+		return result
 
+	result['status'] = 'Complete'
+	#TODO: Convert to log
+	print('entity added by celery worker')
 
+	return result
+	
