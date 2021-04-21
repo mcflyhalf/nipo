@@ -12,6 +12,7 @@ from nipo.forms import LoginForm, RegistrationForm, AddCourseForm
 #Bad practice coming up
 from nipo.forms import *
 import random
+import time
 
 
 
@@ -276,20 +277,29 @@ def request_add_entity(entity_type):
 		# form_data['tablename'] = entity_type
 		#Use celery for long running task (db access)
 		task_info = add_entity.delay(form_data,entity_type)
-		# raise
+		#If an exception is raised by adding an existing  Module ID
+		#This breaks. To fix
+		raise
 		response = {}
 		response['request-id']= task_info.id
-		response['status']= 'In progress'
-		raise
+		response['status']= task_info.status
 		return jsonify(response)
 	print("no form arrived")
 	return jsonify({'status':'fail'})
 
+#Does this require login??
 @app.route('/status/<task_id>')
 def get_task_status(task_id):
+	task = celery_app.AsyncResult(task_id)
 	response = {}
 	response['task-id'] = task_id
-	response['status'] = 'Waiting for implementation'
+
+	if task.info is not None:
+		response['status'] = task.info['status']
+	else:
+		response['status'] = task.status
+	# task.get()
+	# raise
 	return jsonify(response)	
 
 

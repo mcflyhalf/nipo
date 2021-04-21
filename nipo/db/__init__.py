@@ -1,5 +1,6 @@
 from nipo.db.schema import User, Venue, Course, Student, Module
 from nipo.celery import celery_app
+from celery.exceptions import Ignore
 from nipo import session
 
 
@@ -95,22 +96,28 @@ tableName2ORMClass['venue'] = Venue
 tableName2ORMClass['course'] = Course
 tableName2ORMClass['user'] = User
 
-@celery_app.task
-def add_entity(entity_dict, tablename):
+#In the method below, the status is actually stored by the return
+#(in task.info). The state is eventually changed to success because no
+#exception is raised. Need to figure out how to sort this out
+@celery_app.task(bind=True)
+def add_entity(self,entity_dict, tablename):
 	ORM_cls = tableName2ORMClass[tablename]
 	ORM_obj = ORM_cls(**entity_dict)
 	result = {}
+	session.add(ORM_obj)
+	session.commit()
 	try:
 		session.add(ORM_obj)
 		session.commit()
 	except:
-		result['status'] = 'Error'
+		self.update_state(state='FAILURE', meta={'Added': False, 'more': 'info'})
+		result['status'] = 'FAILURE'
 		print('>>celery worker Failed to add entity.')
 		return result
 
-	result['status'] = 'Complete'
+	result['status'] = 'SUCCESS'
+	self.update_state(state='SUCCESS', meta={'Added': True, 'more': 'info1'})
 	#TODO: Convert to log
 	print('entity added by celery worker')
-
 	return result
 	

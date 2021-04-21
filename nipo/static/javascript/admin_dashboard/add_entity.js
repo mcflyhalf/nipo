@@ -44,6 +44,18 @@ function getFormDetails(tablename){
 
 }
 
+function checkStatus(task_id){
+	let url = '/status/'+ task_id;
+
+	fetch(url)
+		.then(res => res.json())
+		.then(res => console.log(res['status']));
+}
+
+function doLater(boundFunc, delay){
+	setTimeout(boundFunc, delay);
+}
+
 function addEntity(tablename){
 	//Add a new entity to the table tablename in the db
 	//Function still being built out e.g. name needs to change
@@ -58,29 +70,9 @@ function addEntity(tablename){
 	parent_modal = document.getElementById("mod-"+tablename);
 	modal_form = parent_modal.getElementsByTagName("form");
 	modal_form = modal_form[0];
-	modal_form.submit();
+	// modal_form.submit();
 
 	const formdata = new FormData(modal_form);
-	// const XHR = new XMLHttpRequest();
-	// // Bind the FormData object and the form element
-	// // Define what happens on successful data submission
-	// XHR.addEventListener( "load", function(event) {
-	//   console.log( event.target.responseText );
-	//   console.log(event);
-	// } );
-	// // Define what happens in case of error
-	// XHR.addEventListener( "error", function(event) {
-	//   console.log( event.target.responseText );
-	//   console.log(event);
-	// } );
-
-	// // Set up our request
-	// XHR.open("POST", modal_form.action);
-
-	// // The data sent is what the user provided in the form
-	// XHR.send(formdata);
-
-  
 
 	const options = {
 		method: 'POST',
@@ -90,10 +82,11 @@ function addEntity(tablename){
 
 	fetch(url,options)
 		.then(res => res.json())
-		.then(res => console.log(res));
+		.then(res => checkStatus.bind(null,res["request-id"]))
+		.then(boundFunc => doLater(boundFunc, 5000));
 
 
-	console.log(modal_form);
+	// console.log(modal_form);
 
 
 
