@@ -33,7 +33,6 @@ def get_logger(loggerName):
 	fh.setFormatter(formatter)
 	ch.setFormatter(formatter)
 	# add the handlers to the logger
-	print ("Adding a set of handlers now")
 	log.addHandler(fh)
 	log.addHandler(ch)
 	log.setLevel(logging.DEBUG)

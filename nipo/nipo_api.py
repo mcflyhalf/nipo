@@ -6,14 +6,11 @@ from flask import Flask, flash, request, render_template, jsonify, redirect, url
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from nipo.db import schema, get_student_list, get_module_list, get_course_list, add_entity
-from nipo.celery import celery_app 
+from nipo.task_mgr import get_celery_app 
 #The nipo.forms import requires the session var so it is done after session's creation.
-from nipo.forms import LoginForm, RegistrationForm, AddCourseForm
-#Bad practice coming up
-from nipo.forms import *
+from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm
 import random
 import time
-
 
 
 #TODOs:
@@ -23,6 +20,7 @@ import time
 
 
 app = Flask(__name__)
+celery_app = get_celery_app()
 app.secret_key = os.environ['FLASK_SECRET_KEY']
 app.config['db_session'] = session #iss this ever used?
 #TODO: Modify app config to expire sessions after a day 
@@ -45,7 +43,6 @@ def make_form_dict():
 	form['module'] = AddModuleForm()
 	return form
 
-#Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
 @login_required
@@ -89,7 +86,6 @@ def landing():
 @login_required
 def logout():
 	logout_user()
-	session.commit()	#Is this necessary??
 	return redirect(url_for('landing'))
 
 @app.route('/login', methods = ['GET','POST'])
@@ -274,18 +270,14 @@ def request_add_entity(entity_type):
 	if form.validate_on_submit():
 		form_data = form.asDict()
 		form_data.pop('csrf_token')
-		# form_data['tablename'] = entity_type
 		#Use celery for long running task (db access)
 		task_info = add_entity.delay(form_data,entity_type)
-		#If an exception is raised by adding an existing  Module ID
-		#This breaks. To fix
-		raise
 		response = {}
 		response['request-id']= task_info.id
 		response['status']= task_info.status
 		return jsonify(response)
-	print("no form arrived")
-	return jsonify({'status':'fail'})
+	return jsonify({'status':'FAILURE', 
+					'info':'Invalid form data'})
 
 #Does this require login??
 @app.route('/status/<task_id>')
@@ -293,14 +285,13 @@ def get_task_status(task_id):
 	task = celery_app.AsyncResult(task_id)
 	response = {}
 	response['task-id'] = task_id
-
-	if task.info is not None:
-		response['status'] = task.info['status']
-	else:
-		response['status'] = task.status
-	# task.get()
-	# raise
+	response['status'] = task.status
+	response['info'] = str(task.info)
 	return jsonify(response)	
+
+# @app.route('/debug', methods = ['GET','POST'])
+# def get_debugger():
+# 	raise
 
 
 # app.debug = True

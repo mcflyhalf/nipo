@@ -23,9 +23,10 @@ body{
 
 }
 
+/*TODO: Make this selector more specific*/
 ul{
 	display: flex;
-	flex-direction: row-reverse;
+	/*flex-direction: row-reverse;*/
 	list-style-type: none;
 
 }
@@ -337,6 +338,15 @@ button:hover{
 
 .admin-db-wrapper > .main-page > .info-table{
 	height: auto;
+}
+
+/*Modal styles*/
+div.file-upload {
+	display: none;
+}
+
+.add-entity-select {
+	display: table;
 }
 
 

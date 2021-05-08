@@ -7,10 +7,6 @@ import enum
 
 Base = declarative_base()
 
-
-
-
-
 #Tutorial for what happens here is found in https://docs.sqlalchemy.org/en/latest/orm/tutorial.html
 #See also https://overiq.com/sqlalchemy-101/defining-schema-in-sqlalchemy-orm/
 #Create Various necessary Tables to be used as tables in the DB. Classes represent tables in the DB and objects will represent rows in these tables. This is how Sqlalchemy and other Python ORM's work

@@ -4,14 +4,17 @@
 
 from celery import Celery
 
-celery_app = Celery('nipo',
-					broker='pyamqp://guest@localhost//',
-					backend='rpc://',
-					include=['nipo.nipo_api'])
+def get_celery_app():	
+	celery_app = Celery('nipo',
+						broker='pyamqp://guest@localhost//',
+						backend='rpc://',
+						include=['nipo.nipo_api'])
 
-celery_app.conf.update(
-	result_expires=3600
-	)
+	celery_app.conf.update(
+		result_expires=3600
+		)
+
+	return celery_app
 
 #if __name__ == '__main__':
 # 	celery_app.start()
