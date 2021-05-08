@@ -26,7 +26,7 @@ for (viewer of viewers){
 	
 	//Bind used to solve the problem discussed in
 	//https://stackoverflow.com/questions/19586137/addeventlistener-using-for-loop-and-passing-values
-	let showT = showTable.bind(null, tid)
+	let showT = showTable.bind(null, tid+"-table")
 
 	viewer.addEventListener("click",showT);
 }

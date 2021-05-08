@@ -9,13 +9,13 @@ import os
 
 
 setup(
-    name = "nipo",
-    version = "0.6.1",
-    author = "Mcflyhalf",
-    author_email = "mcflyhalf@live.com",
-    description = ("An implementation of classroom attendance monitoring"),
-    keywords = "facial recognition classroom attendance",
-    packages= find_packages(),
+	name = "nipo",
+	version = "0.6.1",
+	author = "Mcflyhalf",
+	author_email = "mcflyhalf@live.com",
+	description = ("An implementation of classroom attendance monitoring"),
+	keywords = "facial recognition classroom attendance",
+	packages= find_packages(),
 )
 
 logger = get_logger("nipo_setup")

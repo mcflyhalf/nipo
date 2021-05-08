@@ -79,9 +79,66 @@ Pause the video at 6 seconds
 					</div>
 					<div class="card-footer">
 						<a id= view-{{tables[tableName]['name']}} class= "viewer card-footer-item summary-action-a" href="javascript:void(0);">View {{tables[tableName]['name']}}s</a>
-						<a class= "adder card-footer-item summary-action-b" href="#">Add {{tables[tableName]['name']}}</a>
+						<a id= "add-{{tables[tableName]['name']}}" class= "adder card-footer-item summary-action-b" href="#">Add {{tables[tableName]['name']}}</a>
 					</div>
 				</div>
+				<div id = "mod-{{tables[tableName]['name']}}" class="modal is-active">
+					<div class="modal-background"></div>
+					<div class="modal-card">
+						<header class="modal-card-head">
+							<p class="modal-card-title">Add New {{tables[tableName]['name']}}</p>
+							<button class="delete close-modal" aria-label="close"></button>
+						</header>
+						<section class="modal-card-body">
+							<div class="tabs is-toggle is-fullwidth">
+								<ul>
+							    <li class="is-active">
+							      <a id= "{{tables[tableName]['name']}}-form-tab"class="form-fill-tab">
+							        <span class="icon is-small"><i class="fas fa-align-center" aria-hidden="true"></i></span>
+							        <span>Form fill</span>
+							      </a>
+							    </li>
+							    <li>
+							      <a id="{{tables[tableName]['name']}}-upload-tab" class="file-upload-tab">
+							        <span class="icon is-small"><i class="fas fa-upload" aria-hidden="true"></i></span>
+							        <span>File upload</span>
+							      </a>
+							    </li>
+						  	</ul>
+							</div>
+							<form action="/add/{{tables[tableName]['name']}}" method="post" novalidate>
+							{{ form[tableName].hidden_tag() }}
+							{%for field in form[tableName]%}
+							{%if field != form[tableName]._fields['csrf_token']%}
+								<div class="field">
+									{{field.label}}
+									<!-- https://wtforms.readthedocs.io/en/2.3.x/crash_course/#rendering-fields -->
+									{%if field.type == "SelectField"%}
+									<div class="select add-entity-select">
+										{{ field() }}
+									</div>
+									{%else%}
+									<div class="control">
+										{{ field(size=32, class="input") }}
+									</div>
+									{%endif%}
+									{% for error in field.errors %}
+									<span style="color: red;">[{{ error }}]</span>
+									{% endfor %}
+								</div>
+							{%endif%}
+							{%endfor%}
+							</form>
+							<div class="file-upload add-{{tables[tableName]['name']}}-file-upload">
+								File upload stuff
+							</div>
+						</section>
+						<footer class="modal-card-foot">
+							<button class="button submit-form is-success">Save changes</button>
+							<button class="button close-modal">Cancel</button>
+						</footer>
+					</div>
+				</div> 
 			{%endfor%}
 		</div>
 		<div class="search-area wrapper-f">
@@ -106,7 +163,7 @@ Pause the video at 6 seconds
 		<div class="info-table">
 			
 			{%for tableName in tables%}
-			<table id="{{tables[tableName]['name']}}" class="table is-striped is-hoverable">
+			<table id="{{tables[tableName]['name']}}-table" class="table is-striped is-hoverable">
 				<tr>
 					{%for column in tables[tableName]['headers']%}
 						<th>{{column}}</th>
@@ -128,6 +185,7 @@ Pause the video at 6 seconds
 
 
 <script src="{{url_for('static',filename='javascript/admin_dashboard/showTable.js')}}"></script>
+<script src="{{url_for('static',filename='javascript/admin_dashboard/add_entity.js')}}"></script>
 
 	
 {% endblock %}

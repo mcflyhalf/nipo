@@ -1,21 +1,16 @@
 import datetime
 import os
 from nipo.attendance import ModuleAttendance
-from nipo import attendance, production_session, test_session, db
+from nipo import attendance, session, db
 from flask import Flask, flash, request, render_template, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
-from nipo.db import schema, get_student_list, get_module_list, get_course_list
-
-#Need to find a way to remove following config out of code and into a separate file
-if os.environ['FLASK_ENV'] == 'production':		
-	session = production_session
-else:
-	session = test_session		 
-
+from nipo.db import schema, get_student_list, get_module_list, get_course_list, add_entity
+from nipo.task_mgr import get_celery_app 
 #The nipo.forms import requires the session var so it is done after session's creation.
-from nipo.forms import LoginForm, RegistrationForm
+from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm
 import random
+import time
 
 
 #TODOs:
@@ -25,8 +20,11 @@ import random
 
 
 app = Flask(__name__)
+celery_app = get_celery_app()
 app.secret_key = os.environ['FLASK_SECRET_KEY']
 app.config['db_session'] = session #iss this ever used?
+#TODO: Modify app config to expire sessions after a day 
+#See https://stackoverflow.com/questions/11783025/is-there-an-easy-way-to-make-sessions-timeout-in-flask
 login_manager = LoginManager(app)
 login_manager.init_app(app)
 
@@ -36,9 +34,15 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return session.query(schema.User).filter(schema.User.id==int(user_id)).one_or_none()
 
+def make_form_dict():
+	form = {}
+	form['course'] = AddCourseForm()
+	form['venue'] = AddVenueForm()
+	form['user'] = AddUserForm()
+	form['student'] = AddStudentForm()
+	form['module'] = AddModuleForm()
+	return form
 
-
-#Landing page, display the courses (e.g TIEY4, Form 1, Grade 3B etc)
 @app.route('/')
 @app.route('/index/')
 @login_required
@@ -75,15 +79,13 @@ def landing():
 
 	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
 		tables = db.get_tables_data(session)
-		return render_template('admin_dashboard.html', tables=tables)
-
-	
+		form = make_form_dict()
+		return render_template('admin_dashboard.html', tables=tables, form=form)
 
 @app.route('/logout')
 @login_required
 def logout():
 	logout_user()
-	session.commit()	#Is this necessary??
 	return redirect(url_for('landing'))
 
 @app.route('/login', methods = ['GET','POST'])
@@ -111,7 +113,15 @@ def login():
 		return redirect(next_page)
 	return render_template('login.html', title='Sign In', form=form)
 
-#This route will need to be hidden in future/require login because students wouldnt register themselves. Only an admin should register students. We probably also want to be able to register students in bulk using a csv or excel file
+#The following registration flow has several steps
+#But makes the most sense for an academic institution
+#Will only be implemented if some academic institution is interested
+#Only an admin should register students. 
+#Current implementation idea, admin registers email via admin landing
+#(creates a passwordless account that cannot login)
+#Then student is notified that they can register on this page (including a token)
+#They present the token and the email already provided by admin
+#They now set their password
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 	if current_user.is_authenticated:
@@ -145,7 +155,7 @@ def get_user_details():
 
 
 
-#Will need to rething these routes. 
+#Will need to rethink these routes. 
 	# Currently thinking of them as separate pages.
 	# They should however exist as part of a single page that calls javascript to get data.
 	# The page then evolves as appropriate
@@ -248,6 +258,40 @@ def set_student_module_attendance():
 		#redirect to show student's attendance for the module. Preserve the POST parameters
 		return redirect(url_for('get_student_module_attendance'), code=307)
 	return under_cons_msg + 'for a Get request'
+
+#Potentially change to /modify/entity to allow deleting through this route as well
+@app.route('/add/<entity_type>', methods=['POST'])
+def request_add_entity(entity_type):
+	print("Entity type: {}\nPayload: {}".format(entity_type,123))
+	# return 'Received Form'
+
+	all_forms = make_form_dict()
+	form = all_forms[entity_type.lower()]
+	if form.validate_on_submit():
+		form_data = form.asDict()
+		form_data.pop('csrf_token')
+		#Use celery for long running task (db access)
+		task_info = add_entity.delay(form_data,entity_type)
+		response = {}
+		response['request-id']= task_info.id
+		response['status']= task_info.status
+		return jsonify(response)
+	return jsonify({'status':'FAILURE', 
+					'info':'Invalid form data'})
+
+#Does this require login??
+@app.route('/status/<task_id>')
+def get_task_status(task_id):
+	task = celery_app.AsyncResult(task_id)
+	response = {}
+	response['task-id'] = task_id
+	response['status'] = task.status
+	response['info'] = str(task.info)
+	return jsonify(response)	
+
+# @app.route('/debug', methods = ['GET','POST'])
+# def get_debugger():
+# 	raise
 
 
 # app.debug = True
