@@ -1,7 +1,7 @@
 import pytest
 from nipo import test_session
 from nipo.attendance import ModuleAttendance, StudentAttendance, get_student_attendance
-from nipo.db.schema import Module
+from nipo.db.schema import Module, Student
 from nipo.tests.populate import sd as test_date
 import pandas as pd
 import random
@@ -16,7 +16,8 @@ def test_stud_id():
 
 @pytest.fixture(scope = 'function')
 def testmod():
-	return ModuleAttendance(random.choice(module_code), test_session)
+	#Requires using the first module as it has all students and staff assigned
+	return ModuleAttendance(module_code[0], test_session)
 
 @pytest.fixture
 def test_stud_att():
@@ -26,7 +27,6 @@ class TestModuleAttendance:
 
 	#Tests on the initialiser
 	def test_init_existing_module_code(self,testmod):
-		print (type(testmod))
 		assert type(testmod) is ModuleAttendance
 		assert type(testmod.module) is Module
 		assert testmod.module.code in module_code
@@ -37,10 +37,13 @@ class TestModuleAttendance:
 			ModuleAttendance("NonExistentModule123",test_session)
 
 	def test_CreateAttendance(self,test_stud_id,testmod):
-		test_attendance = testmod.createAttendance(force=True) 
+		test_student = test_session.query(Student).filter(Student.id==test_stud_id).one()
+		testmod.module.addStudent(test_student)
+		test_attendance = testmod.createAttendance(force=True)
 		assert type(test_attendance) is pd.DataFrame
 		assert 'Student_ID' in test_attendance.columns
 		assert test_stud_id in test_attendance.Student_ID.values
+		# assert len(test_attendance.Student_ID.values) == 1
 
 	def test_persistAttendance(self):
 		pass

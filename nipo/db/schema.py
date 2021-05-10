@@ -1,9 +1,15 @@
 from sqlalchemy import Column, String, Integer, DateTime, LargeBinary, MetaData, ForeignKey, Enum, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from werkzeug.security import generate_password_hash, check_password_hash
 import enum
 #from sqlalchemy.types import JSON
+
+# For associating instructors to modules, we need a many-to-many r/shp.
+# See resources below for how to make this. None of these was sufficient
+# https://hackingandslacking.com/managing-relationships-in-sqlalchemy-data-models-effe9d1c8975
+# https://www.michaelcho.me/article/many-to-many-relationships-in-sqlalchemy-models-flask
+# https://prog.world/sqlalchemy-many-to-many/
 
 Base = declarative_base()
 
@@ -12,6 +18,31 @@ Base = declarative_base()
 #Create Various necessary Tables to be used as tables in the DB. Classes represent tables in the DB and objects will represent rows in these tables. This is how Sqlalchemy and other Python ORM's work
 
 #For details about all the column types supported by sqlite, see https://docs.sqlalchemy.org/en/latest/core/type_basics.html
+
+class StudentModule(Base):
+	'''
+	m2m r/shp between students and modules
+	Represents the modules that a student is a part of.
+	'''
+	__tablename__ = "student_module"
+
+	id = Column(Integer, primary_key=True)
+	student_id = Column(Integer, ForeignKey("student.id"))
+	module_code = Column(String, ForeignKey("module.code"))
+
+
+
+class UserModule(Base):
+	'''
+	M2m relationship between staff users and modules
+	All admin users should automatically be a part of all modules
+	'''
+	__tablename__ = "user_module"
+
+	id = Column(Integer, primary_key=True)
+	user_id = Column(Integer, ForeignKey("user.id"))
+	module_code = Column(String, ForeignKey("module.code"))
+
 
 #Create Module class (corresponds to DB table that has a list of modules. We expect that each module will in turn have qualities like start date, end date, class days (are its classes on a Mon, Tue, Wed etc), start time(s), end time(s)(in case of multiple occurences of a module in a week, venue(s), start date, end date(s) and the class that should attend this lesson etc)
 #---------------------MODULE TABLE------------------------
@@ -26,6 +57,64 @@ class Module(Base):
 	attendance = Column(LargeBinary)
 	venues = relationship("Venue", uselist=False)
 	courses = relationship("Course")
+
+	students = relationship("Student", secondary=StudentModule.__tablename__, backref="modules")
+	staff = relationship("User", secondary=UserModule.__tablename__, backref="modules")
+
+	def _addStaffObj(self, staffUserObj):
+		'''
+		Fxn checks for the type of the user before adding them as staff
+		'''
+		if type(staffUserObj) is not User:
+			raise TypeError("Staff to be added to module must be of type {}.\
+				Attempted to add object of type {}".format("User", type(staffUserObj)))
+
+		if staffUserObj.privilege != PrivilegeLevel.staff.name:
+			raise TypeError("User being added as staff must be staff member.\
+				Their privilege level is listed as {}".format(staffUserObj.privilege))
+
+		self.staff.append(staffUserObj)
+
+	def _addStudentObj(self, studentObj):
+		'''
+		Fxn checks to confirm object is a student before adding them to module
+		'''
+		if type(studentObj) is not Student:
+			raise TypeError("Student to be added to module must be of type {}.\
+				Attempted to add object of type {}".format("Student", type(studentObj)))
+
+		self.students.append(studentObj)
+
+
+	def addStaff(self, staffUser):
+		'''
+		Attach staff member(s) to a module
+		:param staffUser: User object (or list of User objects) containing staff members
+
+		:throws TypeError: If staffUser is not actually of type User or does not have staff privilege
+		'''
+		if type(staffUser) is list:
+			#Iterate over the list instead of using list.extend in order to check each object in turn for type correctness
+			assert len(staffUser) > 0
+			for su in staffUser:
+				self._addStaffObj(su)
+		else:
+			self._addStaffObj(staffUser)
+
+	def addStudent(self, student):
+		'''
+		Attach student(s) to a module
+		:param student: Student object (or list of Student objects) containing students
+
+		:throws TypeError: If student is not actually of type Student
+		'''
+		if type(student) is list:
+			#Iterate over the list instead of using list.extend in order to check each object in turn for type correctness
+			assert len(student) > 0
+			for stud in student:
+				self._addStudentObj(stud)
+		else:
+			self._addStudentObj(student)
 
 	def __repr__(self):
 		return "Module {} held at {}".format(self.name, self.venue_code)
@@ -47,6 +136,7 @@ class Student(Base):
 	course = relationship("Course", uselist=False)
 
 	face_encoding = Column(LargeBinary)
+	#modules = This exists because of backref relationship in Modules table 
 
 
 	def __repr__(self):
@@ -110,6 +200,8 @@ class User(Base):
 	privilege = Column(String(15), Enum(PrivilegeLevel, validate_strings=True, default=PrivilegeLevel.student))#Must be enum student,staff, admin
 	authenticated = Column(Boolean, nullable=False)
 	active = Column(Boolean, nullable=False)
+	# Below(modules) Only relevant for staff members. Students get their list of modules from the student table
+	#modules = This exists because of backref relationship in Modules table 	
 	student_id = Column(Integer, ForeignKey("student.id"),nullable=True)		#This is going to be null when the user is not a student but has a Student.id foreign key constraint otherwise
 	password_hash = Column(String, nullable=False)
 

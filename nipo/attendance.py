@@ -10,6 +10,7 @@
 from nipo import get_logger, test_session 
 from nipo.db.schema import Student, Course, Module
 from datetime import datetime
+from numpy import uintc
 import pandas as pd
 import pickle
 
@@ -57,7 +58,7 @@ class ModuleAttendance:
 		if not self.module:
 			raise ValueError("The module code >>{}<< does not exist".format(self.modulecode))
 
-		if (not self.module.attendance) or (pickle.loads(self.module.attendance)is None):
+		if (not self.module.attendance) or (pickle.loads(self.module.attendance) is None):
 			logger.info("Creating and persisting attendance record for module >>{}<<".format(self.module.name))
 			attendance_record = self.createAttendance(force=True)
 			logger.debug("Created attendance record for module >>{}<< with force option".format(self.module.name))
@@ -76,8 +77,8 @@ class ModuleAttendance:
 				logger.debug("Skipping creation of attendance for module >>{}<< code >>{}<< since an attendance record already exists. Use Force = True to create attendance record anyway".format(self.module.name, self.module.code))
 				return	self.module.attendance   #Do not create any record since one already exists. Instead, return the existing one
 
-		modulecourse = self.module.course_code
-		modulestudents = self.session.query(Student).filter(Student.course_uid == modulecourse)
+		# modulecourse = self.module.course_code
+		modulestudents = self.module.students
 		student_ids = []
 
 		#---Old Implementation, To be deleted---#
@@ -91,7 +92,7 @@ class ModuleAttendance:
 			student_ids.append(student.id)
 
 		stud_data = {"Student_ID":pd.Series(student_ids)}
-		attendance_sheet = pd.DataFrame(stud_data)
+		attendance_sheet = pd.DataFrame(stud_data, dtype=uintc)	#Datatype is C unsigned int (via numpy)
 		
 		return attendance_sheet
 
@@ -174,7 +175,9 @@ class ModuleAttendance:
 
 
 class StudentAttendance:
-	'''A class currently primarily for getting the attendance record of an individual student'''
+	'''
+	A class currently primarily for getting the attendance record of an individual student
+	'''
 	def __init__(self, student_id, session=test_session):
 		#Check whether the student id exists in the db. 
 		try:
@@ -209,7 +212,6 @@ class StudentAttendance:
 		att = {str(key):int(stud_att[key].values) for key in stud_att.keys()}
 		att.pop('Student_ID')	#This may print out random stud_ID's to stdout
 
-
 		stud_attendance['attendance'] =  att
 
 		return stud_attendance
@@ -221,13 +223,10 @@ class StudentAttendance:
 	
 	@property
 	def modules(self, max=10):
-		'''get all the modules that the student is registered in. Return a list of the module objects. Assumes a student can be registered to a max of 10 modules'''
-		course_uid = self.student.course_uid
-		student_modules = self.session.query(Module).\
-								filter(Module.course_code == course_uid).\
-								limit(max).all()
-
-		return student_modules
+		'''
+		get all the modules that the student is registered in. Return a list of the module objects. Assumes a student can be registered to a max of 10 modules
+		'''
+		return self.student.modules
 
 	def mark_attendance(self, modulecode, sessiondate, present=False):
 		'''Update the attendance record for this student, for module with modulecode on the date sessiondate to the status present'''
