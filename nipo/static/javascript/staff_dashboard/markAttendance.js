@@ -52,8 +52,8 @@ function markStudent(stud_id, status){
 function setAttendanceAppearance(attData, stud_id){
 	// This function receives the current appearance of the tile and sets the appropriate css class. 
 	// Note that it doesnt actually change the status in the db. That is done by markPresent and markAbsent
-
-	let attendance_data = attData.attendance;
+	console.log(attData);
+	let attendance_status = attData.attendance;
 	let session_date = getCurrentSessionDate();
 	// TODO: Rework this dangerous string manipulation. 
 	// Should be done in python
@@ -61,7 +61,6 @@ function setAttendanceAppearance(attData, stud_id){
 	session_date += ":00"
 	
 	// session_date = attData.attendance[session_date];
-	let attendance_status = attData.attendance[session_date];
 	if (attendance_status == 1){
 		attendance_status = true;
 	}

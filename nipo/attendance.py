@@ -7,7 +7,7 @@
 
 #The nipo calendar is here(https://calendar.google.com/calendar/b/1?cid=ODBmc2g3ajllMjg5amYybGJuYThmODk2dDBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ). It is a Google calendar where when you invite it to any events it is ging to accept given that this event doesnt clash with anything else on its calendar. This will be the default calendar that'll be used for timetabling in this project.
 
-from nipo import get_logger, test_session 
+from nipo import get_logger 
 from nipo.db.schema import Student, Course, Module
 from datetime import datetime
 from numpy import uintc
@@ -112,7 +112,6 @@ class ModuleAttendance:
 		#get the attendance record for this module
 		pickled_attendance = self.module.attendance
 		unpickled_attendance = pickle.loads(pickled_attendance)
-		#assert type(unpickled_attendance) is pd.DataFrame	>> Moved to test_suite
 		return unpickled_attendance
 
 	def createClassSession(self,sessiondate):
@@ -156,11 +155,10 @@ class ModuleAttendance:
 
 	@property
 	def students(self):
-		'''Return a list of students in this module. Limited to max 400 students'''
-		module_course = self.module.course_code
-		module_students = self.session.query(Student).\
-							  filter(Student.course_uid== module_course).\
-							  limit(400).all()
+		'''
+		Return a list of students in this module. Limited to max 400 students
+		'''
+		module_students = self.module.students
 
 		return module_students
 
@@ -178,7 +176,7 @@ class StudentAttendance:
 	'''
 	A class currently primarily for getting the attendance record of an individual student
 	'''
-	def __init__(self, student_id, session=test_session):
+	def __init__(self, student_id, session):
 		#Check whether the student id exists in the db. 
 		try:
 			self.student_id = int(student_id)
@@ -196,7 +194,10 @@ class StudentAttendance:
 
 		
 	def get_module_attendance(self, modulecode):
-		'''Get attendance of this student for the module with modulecode. If modulecode points to a module that doesnt exist, throw a ValueError exception'''
+		'''
+		Get attendance of this student for the module with modulecode. 
+		:throws ValueError: If modulecode points to a module that doesnt exist.
+		'''
 		mod_attendance=ModuleAttendance(modulecode,session=self.session)
 		mod_attendance_record = mod_attendance.getAttendance()
 
@@ -218,13 +219,28 @@ class StudentAttendance:
 
 		#TODO
 	def get_session_attendance(self, modulecode, sessiondate):
-		'''get a present/absent record for a student for a particular session'''
-		pass
+		'''
+		get a present/absent record for a student for a particular session
+
+		:param modulecode: String with the module code
+		:param sessiondate: Datetime object with session date
+		'''
+		if type(sessiondate) is not datetime:
+			raise TypeError("session date must be datetime.\
+				Is currently {}".format(type(sessiondate)))
+
+		mod_att = self.get_module_attendance(modulecode)
+		try:
+			mod_att['attendance'] = mod_att['attendance'][str(sessiondate)]
+		except KeyError:
+			raise ValueError("No session exists for the date {}".format(str(sessiondate)))
+		mod_att['session date'] = str(sessiondate)
+		return mod_att
 	
 	@property
-	def modules(self, max=10):
+	def modules(self):
 		'''
-		get all the modules that the student is registered in. Return a list of the module objects. Assumes a student can be registered to a max of 10 modules
+		get all the modules that the student is registered in. Return a list of the module objects.
 		'''
 		return self.student.modules
 
@@ -243,14 +259,14 @@ class StudentAttendance:
 
 
 
-def get_student_from_encoding(encoding, session=test_session):
+def get_student_from_encoding(encoding, session):
 	student = session.query(Student).\
 							  filter(Student.face_encoding == encoding).\
 							  one_or_none()
 
 	return student
 
-def get_student_from_pixels(face_pixels, session=test_session):
+def get_student_from_pixels(face_pixels, session):
 	face = Face(face_pixels)
 	encoding = face.get_encoding()
 
@@ -269,3 +285,15 @@ def get_student_attendance(studentid,unpickled_attendance,sessiondate=None):
 	else:
 		return unpickled_attendance[unpickled_attendance.Student_ID == studentid][sessiondate].values		#Were they present or absent on that single session?
 
+#To be moved to testing
+if __name__ == "__main__":
+	from nipo import session
+	mod_code =  "ETI001"
+	studid = 4
+	session_date = datetime(2029,5,7,10,30)
+
+	sa = StudentAttendance(studid, session)
+	ma = sa.get_module_attendance(mod_code)
+	sesh_att = sa.get_session_attendance(mod_code, session_date)
+	mod_att = ModuleAttendance(mod_code, session)
+	dts = mod_att.dates
