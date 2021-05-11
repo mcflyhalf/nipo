@@ -61,14 +61,59 @@ def landing():
 		#The refreshed page will contain dates of the selected module (from query string)
 		#Remember to check that staff member has access to module.
 		#Optionally, use post request and have javascript refresh the page (too much work!!!)
-		#TODO: Only show modules staff member is registered to. For each module, only show valid dates. Nipo challenge?
+		#TODO: For each module, only show valid dates. Nipo challenge?
 		modules = current_user.modules
 		dates = []
 		formatted_dates = []
-		selectedModule = modules[0]
-		dates += ModuleAttendance(selectedModule.code, session).dates
-		selectedDate = dates[0]
+		
+		mod_code = request.args.get('mod_code')
+		session_date = request.args.get('session_date')
+		#Each of the options below needs to set:
+		# 1. selectedModule
+		# 2. dates
+		# 3. selectedDate
+		if mod_code is not None and session_date is None:
+			# module changed
+			mod_attendance = ModuleAttendance(mod_code, session)
+			selectedModule = mod_attendance.module
+			if selectedModule not in current_user.modules:
+				# User not enrolled in this module
+				flash("Invalid module selection")
+				return redirect(url_for('landing'))
 
+			dates += mod_attendance.dates
+			if len(dates) == 0:
+				flash("selected module has no registered class sessions")
+				return redirect(url_for('landing'))
+			selectedDate = dates[0]
+
+		elif mod_code is not None and session_date is not None:
+			# Date changed
+			mod_attendance = ModuleAttendance(mod_code, session)
+			selectedModule = mod_attendance.module
+			dates += mod_attendance.dates
+			selectedDate = datetime.datetime.fromisoformat(session_date)
+			if selectedModule not in current_user.modules or selectedDate not in dates:
+				# User not enrolled in this module or module has no session on this date
+				flash("Invalid module or date selection")
+				return redirect(url_for('landing'))
+
+		else:
+			#Default scenario, fresh login
+			selectedModule = modules[0]
+			dates += ModuleAttendance(selectedModule.code, session).dates
+			selectedDate = dates[0]
+		
+		#move selected options to the top of list to make them 
+		#the ones selected by default
+		if selectedDate != dates[0]:
+			dates.remove(selectedDate)
+			dates.insert(0, selectedDate)
+		
+		if selectedModule != modules[0]:
+			modules.remove(selectedModule)
+			modules.insert(0, selectedModule)
+		# raise
 		for date in dates:
 			human_friendly_format = date.strftime('%a %d %b %H:%M')
 			iso_format = date.strftime('%Y-%m-%dT%H:%M')
@@ -218,11 +263,6 @@ def set_student_module_attendance():
 def get_student_module_attendance():
 	if request.method == 'POST':
 		req = request.get_json()
-		# print(req)
-		#{'studentID': '1', 
-		# 'modulecode': 'ETI001', 
-		# 'status': 'Present', 
-		# 'SessionDate': '2029-04-30T10:30'}
 		studentID = req['studentID']
 		modulecode = req['modulecode']
 		isoDate = req['SessionDate']
