@@ -100,6 +100,13 @@ def landing():
 
 		else:
 			#Default scenario, fresh login
+			if len(modules) == 0:
+				flash("You are currently not assigned to any modules. Contact admin to correct this. Showing dummy module.")
+				# TODO: Create test module for showing when 
+				# staff is not assigned to any modules
+				# modules = [test_module]
+				modules = get_module_list(session)
+
 			selectedModule = modules[0]
 			dates += ModuleAttendance(selectedModule.code, session).dates
 			selectedDate = dates[0]

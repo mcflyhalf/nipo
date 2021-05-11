@@ -81,13 +81,6 @@ class ModuleAttendance:
 		modulestudents = self.module.students
 		student_ids = []
 
-		#---Old Implementation, To be deleted---#
-		# attendance_list = []
-		# attendance_list.append(list())
-		# attendance_list[0].append("Dates\\Student ID's")	# Old implementation. To be deprecated in V1.3
-		# for student in modulestudents:
-		# 	attendance_list[0].append(student.id)
-
 		for student in modulestudents:
 			student_ids.append(student.id)
 
@@ -202,7 +195,9 @@ class StudentAttendance:
 		mod_attendance_record = mod_attendance.getAttendance()
 
 		stud_att = get_student_attendance(self.student_id, mod_attendance_record)
-
+		logger.debug("Type stud_att is {} and content is:\n {}\n\
+			and module concerned is {}"
+			.format(type(stud_att), stud_att, modulecode))
 		stud_attendance = {}
 		stud_attendance['student_name'] = self.student.name
 		stud_attendance['student_id'] = self.student.id
