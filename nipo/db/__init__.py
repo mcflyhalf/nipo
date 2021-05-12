@@ -48,7 +48,10 @@ def get_tables_metadata():
 	return sorted_tables
 
 def get_tables_data(session):
-	'''Get BOTH data and metadata of the tables. Metadata is required to make sense of the data'''
+	'''
+	Get BOTH data and metadata of the tables. Metadata is required to make sense of the data
+	The tables student_module and user_module are excluded as they are secondary tables
+	'''
 	# Tables to be stored in a dict as:
 	# * Table1Name
 	#	- Name
@@ -62,6 +65,10 @@ def get_tables_data(session):
 	table = {} #Dict to store the table info (headers + data)
 	
 	_tables = get_tables_metadata()
+	# drop student_module and user_module tables
+	for _table in _tables:
+		if _table.name.endswith("_module"):
+			_tables.remove(_table)
 
 	for _table in _tables:
 		table_prop = {}	#Dict for table properties

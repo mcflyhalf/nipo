@@ -2,7 +2,10 @@ import pytest
 
 from nipo import nipo_api, test_session
 from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
+from nipo.attendance import ModuleAttendance
 from flask_login import current_user
+from datetime import datetime
+import random
 #Discardable test credentials
 admin_uname = 'addmein'
 admin_pw = 'notApassword'
@@ -17,6 +20,13 @@ student_pw = 'stillProcrastinatingAssignments'
 course_name = 'Test Course'
 course_uid = 'Test89'
 
+test_session_date = datetime(2099,4,30,19,30)
+
+module = {}
+module["code"] = "MOD991"
+module["name"] = "Test Module"
+module["course_code"] = course_uid
+
 #setup database assets
 @pytest.fixture(scope='module')	#Maybe scope=session
 def test_db():
@@ -24,6 +34,7 @@ def test_db():
 	#create test users (admin, staff, student)
 	test_student = Student(name = student_name, course_uid =course_uid )
 	test_course = Course(uid = course_uid, name = course_name)
+
 	
 	session.add(test_course)
 	session.add(test_student)
@@ -58,16 +69,34 @@ def test_db():
 
 	session.commit()
 
-	yield
-	#delete test entities 
-	session.delete(test_student_user)
-	session.delete(test_staff_user)
-	session.delete(test_admin_user)
-	session.delete(test_student)
-	session.delete(test_course)
+	test_module = Module(**module)
+	test_module.students.append(test_student)
+	test_module.staff.append(test_staff_user)
+
+	session.add(test_module)
 
 	session.commit()
 
+	test_mod_att = ModuleAttendance(test_module.code, session)
+	test_mod_att.createClassSession(test_session_date)
+	test_mod_att.updateAttendance(test_student.id,test_session_date, present=random.choice([True,False]))
+
+	session.commit()
+
+	yield
+	#delete test entities
+	test_module.students.remove(test_student)
+	test_module.staff.remove(test_staff_user)
+	session.commit()
+	session.delete(test_student_user)
+	session.delete(test_staff_user)
+	session.delete(test_admin_user)
+	session.commit()
+	session.delete(test_student)
+	session.delete(test_module)
+	session.delete(test_course)
+
+	session.commit()
 
 
 @pytest.fixture

@@ -1,6 +1,6 @@
 import datetime
 import os
-from nipo.attendance import ModuleAttendance
+from nipo.attendance import ModuleAttendance, StudentAttendance
 from nipo import attendance, session, db
 from flask import Flask, flash, request, render_template, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
@@ -57,13 +57,70 @@ def landing():
 		return render_template('list_courses.html', courses = courses)
 
 	elif current_user.privilege == schema.PrivilegeLevel.staff.name:
-		#TODO: Only show modules staff member is registered to. For each module, only show valid dates. Nipo challenge?
-		modules = get_module_list(session)
+		#Use query strings to pass name of module in url and refresh whenever module is changed
+		#The refreshed page will contain dates of the selected module (from query string)
+		#Remember to check that staff member has access to module.
+		#Optionally, use post request and have javascript refresh the page (too much work!!!)
+		#TODO: For each module, only show valid dates. Nipo challenge?
+		modules = current_user.modules
 		dates = []
 		formatted_dates = []
-		for module in modules:
-			dates += ModuleAttendance(module.code, session).dates
+		
+		mod_code = request.args.get('mod_code')
+		session_date = request.args.get('session_date')
+		#Each of the options below needs to set:
+		# 1. selectedModule
+		# 2. dates
+		# 3. selectedDate
+		if mod_code is not None and session_date is None:
+			# module changed
+			mod_attendance = ModuleAttendance(mod_code, session)
+			selectedModule = mod_attendance.module
+			if selectedModule not in current_user.modules:
+				# User not enrolled in this module
+				flash("Invalid module selection")
+				return redirect(url_for('landing'))
 
+			dates += mod_attendance.dates
+			if len(dates) == 0:
+				flash("selected module has no registered class sessions")
+				return redirect(url_for('landing'))
+			selectedDate = dates[0]
+
+		elif mod_code is not None and session_date is not None:
+			# Date changed
+			mod_attendance = ModuleAttendance(mod_code, session)
+			selectedModule = mod_attendance.module
+			dates += mod_attendance.dates
+			selectedDate = datetime.datetime.fromisoformat(session_date)
+			if selectedModule not in current_user.modules or selectedDate not in dates:
+				# User not enrolled in this module or module has no session on this date
+				flash("Invalid module or date selection")
+				return redirect(url_for('landing'))
+
+		else:
+			#Default scenario, fresh login
+			if len(modules) == 0:
+				flash("You are currently not assigned to any modules. Contact admin to correct this. Showing dummy module.")
+				# TODO: Create test module for showing when 
+				# staff is not assigned to any modules
+				# modules = [test_module]
+				modules = get_module_list(session)
+
+			selectedModule = modules[0]
+			dates += ModuleAttendance(selectedModule.code, session).dates
+			selectedDate = dates[0]
+		
+		#move selected options to the top of list to make them 
+		#the ones selected by default
+		if selectedDate != dates[0]:
+			dates.remove(selectedDate)
+			dates.insert(0, selectedDate)
+		
+		if selectedModule != modules[0]:
+			modules.remove(selectedModule)
+			modules.insert(0, selectedModule)
+		# raise
 		for date in dates:
 			human_friendly_format = date.strftime('%a %d %b %H:%M')
 			iso_format = date.strftime('%Y-%m-%dT%H:%M')
@@ -72,9 +129,16 @@ def landing():
 
 			formatted_dates.append(combined_format)
 
-		students = get_student_list(session)
+		students = selectedModule.students
 		for student in students:
-			student.status=random.choice(["student-absent","student-present"])
+			student_attendance = StudentAttendance(student.id, session)
+			session_attendance = student_attendance.get_session_attendance(selectedModule.code, selectedDate)
+
+			if session_attendance['attendance']:
+				student.status= "student-present"
+			else:
+				student.status= "student-absent"
+
 		return render_template('staff_dashboard.html',dates=formatted_dates,students=students,modules=modules)
 
 	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
@@ -167,14 +231,52 @@ def get_student_modules():
 	return get_student_attendance()
 
 # Return attendance record for the student logged in for the specified module
+@app.route('/module/attendance/mark', methods = ['POST'])
+def set_student_module_attendance():
+	if request.method == 'POST':
+		req = request.get_json()
+		studentID = req['studentID']
+		modulecode = req['modulecode']
+		status = req['status']
+		sess_date = req['SessionDate']	#Expects YYYY-MM-DDTHH:MM Format (Iso 8601)
+		try:
+			studentID = int(studentID)
+		except ValueError:
+			return "The student ID {} must be a number (integer)".format(studentID)
+		try:
+			sess_date = datetime.datetime.strptime(sess_date, '%Y-%m-%dT%H:%M')
+		except ValueError:
+			return "The date {} is not in the required YYYY-MM-DDTHH:mm format".format(sess_date) 
+
+		if status.lower() == "present":
+			status = True
+		else:
+			status = False
+
+		mod_attendance = attendance.ModuleAttendance(modulecode, session)
+
+		# mod_attendance.updateAttendance(studentID,sess_date, present=status)
+		try:
+			mod_attendance.updateAttendance(studentID,sess_date, present=status)			
+		except ValueError:
+			return "The date >>{}<< does not have a class session for the module with code >>{}<<".format(sess_date.isoformat(), modulecode)
+
+		#redirect to show student's attendance for the module. Preserve the POST parameters
+		return redirect(url_for('get_student_module_attendance'), code=307)
+
+
+# Return attendance record for the student logged in for the specified module
 @app.route('/module/attendance', methods = ['GET','POST'])
 def get_student_module_attendance():
 	if request.method == 'POST':
 		req = request.get_json()
 		studentID = req['studentID']
 		modulecode = req['modulecode']
-		student_attendance = get_attendance_student_module(studentID,modulecode)
-		resp = student_attendance
+		isoDate = req['SessionDate']
+		sessiondate = datetime.datetime.fromisoformat(isoDate)
+		student_attendance = StudentAttendance(studentID, session)
+		session_attendance = student_attendance.get_session_attendance(modulecode, sessiondate)
+		resp = session_attendance
 
 		return jsonify(resp) 	#TODO: Have this returned by a pretty render_template TODO: MAke the datetime in this response ISO8601 format
 	return under_cons_msg + 'for a Get request'
@@ -224,40 +326,6 @@ def get_module_students():		#Not Yet implemented
 		return jsonify(resp) 	#TODO: Have this returned by a pretty template
 	return under_cons_msg + 'for a Get request'
 
-# Return attendance record for the student logged in for the specified module
-@app.route('/module/attendance/mark', methods = ['GET','POST'])
-def set_student_module_attendance():
-	if request.method == 'POST':
-		req = request.get_json()
-		studentID = req['studentID']
-		modulecode = req['modulecode']
-		status = req['status']
-		sess_date = req['SessionDate']	#Expects YYYY-MM-DDTHH:MM Format (Iso 8601)
-		try:
-			studentID = int(studentID)
-		except ValueError:
-			return "The student ID {} must be a number (integer)".format(studentID)
-		try:
-			sess_date = datetime.datetime.strptime(sess_date, '%Y-%m-%dT%H:%M')
-		except ValueError:
-			return "The date {} is not in the required YYYY-MM-DDTHH:mm format".format(sess_date) 
-
-		if status.lower() == "present":
-			status = True
-		else:
-			status = False
-
-		mod_attendance = attendance.ModuleAttendance(modulecode, session)
-
-		# mod_attendance.updateAttendance(studentID,sess_date, present=status)
-		try:
-			mod_attendance.updateAttendance(studentID,sess_date, present=status)			
-		except ValueError:
-			return "The date >>{}<< does not have a class session for the module with code >>{}<<".format(sess_date.isoformat(), modulecode)
-
-		#redirect to show student's attendance for the module. Preserve the POST parameters
-		return redirect(url_for('get_student_module_attendance'), code=307)
-	return under_cons_msg + 'for a Get request'
 
 #Potentially change to /modify/entity to allow deleting through this route as well
 @app.route('/add/<entity_type>', methods=['POST'])

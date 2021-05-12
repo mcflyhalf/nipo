@@ -7,9 +7,10 @@
 
 #The nipo calendar is here(https://calendar.google.com/calendar/b/1?cid=ODBmc2g3ajllMjg5amYybGJuYThmODk2dDBAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ). It is a Google calendar where when you invite it to any events it is ging to accept given that this event doesnt clash with anything else on its calendar. This will be the default calendar that'll be used for timetabling in this project.
 
-from nipo import get_logger, test_session 
+from nipo import get_logger 
 from nipo.db.schema import Student, Course, Module
 from datetime import datetime
+from numpy import uintc
 import pandas as pd
 import pickle
 
@@ -57,7 +58,7 @@ class ModuleAttendance:
 		if not self.module:
 			raise ValueError("The module code >>{}<< does not exist".format(self.modulecode))
 
-		if (not self.module.attendance) or (pickle.loads(self.module.attendance)is None):
+		if (not self.module.attendance) or (pickle.loads(self.module.attendance) is None):
 			logger.info("Creating and persisting attendance record for module >>{}<<".format(self.module.name))
 			attendance_record = self.createAttendance(force=True)
 			logger.debug("Created attendance record for module >>{}<< with force option".format(self.module.name))
@@ -76,22 +77,15 @@ class ModuleAttendance:
 				logger.debug("Skipping creation of attendance for module >>{}<< code >>{}<< since an attendance record already exists. Use Force = True to create attendance record anyway".format(self.module.name, self.module.code))
 				return	self.module.attendance   #Do not create any record since one already exists. Instead, return the existing one
 
-		modulecourse = self.module.course_code
-		modulestudents = self.session.query(Student).filter(Student.course_uid == modulecourse)
+		# modulecourse = self.module.course_code
+		modulestudents = self.module.students
 		student_ids = []
-
-		#---Old Implementation, To be deleted---#
-		# attendance_list = []
-		# attendance_list.append(list())
-		# attendance_list[0].append("Dates\\Student ID's")	# Old implementation. To be deprecated in V1.3
-		# for student in modulestudents:
-		# 	attendance_list[0].append(student.id)
 
 		for student in modulestudents:
 			student_ids.append(student.id)
 
 		stud_data = {"Student_ID":pd.Series(student_ids)}
-		attendance_sheet = pd.DataFrame(stud_data)
+		attendance_sheet = pd.DataFrame(stud_data, dtype=uintc)	#Datatype is C unsigned int (via numpy)
 		
 		return attendance_sheet
 
@@ -111,7 +105,6 @@ class ModuleAttendance:
 		#get the attendance record for this module
 		pickled_attendance = self.module.attendance
 		unpickled_attendance = pickle.loads(pickled_attendance)
-		#assert type(unpickled_attendance) is pd.DataFrame	>> Moved to test_suite
 		return unpickled_attendance
 
 	def createClassSession(self,sessiondate):
@@ -155,11 +148,10 @@ class ModuleAttendance:
 
 	@property
 	def students(self):
-		'''Return a list of students in this module. Limited to max 400 students'''
-		module_course = self.module.course_code
-		module_students = self.session.query(Student).\
-							  filter(Student.course_uid== module_course).\
-							  limit(400).all()
+		'''
+		Return a list of students in this module. Limited to max 400 students
+		'''
+		module_students = self.module.students
 
 		return module_students
 
@@ -174,8 +166,10 @@ class ModuleAttendance:
 
 
 class StudentAttendance:
-	'''A class currently primarily for getting the attendance record of an individual student'''
-	def __init__(self, student_id, session=test_session):
+	'''
+	A class currently primarily for getting the attendance record of an individual student
+	'''
+	def __init__(self, student_id, session):
 		#Check whether the student id exists in the db. 
 		try:
 			self.student_id = int(student_id)
@@ -193,12 +187,17 @@ class StudentAttendance:
 
 		
 	def get_module_attendance(self, modulecode):
-		'''Get attendance of this student for the module with modulecode. If modulecode points to a module that doesnt exist, throw a ValueError exception'''
+		'''
+		Get attendance of this student for the module with modulecode. 
+		:throws ValueError: If modulecode points to a module that doesnt exist.
+		'''
 		mod_attendance=ModuleAttendance(modulecode,session=self.session)
 		mod_attendance_record = mod_attendance.getAttendance()
 
 		stud_att = get_student_attendance(self.student_id, mod_attendance_record)
-
+		logger.debug("Type stud_att is {} and content is:\n {}\n\
+			and module concerned is {}"
+			.format(type(stud_att), stud_att, modulecode))
 		stud_attendance = {}
 		stud_attendance['student_name'] = self.student.name
 		stud_attendance['student_id'] = self.student.id
@@ -209,25 +208,36 @@ class StudentAttendance:
 		att = {str(key):int(stud_att[key].values) for key in stud_att.keys()}
 		att.pop('Student_ID')	#This may print out random stud_ID's to stdout
 
-
 		stud_attendance['attendance'] =  att
 
 		return stud_attendance
 
 		#TODO
 	def get_session_attendance(self, modulecode, sessiondate):
-		'''get a present/absent record for a student for a particular session'''
-		pass
+		'''
+		get a present/absent record for a student for a particular session
+
+		:param modulecode: String with the module code
+		:param sessiondate: Datetime object with session date
+		'''
+		if type(sessiondate) is not datetime:
+			raise TypeError("session date must be datetime.\
+				Is currently {}".format(type(sessiondate)))
+
+		mod_att = self.get_module_attendance(modulecode)
+		try:
+			mod_att['attendance'] = mod_att['attendance'][str(sessiondate)]
+		except KeyError:
+			raise ValueError("No session exists for the date {}".format(str(sessiondate)))
+		mod_att['session date'] = str(sessiondate)
+		return mod_att
 	
 	@property
-	def modules(self, max=10):
-		'''get all the modules that the student is registered in. Return a list of the module objects. Assumes a student can be registered to a max of 10 modules'''
-		course_uid = self.student.course_uid
-		student_modules = self.session.query(Module).\
-								filter(Module.course_code == course_uid).\
-								limit(max).all()
-
-		return student_modules
+	def modules(self):
+		'''
+		get all the modules that the student is registered in. Return a list of the module objects.
+		'''
+		return self.student.modules
 
 	def mark_attendance(self, modulecode, sessiondate, present=False):
 		'''Update the attendance record for this student, for module with modulecode on the date sessiondate to the status present'''
@@ -244,14 +254,14 @@ class StudentAttendance:
 
 
 
-def get_student_from_encoding(encoding, session=test_session):
+def get_student_from_encoding(encoding, session):
 	student = session.query(Student).\
 							  filter(Student.face_encoding == encoding).\
 							  one_or_none()
 
 	return student
 
-def get_student_from_pixels(face_pixels, session=test_session):
+def get_student_from_pixels(face_pixels, session):
 	face = Face(face_pixels)
 	encoding = face.get_encoding()
 
@@ -270,3 +280,15 @@ def get_student_attendance(studentid,unpickled_attendance,sessiondate=None):
 	else:
 		return unpickled_attendance[unpickled_attendance.Student_ID == studentid][sessiondate].values		#Were they present or absent on that single session?
 
+#To be moved to testing
+if __name__ == "__main__":
+	from nipo import session
+	mod_code =  "ETI001"
+	studid = 4
+	session_date = datetime(2029,5,7,10,30)
+
+	sa = StudentAttendance(studid, session)
+	ma = sa.get_module_attendance(mod_code)
+	sesh_att = sa.get_session_attendance(mod_code, session_date)
+	mod_att = ModuleAttendance(mod_code, session)
+	dts = mod_att.dates
