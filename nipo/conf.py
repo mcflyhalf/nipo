@@ -13,7 +13,7 @@ def get_configs(profile = 'DEFAULT'):
 	curdir = os.path.dirname(__file__)	#The Path to this __init__ file. Trick from https://stackoverflow.com/questions/247770/how-to-retrieve-a-modules-path
 	curdir = os.path.abspath(curdir)
 	config = configparser.ConfigParser()
-	config.read(os.path.join(curdir,'..',CONFIG_FILENAME))
+	config.read(os.path.join(curdir,CONFIG_FILENAME))
 	
 	return config[profile]
 
@@ -95,8 +95,8 @@ class NipoConfig:
 		default = config['DEFAULT']
 
 		default['Install Location'] = str(os.getcwd())	#Base install directory
-		default['config_file'] = os.path.join(os.getcwd(), CONFIG_FILENAME)
+		default['config_file'] = os.path.join(os.getcwd(),'nipo', CONFIG_FILENAME)
 
 		#Create config file
-		with open(CONFIG_FILENAME, 'w') as configfile:
+		with open(default['config_file'], 'w') as configfile:
 			config.write(configfile)

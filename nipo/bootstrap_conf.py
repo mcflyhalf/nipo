@@ -11,10 +11,10 @@ def create_bootstrap_configfile():
 	default = config['DEFAULT']
 
 	default['Install Location'] = str(os.getcwd())	#Base install directory
-	default['config_file'] = os.path.join(os.getcwd(), CONFIG_FILE_NAME)
+	default['config_file'] = os.path.join(os.getcwd(),'nipo', CONFIG_FILE_NAME)
 
 	#Create config file
-	with open(CONFIG_FILE_NAME, 'w') as configfile:
+	with open(default['config_file'], 'w') as configfile:
 		config.write(configfile)
 
 # create_bootstrap_configfile()
