@@ -11,7 +11,7 @@ def create_bootstrap_configfile():
 	default = config['DEFAULT']
 
 	default['Install Location'] = str(os.getcwd())	#Base install directory
-	default['config_file'] = os.path.join(os.getcwd(), CONFIG_FILENAME)
+	default['config_file'] = os.path.join(os.getcwd(), CONFIG_FILE_NAME)
 
 	#Create config file
 	with open(CONFIG_FILE_NAME, 'w') as configfile:
