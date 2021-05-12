@@ -1,7 +1,7 @@
 #Attendance class will do the following:
 #->Check whether there is a class (from Google/any other calendar)
 #->Mark a particular student present
-#->Persist attendance records to db (current strategy is to serialise/pickle a 2D list and store it as a blob in the db)
+#->Persist attendance records to db (current strategy is to use python-pandas)
 #->Display attendance records for a particular module
 #->Display the attendance record for a particular student
 

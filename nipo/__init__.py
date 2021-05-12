@@ -5,7 +5,6 @@ from logging.handlers import RotatingFileHandler
 import os,sys
 import configparser
 
-CONFIG_FILENAME = 'nipo_config.cfg'
 
 def get_configs(profile = 'DEFAULT'):
 	
