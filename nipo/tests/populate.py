@@ -2,7 +2,8 @@
 
 #Documentation for creating an instance of the mapped classes is very well done at https://docs.sqlalchemy.org/en/latest/orm/tutorial.html#create-an-instance-of-the-mapped-class
 
-from nipo import test_session, get_logger
+from nipo import test_session
+from nipo.conf import get_logger
 from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
 from nipo.attendance import ModuleAttendance, get_student_attendance
 from datetime import datetime

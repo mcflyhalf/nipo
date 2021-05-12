@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import logging
-from logging.handlers import RotatingFileHandler
-import os,sys
+import os
 import configparser
 
 

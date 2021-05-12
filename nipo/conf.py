@@ -1,10 +1,12 @@
-from nipo import get_logger
+import os
+import logging
+import configparser
+from logging.handlers import RotatingFileHandler
 from nipo.db.schema import Base
 from nipo.db import get_tables_metadata
 from nipo.bootstrap_conf import CONFIG_FILE_NAME
 
 CONFIG_FILENAME = CONFIG_FILE_NAME
-logger = get_logger("nipo_config")
 
 def get_configs(profile = 'DEFAULT'):
 	
@@ -36,6 +38,7 @@ def get_logger(loggerName):
 	log.setLevel(logging.DEBUG)
 	return log
 
+logger = get_logger("nipo_config")
 
 class NipoConfig:
 	'''
