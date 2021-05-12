@@ -17,4 +17,4 @@ def create_bootstrap_configfile():
 	with open(CONFIG_FILE_NAME, 'w') as configfile:
 		config.write(configfile)
 
-create_bootstrap_configfile()
+# create_bootstrap_configfile()
