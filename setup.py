@@ -1,5 +1,5 @@
 #Create Setup.py file to make the module installable
-import nipo.bootstrap_conf.py
+import nipo.bootstrap_conf
 from setuptools import setup, find_packages
 from nipo import get_logger, production_engine, test_engine
 from nipo.tests.populate import populate_testdb
