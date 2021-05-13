@@ -15,6 +15,10 @@ setup(
 	description = ("An implementation of classroom attendance monitoring"),
 	keywords = "facial recognition classroom attendance",
 	packages= find_packages(),
+	package_data={
+        # For nipo_config file:
+        "nipo": ["*config.cfg"],
+        }
 )
 
 logger = get_logger("nipo_setup")
