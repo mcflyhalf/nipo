@@ -135,7 +135,6 @@ class Student(Base):
 	course_uid = Column(String, ForeignKey("course.uid"), nullable=False)	#Relate to the course UID
 	course = relationship("Course", uselist=False)
 
-	face_encoding = Column(LargeBinary)
 	#modules = This exists because of backref relationship in Modules table 
 
 
