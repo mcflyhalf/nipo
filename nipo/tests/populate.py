@@ -2,7 +2,8 @@
 
 #Documentation for creating an instance of the mapped classes is very well done at https://docs.sqlalchemy.org/en/latest/orm/tutorial.html#create-an-instance-of-the-mapped-class
 
-from nipo import test_session, get_logger
+from nipo import test_session
+from nipo.conf import get_logger
 from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
 from nipo.attendance import ModuleAttendance, get_student_attendance
 from datetime import datetime
@@ -23,7 +24,7 @@ def populate_testdb():
 	'''Populate the test db with test info'''
 	logger.info("Populating DB >>{}<< with dummy data for integration testing".format(conn_details))
 	venue1 = Venue(code = "H7009", name = "Hall 7 Rm 9", capacity = 20)
-	venue2 = Venue(code = "EMB101", name = "Eng MAin Building 101" , capacity = 30)
+	venue2 = Venue(code = "EMB101", name = "Eng Main Building 101" , capacity = 30)
 	venue3 = Venue(code = "4A", name = "Form 4A", capacity = 60)
 	venue4 = Venue(code = "SHAC", name = "Shirrin Aumreedy-Cziffra" , capacity = 35 )
 	venue5 = Venue(code = "PLMM", name = "Patrice Lumumba" , capacity = 40)
@@ -138,7 +139,35 @@ def populate_testdb():
 	
 	logger.debug("Created staff users dummy data for DB >>{}<< for integration testing. Attempting to persist the data...".format(conn_details))
 	session.commit()
+
+	#------------------Attach staff users to modules------------------#
+	for i, module in enumerate(modules, start=1):
+		if i == 1:
+			#For the first module, include all (students and) staff
+			module.addStaff(staff_users)
+		elif i%2 == 0:
+			#For even numbered modules append 1 staff user
+			module.addStaff(staff_users[0])
+		else:
+			#For odd numbered modules append some staff user
+			module.addStaff(staff_users[1])
+
+
+	#------------------Attach students to modules------------------#
+	for i, module in enumerate(modules, start=1):
+		if i == 1:
+			#For the first module, include all students (and staff)
+			module.addStudent(students)
+		elif i%2 == 0:
+			#For even numbered modules exclude first 2 students
+			module.addStudent(students[2:])
+		else:
+			#For odd numbered modules exclude last 3 students
+			module.addStudent(students[:-3])
+
+
 	logger.info("Persisted all dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
+
 
 
 	module_code = "ETI001"
