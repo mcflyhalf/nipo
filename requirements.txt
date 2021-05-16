@@ -24,6 +24,7 @@ Flask-Login==0.5.0
 Flask-WTF==0.14.3
 greenlet==1.0.0
 grip==4.5.2
+gunicorn==20.1.0
 html5lib==1.0.1
 idna==2.8
 iniconfig==1.1.1
@@ -36,7 +37,6 @@ Markdown==3.3.4
 MarkupSafe==1.1.1
 more-itertools==8.7.0
 msgpack==0.6.2
--e git+git@github.com:mcflyhalf/nipo.git@6a6adaec9962dc806fad950ad6f25784a01f3c67#egg=nipo
 numpy==1.20.2
 opencv-python==4.5.1.48
 packaging==20.3
