@@ -1,14 +1,16 @@
 import datetime
+import tempfile
 import os
 from nipo.attendance import ModuleAttendance, StudentAttendance
 from nipo import attendance, session, db
 from flask import Flask, flash, request, render_template, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
-from nipo.db import schema, get_student_list, get_module_list, get_course_list, add_entity
-from nipo.task_mgr import get_celery_app 
+from nipo.db import schema
+from nipo.db.utils import get_student_list, get_module_list, get_course_list, add_entity, add_entities, celery_app
+# from nipo.task_mgr import celery_app 
 #The nipo.forms import requires the session var so it is done after session's creation.
-from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm
+from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm, BulkAddForm
 import random
 import time
 
@@ -20,7 +22,7 @@ import time
 
 
 app = Flask(__name__)
-celery_app = get_celery_app()
+# celery_app = get_celery_app()
 app.secret_key = os.environ['FLASK_SECRET_KEY']
 app.config['db_session'] = session #iss this ever used?
 #TODO: Modify app config to expire sessions after a day 
@@ -29,6 +31,7 @@ login_manager = LoginManager(app)
 login_manager.init_app(app)
 
 login_manager.login_view = 'login'
+UPLOAD_PATH = os.path.join(tempfile.gettempdir(), "nipo")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -41,6 +44,7 @@ def make_form_dict():
 	form['user'] = AddUserForm()
 	form['student'] = AddStudentForm()
 	form['module'] = AddModuleForm()
+	form['file_upload'] = BulkAddForm()
 	return form
 
 @app.route('/')
@@ -142,7 +146,7 @@ def landing():
 		return render_template('staff_dashboard.html',dates=formatted_dates,students=students,modules=modules)
 
 	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
-		tables = db.get_tables_data(session)
+		tables = db.utils.get_tables_data(session)
 		form = make_form_dict()
 		return render_template('admin_dashboard.html', tables=tables, form=form)
 
@@ -330,9 +334,6 @@ def get_module_students():		#Not Yet implemented
 #Potentially change to /modify/entity to allow deleting through this route as well
 @app.route('/add/<entity_type>', methods=['POST'])
 def request_add_entity(entity_type):
-	print("Entity type: {}\nPayload: {}".format(entity_type,123))
-	# return 'Received Form'
-
 	all_forms = make_form_dict()
 	form = all_forms[entity_type.lower()]
 	if form.validate_on_submit():
@@ -347,6 +348,46 @@ def request_add_entity(entity_type):
 	return jsonify({'status':'FAILURE', 
 					'info':'Invalid form data'})
 
+#Bulk add entities using a file
+@app.route('/fadd/<entity_type>', methods=['POST'])
+def request_bulk_add_entities_via_file(entity_type):
+	all_forms = make_form_dict()
+	form = all_forms['file_upload']
+	if form.validate_on_submit():
+		uploaded_data = request.files[form.csv.name].read()
+		if not os.path.exists(UPLOAD_PATH):
+			os.makedirs(UPLOAD_PATH)
+		tmp_file = tempfile.NamedTemporaryFile(
+									suffix='.csv',
+									prefix='nipo_fupload_',
+									dir=UPLOAD_PATH,
+									delete=False)
+		with open(tmp_file.name, 'w') as f:
+			f.write(uploaded_data.decode('utf-8'))
+		#Confirm that stuff is actually written to the temp file
+		# raise
+		task_info = add_entities.delay(entity_type, tmp_file.name)
+		response = {}
+		response['request-id']= task_info.id
+		response['status']= task_info.status
+		return jsonify(response)
+	return jsonify({'status':'FAILURE', 
+					'info':'Invalid file format'})
+
+
+	pass
+	# Get the entity type
+
+	#Confirm entity type is among the acceptable options (module, student, user etc)
+
+	#Get the file, give it a random name and store it in a place on the fs
+
+
+	#Start a celery task to process the file
+
+
+	#Respond with the task id
+
 #Does this require login??
 @app.route('/status/<task_id>')
 def get_task_status(task_id):
@@ -360,7 +401,6 @@ def get_task_status(task_id):
 # @app.route('/debug', methods = ['GET','POST'])
 # def get_debugger():
 # 	raise
-
 
 # app.debug = True
 # if __name__ == '__main__':

@@ -93,23 +93,47 @@ Pause the video at 6 seconds
 							<div class="tabs is-toggle is-fullwidth">
 								<ul>
 							    <li class="is-active">
-							      <a id= "{{tables[tableName]['name']}}-form-tab"class="form-fill-tab">
+							      <a id= "{{tables[tableName]['name']}}-form-tab" class="form-fill-tab add-entity-tab">
 							        <span class="icon is-small"><i class="fas fa-align-center" aria-hidden="true"></i></span>
 							        <span>Form fill</span>
 							      </a>
 							    </li>
 							    <li>
-							      <a id="{{tables[tableName]['name']}}-upload-tab" class="file-upload-tab">
+							      <a id="{{tables[tableName]['name']}}-upload-tab" class="file-upload-tab add-entity-tab">
 							        <span class="icon is-small"><i class="fas fa-upload" aria-hidden="true"></i></span>
 							        <span>File upload</span>
 							      </a>
 							    </li>
 						  	</ul>
 							</div>
-							<form action="/add/{{tables[tableName]['name']}}" method="post" novalidate>
+							<form id= "{{tables[tableName]['name']}}-record-upload" action="/add/{{tables[tableName]['name']}}" method="post" novalidate>
 							{{ form[tableName].hidden_tag() }}
 							{%for field in form[tableName]%}
 							{%if field != form[tableName]._fields['csrf_token']%}
+								<div class="field">
+									{{field.label}}
+									<!-- https://wtforms.readthedocs.io/en/2.3.x/crash_course/#rendering-fields -->
+									{%if field.type == "SelectField"%}
+									<div class="select add-entity-select">
+										{{ field() }}
+									</div>
+									{%else%}
+									<div class="control">
+										{{ field(size=32, class="input") }}
+									</div>
+									{%endif%}
+									{% for error in field.errors %}
+									<span style="color: red;">[{{ error }}]</span>
+									{% endfor %}
+								</div>
+							{%endif%}
+							{%endfor%}
+							</form>
+							<form id= "{{tables[tableName]['name']}}-file-upload" action="/fadd/{{tables[tableName]['name']}}" method="post" class = "hidden {{tables[tableName]['name']}}-upload" novalidate>
+							{{tables[tableName]['name']}} File Upload form
+							{{ form['file_upload'].hidden_tag() }}
+							{%for field in form['file_upload']%}
+							{%if field != form['file_upload']._fields['csrf_token']%}
 								<div class="field">
 									{{field.label}}
 									<!-- https://wtforms.readthedocs.io/en/2.3.x/crash_course/#rendering-fields -->

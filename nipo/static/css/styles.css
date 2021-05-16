@@ -412,3 +412,7 @@ table, th, td{
 	color: red;
 	background-color: whitesmoke;
 }
+
+.hidden {
+	display: none;
+}
