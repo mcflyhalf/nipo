@@ -3,8 +3,12 @@ import logging
 import configparser
 from logging.handlers import RotatingFileHandler
 from nipo.db.schema import Base
-from nipo.db.utils import get_tables_metadata
+from nipo.db import get_tables_metadata
 from nipo.bootstrap_conf import CONFIG_FILE_NAME
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import os
 
 CONFIG_FILENAME = CONFIG_FILE_NAME
 
@@ -100,3 +104,33 @@ class NipoConfig:
 		#Create config file
 		with open(default['config_file'], 'w') as configfile:
 			config.write(configfile)
+
+
+
+#create sqlalchemy engine (for actual use), test engine(for testing db connection) and session (only for the engine)
+
+production_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
+	dbuser = os.environ['POSTGRES_USER'] ,
+	passwd = os.environ['POSTGRES_PASS'],
+	host = 'localhost',
+	port = os.environ['POSTGRES_PORT'],
+	dbname = os.environ['POSTGRES_NIPO_DBNAME']))
+
+Session = sessionmaker(bind=production_engine)
+production_session = Session()
+
+test_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
+	dbuser = os.environ['POSTGRES_USER'] ,
+	passwd = os.environ['POSTGRES_PASS'],
+	host = 'localhost',
+	port = os.environ['POSTGRES_PORT'],
+	dbname = os.environ['POSTGRES_NIPO_TEST_DBNAME']),
+	echo = False)
+
+TestSession = sessionmaker(bind=test_engine)
+test_session = TestSession()
+if os.environ['FLASK_ENV'] == 'production':		
+	session = production_session
+else:
+	session = test_session		 
+

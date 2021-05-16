@@ -2,7 +2,7 @@
 from nipo.bootstrap_conf import create_bootstrap_configfile
 create_bootstrap_configfile()
 from setuptools import setup, find_packages
-from nipo import production_engine, test_engine
+from nipo.conf import production_engine, test_engine
 from nipo.tests.populate import populate_testdb
 from nipo.conf import NipoConfig, get_logger
 

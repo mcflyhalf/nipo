@@ -2,23 +2,17 @@ import datetime
 import tempfile
 import os
 from nipo.attendance import ModuleAttendance, StudentAttendance
-from nipo import attendance, session, db
+from nipo import attendance, db
+from nipo.conf import session
 from flask import Flask, flash, request, render_template, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from nipo.db import schema
 from nipo.db.utils import get_student_list, get_module_list, get_course_list, add_entity, add_entities, celery_app
 # from nipo.task_mgr import celery_app 
-#The nipo.forms import requires the session var so it is done after session's creation.
 from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm, BulkAddForm
 import random
 import time
-
-
-#TODOs:
-# 1. Make provision to scale (celery workers, multithreading?).
-# 2. Create view to check individual attendance
-#
 
 
 app = Flask(__name__)
@@ -194,6 +188,8 @@ def login():
 def register():
 	if current_user.is_authenticated:
 		return redirect(url_for('landing'))
+	flash("registration page is disabled. Contact admin")
+	return redirect(url_for('login'))
 	form = RegistrationForm()
 	if form.validate_on_submit():
 		user = schema.User(username=form.username.data.lower(), email=form.email.data,authenticated=False,active=True)

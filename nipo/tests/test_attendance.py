@@ -1,5 +1,5 @@
 import pytest
-from nipo import test_session
+from nipo.conf import test_session
 from nipo.attendance import ModuleAttendance, StudentAttendance, get_student_attendance
 from nipo.db.schema import Module, Student
 from nipo.tests.populate import sd as test_date

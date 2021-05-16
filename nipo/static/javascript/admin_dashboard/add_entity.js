@@ -48,11 +48,19 @@ function addEntity(tablename){
 	modal_forms = parent_modal.getElementsByTagName("form");
 	//TODO: Choose the form that isn't hidden
 	if (modal_forms[0].classList.contains("hidden")) {
+		//File upload
 		modal_form = modal_forms[1];
+		// const headers = {
+		// 'Content-Type': 'multipart/form-data'
+		// }
 	} else {
+		//Single record upload
 		modal_form = modal_forms[0];
+		// const headers = {
+		// 'Content-Type': 'application/x-www-form-urlencoded'
+		// }
 	}
-	modal_form.submit();
+	// modal_form.submit();
 	const formdata = new FormData(modal_form);
 
 	const options = {

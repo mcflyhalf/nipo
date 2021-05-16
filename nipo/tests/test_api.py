@@ -1,6 +1,7 @@
 import pytest
 
-from nipo import nipo_api, test_session
+from nipo import nipo_api
+from nipo.conf import test_session
 from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
 from nipo.attendance import ModuleAttendance
 from flask_login import current_user

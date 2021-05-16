@@ -2,9 +2,9 @@ import pandas
 from celery.exceptions import Ignore
 from sqlalchemy.exc import IntegrityError
 from nipo.db.schema import User, Venue, Course, Student, Module
-from nipo.db import schema
+from nipo.db import schema, get_tables_metadata
 from nipo.task_mgr import get_celery_app
-from nipo import session
+from nipo.conf import session
 
 celery_app= get_celery_app()
 
@@ -44,10 +44,6 @@ def get_venue_list(session, max=10):
 
 	return venues
 
-def get_tables_metadata():
-	sorted_tables = schema.Base.metadata.sorted_tables
-
-	return sorted_tables
 
 def get_tables_data(session):
 	'''
@@ -172,11 +168,14 @@ def add_entities(self, entity_type, filepath):
 		except IntegrityError as e:
 			# Log these actions??
 			self.update_state(state= 'IN PROGRESS',
-							  meta ={'current': i, 'total': total_entities, 'fail'+i: 'ERROR'})
+							  meta ={'current': i, 'total': total_entities, 'fail '+str(i): 'ERROR'})
 			session.rollback()
 			print('>>celery worker Failed to add entity {} of {}.'
 				.format(i, total_entities))
 			# return result
+			raise e
+		except Exception as e:
+			session.rollback()
 			raise e
 	# self.update_state(state='SUCCESS', meta={'Added': True, 'more': 'info1'})
 	#TODO: Convert to log

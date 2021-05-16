@@ -5,7 +5,7 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Le
 from nipo.db import schema
 from nipo.db.utils import get_course_list
 from nipo.db.schema import PrivilegeLevel
-from nipo.nipo_api import session
+from nipo.conf import session
 
 class DictForm(FlaskForm):
 	'''
