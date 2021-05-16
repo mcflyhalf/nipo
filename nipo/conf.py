@@ -3,7 +3,7 @@ import logging
 import configparser
 from logging.handlers import RotatingFileHandler
 from nipo.db.schema import Base
-from nipo.db import get_tables_metadata
+from nipo.db.utils import get_tables_metadata
 from nipo.bootstrap_conf import CONFIG_FILE_NAME
 
 CONFIG_FILENAME = CONFIG_FILE_NAME
