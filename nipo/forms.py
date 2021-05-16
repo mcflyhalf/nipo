@@ -1,7 +1,9 @@
+import re
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
-from nipo.db import schema, get_course_list
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField, FileField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, Regexp
+from nipo.db import schema
+from nipo.db.utils import get_course_list
 from nipo.db.schema import PrivilegeLevel
 from nipo.nipo_api import session
 
@@ -75,3 +77,51 @@ class AddUserForm(DictForm):
 class AddStudentForm(DictForm):
 	name = StringField('Student name', validators=[DataRequired()])
 	course_uid = SelectField('Student\'s Course', choices=[(course.uid, course.name) for course in courses])
+
+class BulkAddForm(FlaskForm):
+	'''
+	Base form class for adding entities via a form
+	'''
+	# csv = FileField(u'csv File', validators=[regexp(u'^[^/\\]\.csv$')])
+	# 				  [validators.regexp(u'^[^/\\]\.jpg$')]
+	# csv = FileField(u'csv File', validators=[Regexp(u'^[^/]+\.csv$')])
+	csv = FileField(u'csv File')
+
+	# TODO: Limit file size to 100 kb (approx 100 records)
+	def validate_csv(self, csv):
+		if csv.data:
+			# csv.data = re.sub(r'[^a-z0-9_.-]', '_', csv.data)
+			pass
+
+
+# ----------Seems like these arent quite necessary-----------
+# class BulkAddCourseForm(BulkAddForm):
+# 	pass
+
+# class BulkAddVenueForm(FlaskForm):
+# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
+
+# 	def validate_csv(self, csv):
+# 		if field.data:
+# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+
+# class BulkAddModuleForm(FlaskForm):
+# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
+
+# 	def validate_csv(self, csv):
+# 		if field.data:
+# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+
+# class BulkAddUserForm(FlaskForm):
+# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
+
+# 	def validate_csv(self, csv):
+# 		if field.data:
+# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+
+# class BulkAddStudentForm(FlaskForm):
+# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
+
+# 	def validate_csv(self, csv):
+# 		if field.data:
+# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)

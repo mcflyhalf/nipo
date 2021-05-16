@@ -45,9 +45,14 @@ function addEntity(tablename){
 	
 
 	parent_modal = document.getElementById("mod-"+tablename);
-	modal_form = parent_modal.getElementsByTagName("form");
-	modal_form = modal_form[0];
-
+	modal_forms = parent_modal.getElementsByTagName("form");
+	//TODO: Choose the form that isn't hidden
+	if (modal_forms[0].classList.contains("hidden")) {
+		modal_form = modal_forms[1];
+	} else {
+		modal_form = modal_forms[0];
+	}
+	modal_form.submit();
 	const formdata = new FormData(modal_form);
 
 	const options = {
@@ -79,6 +84,26 @@ for (adder of adders){
 	adder.addEventListener("click",showM);
 }
 
+function show_form(formid) {
+	form = document.getElementById(formid);
+	form.classList.remove("hidden");
+}
+
+function hide_form(formid) {
+	form = document.getElementById(formid);
+	form.classList.add("hidden");
+}
+
+function show_form_hide_other(form_to_show_id, form_to_hide_id) {
+	hide_form(form_to_hide_id);
+	show_form(form_to_show_id);
+}
+
+function activate_tab_deactivate_other(tab_to_activate, tab_to_deactivate) {
+	tab_to_activate.classList.add("is-active");
+	tab_to_deactivate.classList.remove("is-active");
+}
+
 
 //For each modal, add necessary event listeners
 let modals = document.getElementsByClassName("modal")
@@ -98,5 +123,28 @@ for(modal of modals){
 	for (btn of submit_btn){
 		btn.addEventListener("click", addE);
 	}
+
+	// Activate the tabs to togle form and file upload sections
+	tab_buttons = modal.getElementsByClassName("add-entity-tab");
+
+	file_upload_tab = modal.getElementsByClassName("file-upload-tab");
+	form_upload_tab = modal.getElementsByClassName("form-fill-tab");
+	file_upload_tab = file_upload_tab[0];
+	form_upload_tab = form_upload_tab[0];
+	file_upload_activator = file_upload_tab.parentElement;
+	form_upload_activator = form_upload_tab.parentElement;
+
+	file_upload_form_id = tablename + "-file-upload"
+	form_upload_form_id = tablename + "-record-upload"
+
+	show_file_upload = show_form_hide_other.bind(null, file_upload_form_id, form_upload_form_id);
+	show_form_upload = show_form_hide_other.bind(null, form_upload_form_id, file_upload_form_id);
+	activate_file_upload = activate_tab_deactivate_other.bind(null, file_upload_activator, form_upload_activator);
+	activate_form_upload = activate_tab_deactivate_other.bind(null, form_upload_activator, file_upload_activator);
+
+	file_upload_tab.addEventListener("click", show_file_upload);
+	file_upload_tab.addEventListener("click", activate_file_upload);
+	form_upload_tab.addEventListener("click", show_form_upload);
+	form_upload_tab.addEventListener("click", activate_form_upload);
 }
 

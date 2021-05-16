@@ -9,7 +9,7 @@ from nipo.conf import NipoConfig, get_logger
 
 setup(
 	name = "nipo",
-	version = "0.6.2",
+	version = "0.6.3",
 	author = "Mcflyhalf",
 	author_email = "mcflyhalf@live.com",
 	description = ("An implementation of classroom attendance monitoring"),
@@ -28,7 +28,7 @@ logger.info("Nipo python package successfuly installed")
 #Create production db for actual work and test db for integration tests
 logger.info("Creating tables for production. Will not drop if existing")
 NipoConfig(production_engine, tables_dropped=False)
-logger.info("Created tables for prodction. Did not drop if existing")
+logger.info("Created tables for production. Did not drop if existing")
 logger.info("Creating tables for test. Will drop if existing")
 NipoConfig(test_engine, tables_dropped=True)
 logger.info("Created tables for test. Dropped if existing")
