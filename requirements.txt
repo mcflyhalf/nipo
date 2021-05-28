@@ -38,7 +38,6 @@ MarkupSafe==1.1.1
 more-itertools==8.7.0
 msgpack==0.6.2
 numpy==1.20.2
-opencv-python==4.5.1.48
 packaging==20.3
 pandas==1.2.4
 path-and-address==2.0.1

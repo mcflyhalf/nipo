@@ -6,8 +6,8 @@ from celery import Celery
 
 def get_celery_app():	
 	celery_app = Celery('nipo',
-						broker='pyamqp://guest@localhost//',
-						backend='rpc://',
+						broker='redis://',
+						backend='redis://',
 						include=['nipo.nipo_api'])
 
 	celery_app.conf.update(
