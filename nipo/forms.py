@@ -83,9 +83,9 @@ class BulkAddForm(FlaskForm):
 	Base form class for adding entities via a form
 	'''
 	# csv = FileField(u'csv File', validators=[regexp(u'^[^/\\]\.csv$')])
-	# 				  [validators.regexp(u'^[^/\\]\.jpg$')]
-	# csv = FileField(u'csv File', validators=[Regexp(u'^[^/]+\.csv$')])
-	csv = FileField(u'csv File')
+	csv = FileField(u'csv File', validators=[Regexp(u'^[a-zA-Z0-9_]+\.csv$', message="filenames can only contain alphanumeric and underscore characters"),
+											])
+	# csv = FileField(u'csv File')
 
 	# TODO: Limit file size to 100 kb (approx 100 records)
 	def validate_csv(self, csv):

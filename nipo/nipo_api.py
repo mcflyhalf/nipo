@@ -21,6 +21,8 @@ app.secret_key = os.environ['FLASK_SECRET_KEY']
 app.config['db_session'] = session #iss this ever used?
 #TODO: Modify app config to expire sessions after a day 
 #See https://stackoverflow.com/questions/11783025/is-there-an-easy-way-to-make-sessions-timeout-in-flask
+#Max upload size = 100 kB
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 
 login_manager = LoginManager(app)
 login_manager.init_app(app)
 
