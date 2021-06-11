@@ -372,20 +372,6 @@ def request_bulk_add_entities_via_file(entity_type):
 	return jsonify({'status':'FAILURE', 
 					'info':'Invalid file format'})
 
-
-	pass
-	# Get the entity type
-
-	#Confirm entity type is among the acceptable options (module, student, user etc)
-
-	#Get the file, give it a random name and store it in a place on the fs
-
-
-	#Start a celery task to process the file
-
-
-	#Respond with the task id
-
 #Does this require login??
 @app.route('/status/<task_id>')
 def get_task_status(task_id):
@@ -394,13 +380,10 @@ def get_task_status(task_id):
 	response['task-id'] = task_id
 	response['status'] = task.status
 	response['info'] = str(task.info)
+	# if task.status in ["SUCCESS", "FAILURE"]:
+	task.forget()
 	return jsonify(response)	
 
 # @app.route('/debug', methods = ['GET','POST'])
 # def get_debugger():
 # 	raise
-
-# app.debug = True
-# if __name__ == '__main__':
-# 	app.run(debug = True)
-#Because of this final comment, the only way to run the flask app is to `flask run` on cmd
