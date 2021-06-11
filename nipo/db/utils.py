@@ -1,4 +1,5 @@
 import pandas
+import os
 from celery.exceptions import Ignore
 from sqlalchemy.exc import IntegrityError
 from nipo.db.schema import User, Venue, Course, Student, Module
@@ -130,7 +131,7 @@ def add_entity(self,entity_dict, tablename):
 
 	result['status'] = 'SUCCESS'
 	self.update_state(state='SUCCESS', meta={'Added': True, 'more': 'info1'})
-	#TODO: Convert to log
+	#TODO: Convert to log. Still currently 
 	print('entity added by celery worker')
 	return result
 	
@@ -138,11 +139,13 @@ def add_entity(self,entity_dict, tablename):
 def add_entities(self, entity_type, filepath):
 	'''
 	adds several entities (of the same type) To db from a csv file
-	:param entity_type: The type of entities. CAn be one of the db tables (Module, Student, User etc)
-	:param filepath: The full path tot he location of the file. Must be a csv file with a header row where headers are names of attributes
+	:param entity_type: The type of entities. Can be one of the db tables (Module, Student, User etc)
+	:param filepath: The full path to the location of the file. Must be a csv file with a header row where headers are names of attributes
 	'''
 	tablename = entity_type.lower()
 	entities_df = pandas.read_csv(filepath)
+	#Mark file for deletion in 24 hours
+	remove_file.apply_async((filepath,), countdown=24*60*60)
 	col_rename_mapper = {}
 
 	for column in entities_df.columns:
@@ -182,3 +185,16 @@ def add_entities(self, entity_type, filepath):
 	#TODO: Start a task that deletes the temp file an hour from now
 	print('entity added by celery worker')
 	return
+
+@celery_app.task(ignore_result=True)
+def remove_file(filepath):
+	'''
+	Deletes a file. Function defined so it can be called later via celery
+
+	:param filepath: The full path to the location of the file.
+	'''
+	if os.path.exists(filepath):
+		os.remove(filepath)
+		print ('File >>{}<< removed by celery worker'.format(filepath))
+		return
+	print ('Attempted to remove File >>{}<<. File not found by celery worker'.format(filepath))
