@@ -38,9 +38,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Setup environment
+      - name: Setup environment and databases
         run: |
           cat .github/workflows/gh_actions_env.txt >> $GITHUB_ENV
+          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo";'
+          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo_test";'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
