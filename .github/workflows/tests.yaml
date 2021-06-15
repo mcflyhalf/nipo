@@ -49,6 +49,7 @@ jobs:
           pip install --use-feature=in-tree-build .
         env:
           # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_USER: postgres
           POSTGRES_HOST: localhost
           # The default PostgreSQL port
           POSTGRES_PORT: 5432
