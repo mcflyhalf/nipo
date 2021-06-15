@@ -20,6 +20,7 @@ jobs:
         env:
           # POSTGRES_USER: psql_username
           # POSTGRES_PASSWORD: psql_password
+          POSTGRES_DB: nipo
           POSTGRES_HOST_AUTH_METHOD: trust
         # Set health checks to wait until postgres has started
         options: >-
