@@ -73,7 +73,7 @@ def get_tables_data(session):
 		table_prop = {}	#Dict for table properties
 		tableName = str(_table.name)
 		headers = [col.name for col in _table.columns]
-		raw_data = session.query(_table).limit(10).all()
+		raw_data = session.query(_table).limit(30).all()
 
 		#Regretable hack to remove the password hash and attendance columns
 		#TODO: Modify query to only return the columns of interest

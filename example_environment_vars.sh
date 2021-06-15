@@ -2,6 +2,7 @@
 
 export POSTGRES_USER="psql_username"
 export POSTGRES_PASS=psql_password
+export POSTGRES_HOST=localhost
 export POSTGRES_PORT=5432
 export POSTGRES_NIPO_DBNAME=nipo
 export POSTGRES_NIPO_TEST_DBNAME=nipo_test
