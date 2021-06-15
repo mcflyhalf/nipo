@@ -53,6 +53,7 @@ jobs:
           # The default PostgreSQL port
           POSTGRES_PORT: 5432
           POSTGRES_PASS: psql_password
+          POSTGRES_PASSWORD: psql_password
       - name: Test with pytest
         run: |
           cd nipo
