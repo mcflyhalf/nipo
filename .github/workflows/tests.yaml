@@ -26,6 +26,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        #Map container port to runner/host port 
+        ports: 
+          - 5432:5432
 
 
     steps:
