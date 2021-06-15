@@ -41,10 +41,10 @@ jobs:
       - name: Setup environment and databases
         run: |
           cat .github/workflows/gh_actions_env.txt >> $GITHUB_ENV
-          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo";'
-          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo_test";'
       - name: Install dependencies
         run: |
+          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo";'
+          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo_test";'
           python -m pip install --upgrade pip
           pip install pytest wheel
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
