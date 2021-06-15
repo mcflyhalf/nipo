@@ -18,8 +18,8 @@ jobs:
         image: postgres:12.6
         # Provide the password for postgres
         env:
-          POSTGRES_USER: psql_username
-          POSTGRES_PASSWORD: psql_password
+          # POSTGRES_USER: psql_username
+          # POSTGRES_PASSWORD: psql_password
           POSTGRES_HOST_AUTH_METHOD: trust
         # Set health checks to wait until postgres has started
         options: >-
@@ -53,8 +53,8 @@ jobs:
           POSTGRES_HOST: localhost
           # The default PostgreSQL port
           POSTGRES_PORT: 5432
-          POSTGRES_PASS: psql_password
-          POSTGRES_PASSWORD: psql_password
+          # POSTGRES_PASS: psql_password
+          # POSTGRES_PASSWORD: psql_password
       - name: Test with pytest
         run: |
           cd nipo
