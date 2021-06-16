@@ -1,5 +1,6 @@
 POSTGRES_USER=psql_username
 POSTGRES_PASS=psql_password
+PGPASSWORD=psql_password
 POSTGRES_PASSWORD=psql_password
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
