@@ -112,7 +112,7 @@ class NipoConfig:
 production_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
 	dbuser = os.environ['POSTGRES_USER'] ,
 	passwd = os.environ['POSTGRES_PASS'],
-	host = 'localhost',
+	host = os.environ['POSTGRES_HOST'],
 	port = os.environ['POSTGRES_PORT'],
 	dbname = os.environ['POSTGRES_NIPO_DBNAME']))
 
@@ -122,7 +122,7 @@ production_session = Session()
 test_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
 	dbuser = os.environ['POSTGRES_USER'] ,
 	passwd = os.environ['POSTGRES_PASS'],
-	host = 'localhost',
+	host = os.environ['POSTGRES_HOST'],
 	port = os.environ['POSTGRES_PORT'],
 	dbname = os.environ['POSTGRES_NIPO_TEST_DBNAME']),
 	echo = False)

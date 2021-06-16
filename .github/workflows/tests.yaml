@@ -1,0 +1,68 @@
+name: Nipo
+
+on: [push]
+
+jobs:
+  integration_test:
+    name: integration test ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [3.8]
+        os: [ubuntu-20.04, ubuntu-18.04]
+
+   # Postgres service container
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:12.6
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: psql_username
+          POSTGRES_PASSWORD: psql_password
+          POSTGRES_DB: nipo
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        #Map container port to runner/host port 
+        ports: 
+          - 5432:5432
+
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      
+      - name: Install dependencies test postgres db
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest wheel
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          psql -h localhost -d nipo -U psql_username -c 'SELECT 1;'
+
+      - name: Install nipo and Test with pytest
+        run: |
+          pip install --use-feature=in-tree-build .
+          cd nipo
+          pytest
+
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_USER: psql_username
+          POSTGRES_PASS: psql_password
+          POSTGRES_HOST: localhost
+          # The default PostgreSQL port
+          POSTGRES_PORT: 5432
+          POSTGRES_NIPO_DBNAME: nipo
+          POSTGRES_NIPO_TEST_DBNAME: nipo
+          FLASK_APP: nipo_api.py
+          FLASK_ENV: development
+          FLASK_SECRET_KEY: b'donotuseme'
