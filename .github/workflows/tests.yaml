@@ -42,32 +42,28 @@ jobs:
       # - name: Setup environment and databases
       #   run: |
       #     cat .github/workflows/gh_actions_env.txt >> $GITHUB_ENV
-      - name: Install dependencies
+      - name: Install dependencies test postgres db
         run: |
-          cat .github/workflows/gh_actions_env.txt >> $GITHUB_ENV
           python -m pip install --upgrade pip
           pip install pytest wheel
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           psql -h localhost -d nipo -U psql_username -c 'SELECT 1;'
+
+      - name: Install nipo and Test with pytest
+        run: |
           pip install --use-feature=in-tree-build .
           cd nipo
           pytest
+
         env:
           # The hostname used to communicate with the PostgreSQL service container
           POSTGRES_USER: psql_username
+          POSTGRES_PASS: psql_password
           POSTGRES_HOST: localhost
           # The default PostgreSQL port
           POSTGRES_PORT: 5432
-          POSTGRES_PASS: psql_password
           POSTGRES_NIPO_DBNAME: nipo
           POSTGRES_NIPO_TEST_DBNAME: nipo
           FLASK_APP: nipo_api.py
           FLASK_ENV: development
           FLASK_SECRET_KEY: b'donotuseme'
-      # - name: Test with pytest
-      #   run: |
-      #     cd nipo
-      #     pytest
-
-# Need to connect to psql db. 
-# See https://docs.github.com/en/actions/guides/creating-postgresql-service-containers
