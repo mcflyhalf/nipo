@@ -18,10 +18,10 @@ jobs:
         image: postgres:12.6
         # Provide the password for postgres
         env:
-          # POSTGRES_USER: psql_username
-          # POSTGRES_PASSWORD: psql_password
-          # POSTGRES_DB: nipo
-          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: psql_username
+          POSTGRES_PASSWORD: psql_password
+          POSTGRES_DB: nipo
+          # POSTGRES_HOST_AUTH_METHOD: trust
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -39,13 +39,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Setup environment and databases
-        run: |
-          cat .github/workflows/gh_actions_env.txt >> $GITHUB_ENV
+      # - name: Setup environment and databases
+      #   run: |
+      #     cat .github/workflows/gh_actions_env.txt >> $GITHUB_ENV
       - name: Install dependencies
         run: |
-          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo";'
-          psql -h localhost -U postgres -c 'CREATE DATABASE "nipo_test";'
+          cat .github/workflows/gh_actions_env.txt >> $GITHUB_ENV
           python -m pip install --upgrade pip
           pip install pytest wheel
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
@@ -53,12 +52,11 @@ jobs:
           pip install --use-feature=in-tree-build .
         env:
           # The hostname used to communicate with the PostgreSQL service container
-          POSTGRES_USER: postgres
-          POSTGRES_HOST: localhost
-          # The default PostgreSQL port
-          POSTGRES_PORT: 5432
+          # POSTGRES_USER: postgres
+          # POSTGRES_HOST: localhost
+          # # The default PostgreSQL port
+          # POSTGRES_PORT: 5432
           # POSTGRES_PASS: psql_password
-          # POSTGRES_PASSWORD: psql_password
       - name: Test with pytest
         run: |
           cd nipo
