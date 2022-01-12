@@ -1,7 +1,7 @@
 import pytest
 
 from nipo import nipo_api
-from nipo.conf import test_session
+from nipo.conf import TestSession
 from nipo.db.schema import Module, Student, Course, Venue, User, PrivilegeLevel
 from nipo.attendance import ModuleAttendance
 from flask_login import current_user
@@ -31,73 +31,73 @@ module["course_code"] = course_uid
 #setup database assets
 @pytest.fixture(scope='module')	#Maybe scope=session
 def test_db():
-	session = test_session
-	#create test users (admin, staff, student)
-	test_student = Student(name = student_name, course_uid =course_uid )
-	test_course = Course(uid = course_uid, name = course_name)
+	with TestSession() as session:
+		#create test users (admin, staff, student)
+		test_course = Course(uid = course_uid, name = course_name)
+		test_student = Student(name = student_name, course_uid =course_uid )
 
-	
-	session.add(test_course)
-	session.add(test_student)
-	session.commit()
+		
+		session.add(test_course)
+		session.add(test_student)
+		session.commit()
 
-	test_admin_user = User(username= admin_uname,\
-						 email= admin_uname+'@mail.com',\
-						 name= 'Ad Min',\
-						 privilege= PrivilegeLevel.admin.name,
-						 active= True,\
-						 authenticated= False)
-	test_staff_user = User(username= staff_uname,\
-						 email= staff_uname+'@mail.com',\
-						 name= 'Staff, ChiefOf',\
-						 privilege= PrivilegeLevel.staff.name,
-						 active= True,\
-						 authenticated= False)
-	test_student_user = User(username= student_uname,\
-						 email= student_uname+'@mail.com',\
-						 name= 'Stew Dent',\
-						 privilege= PrivilegeLevel.student.name,
-						 active= True,\
-						 authenticated= False,\
-						 student_id= test_student.id)
-	test_student_user.set_password(student_pw)
-	test_staff_user.set_password(staff_pw)
-	test_admin_user.set_password(admin_pw)
-	
-	session.add(test_student_user)
-	session.add(test_staff_user)
-	session.add(test_admin_user)
+		test_admin_user = User(username= admin_uname,\
+							 email= admin_uname+'@mail.com',\
+							 name= 'Ad Min',\
+							 privilege= PrivilegeLevel.admin.name,
+							 active= True,\
+							 authenticated= False)
+		test_staff_user = User(username= staff_uname,\
+							 email= staff_uname+'@mail.com',\
+							 name= 'Staff, ChiefOf',\
+							 privilege= PrivilegeLevel.staff.name,
+							 active= True,\
+							 authenticated= False)
+		test_student_user = User(username= student_uname,\
+							 email= student_uname+'@mail.com',\
+							 name= 'Stew Dent',\
+							 privilege= PrivilegeLevel.student.name,
+							 active= True,\
+							 authenticated= False,\
+							 student_id= test_student.id)
+		test_student_user.set_password(student_pw)
+		test_staff_user.set_password(staff_pw)
+		test_admin_user.set_password(admin_pw)
+		
+		session.add(test_student_user)
+		session.add(test_staff_user)
+		session.add(test_admin_user)
 
-	session.commit()
+		session.commit()
 
-	test_module = Module(**module)
-	test_module.students.append(test_student)
-	test_module.staff.append(test_staff_user)
+		test_module = Module(**module)
+		test_module.students.append(test_student)
+		test_module.staff.append(test_staff_user)
 
-	session.add(test_module)
+		session.add(test_module)
 
-	session.commit()
+		session.commit()
 
-	test_mod_att = ModuleAttendance(test_module.code, session)
-	test_mod_att.createClassSession(test_session_date)
-	test_mod_att.updateAttendance(test_student.id,test_session_date, present=random.choice([True,False]))
+		test_mod_att = ModuleAttendance(test_module.code, session)
+		test_mod_att.createClassSession(test_session_date)
+		test_mod_att.updateAttendance(test_student.id,test_session_date, present=random.choice([True,False]))
 
-	session.commit()
+		session.commit()
 
-	yield
-	#delete test entities
-	test_module.students.remove(test_student)
-	test_module.staff.remove(test_staff_user)
-	session.commit()
-	session.delete(test_student_user)
-	session.delete(test_staff_user)
-	session.delete(test_admin_user)
-	session.commit()
-	session.delete(test_student)
-	session.delete(test_module)
-	session.delete(test_course)
+		yield
+		#delete test entities
+		test_module.students.remove(test_student)
+		test_module.staff.remove(test_staff_user)
+		session.commit()
+		session.delete(test_student_user)
+		session.delete(test_staff_user)
+		session.delete(test_admin_user)
+		session.commit()
+		session.delete(test_student)
+		session.delete(test_module)
+		session.delete(test_course)
 
-	session.commit()
+		session.commit()
 
 
 @pytest.fixture
@@ -165,3 +165,27 @@ class TestAPI:
 		
 
 
+#Code to find and delete test entities in case the test fails somewhere between creation and deletion
+#Tests should probably clear db before starting...
+# with TestSession() as session:
+# 		#find test entities
+# 		#create test users (admin, staff, student)
+# 		test_course = session.query(Course).filter(Course.uid == course_uid).one()
+# 		test_student = session.query(Student).filter(Student.name==student_name).one()
+# 		test_admin_user = session.query(User).filter(User.username==admin_uname).one()
+# 		test_staff_user = session.query(User).filter(User.username==staff_uname).one()
+# 		test_student_user = session.query(User).filter(User.username==student_uname).one()
+# 		test_module = session.query(Module).filter(Module.code=="MOD991").one()
+# 		#delete test entities
+# 		test_module.students.remove(test_student)
+# 		test_module.staff.remove(test_staff_user)
+# 		session.commit()
+# 		session.delete(test_student_user)
+# 		session.delete(test_staff_user)
+# 		session.delete(test_admin_user)
+# 		session.commit()
+# 		session.delete(test_student)
+# 		session.delete(test_module)
+# 		session.delete(test_course)
+
+# 		session.commit()

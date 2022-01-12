@@ -33,6 +33,10 @@ UPLOAD_PATH = os.path.join(tempfile.gettempdir(), "nipo")
 def load_user(user_id):
     return session.query(schema.User).filter(schema.User.id==int(user_id)).one_or_none()
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    session.close()
+
 def make_form_dict():
 	form = {}
 	form['course'] = AddCourseForm()
