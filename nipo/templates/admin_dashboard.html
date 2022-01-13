@@ -38,28 +38,9 @@ Pause the video at 6 seconds
 <div class="wrapper admin-db-wrapper">
 	<div class="side-panel">
 		<nav class="side-menu">
-			<ul class ="side-panel-menu admin-db-side-panel wrapper-f">
-				<li>
-					<a href="#"><i class="fas fa-graduation-cap"></i>
-								Students</a>
-				</li>
-				<li>
-					<a href="#"><i class="fas fa-book-open"></i>
-								Modules</a>
-				</li>
-				<li>
-					<a href="#"><i class="user-image fas fa-user-cog"></i>
-								Users</a>
-				</li>
-				<li>
-					<a href="#"><i class="user-image fas fa-home"></i>
-								Venues</a>
-				</li>
-				<li>
-					<a href="#"><i class="user-image fas fa-university"></i>
-								Courses</a>
-				</li>
-			</ul>
+			{% block side_menu %} 
+			{%include 'admin_sidebar.html'%}
+			{% endblock %}
 		</nav>		
 	</div>
 	<div class="main-page admin-main-page wrapper-f">
