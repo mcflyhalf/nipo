@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from nipo.db.schema import User, Venue, Course, Student, Module
 from nipo.db import schema, get_tables_metadata
 from nipo.task_mgr import get_celery_app
-from nipo.conf import session
+from nipo.conf import Session
 
 celery_app= get_celery_app()
 
@@ -119,15 +119,16 @@ def _ORM_obj_from_dict(entity_dict, tablename):
 def add_entity(self,entity_dict, tablename):
 	ORM_obj = _ORM_obj_from_dict(entity_dict, tablename)
 	result = {}
-	try:
-		session.add(ORM_obj)
-		session.commit()
-	except IntegrityError as e:
-		self.update_state(meta={'Added': False, 'description': 'Non-unique id property'})
-		session.rollback()
-		print('>>celery worker Failed to add entity.')
-		# return result
-		raise e
+	with Session() as session:
+		try:
+			session.add(ORM_obj)
+			session.commit()
+		except IntegrityError as e:
+			self.update_state(meta={'Added': False, 'description': 'Non-unique id property'})
+			session.rollback()
+			print('>>celery worker Failed to add entity.')
+			# return result
+			raise e
 
 	result['status'] = 'SUCCESS'
 	self.update_state(state='SUCCESS', meta={'Added': True, 'more': 'info1'})
@@ -160,31 +161,46 @@ def add_entities(self, entity_type, filepath):
 	entities_list = entities_df.to_dict(orient='records')
 	total_entities = len(entities_list)
 
-	for i, entity_dict in enumerate(entities_list):
-		ORM_obj = _ORM_obj_from_dict(entity_dict, tablename)
+	# Previous implementation that could tell exactly which record was duplicated
+	# with Session() as session:
+	# 	for i, entity_dict in enumerate(entities_list):
+	# 		ORM_obj = _ORM_obj_from_dict(entity_dict, tablename)
+	# 		try:
+	# 			session.add(ORM_obj)
+	# 			session.commit()
+	# 			self.update_state(state= 'IN PROGRESS',
+	# 							  meta ={'current': i, 'total': total_entities})
+	# 		except IntegrityError as e:
+	# 			# Log these actions??
+	# 			self.update_state(state= 'IN PROGRESS',
+	# 							  meta ={'current': i, 'total': total_entities, 'fail '+str(i): 'ERROR'})
+	# 			print('>>celery worker Failed to add entity {} of {}.'
+	# 				.format(i, total_entities))
+	# 			# return result
+	# 			raise e
 
+	# This version uses context managers and foregoes committing records 1 by 1.
+	# This loses benefit of knowing exactly which record failed. This info 
+	# is still available in the exception message but has been deemed unnecessary
+	# as the entire transaction is supposed to be rolled back anyway 
+	with Session() as session:
 		try:
-			session.add(ORM_obj)
-			session.commit()
-			self.update_state(state= 'IN PROGRESS',
-							  meta ={'current': i, 'total': total_entities})
+			with session.begin(): 
+				for i, entity_dict in enumerate(entities_list):
+					ORM_obj = _ORM_obj_from_dict(entity_dict, tablename)
+					session.add(ORM_obj)
+					self.update_state(state= 'IN PROGRESS',
+									  meta ={'current': i, 'total': total_entities})
 		except IntegrityError as e:
 			# Log these actions??
 			self.update_state(state= 'IN PROGRESS',
 							  meta ={'current': i, 'total': total_entities, 'fail '+str(i): 'ERROR'})
-			session.rollback()
-			print('>>celery worker Failed to add entity {} of {}.'
-				.format(i, total_entities))
+			print('>>celery worker Failed to add at least one of the entities.')
 			# return result
 			raise e
-		except Exception as e:
-			session.rollback()
-			raise e
-	# self.update_state(state='SUCCESS', meta={'Added': True, 'more': 'info1'})
+			
 	#TODO: Convert to log
-	#TODO: Start a task that deletes the temp file an hour from now
-	print('entity added by celery worker')
-	return
+	print('entities added by celery worker')
 
 @celery_app.task(ignore_result=True)
 def remove_file(filepath):
