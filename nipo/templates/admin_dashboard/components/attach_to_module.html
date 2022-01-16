@@ -1,0 +1,64 @@
+
+<div id = "mod-attach-to-module" class="modal attacher-modal">
+	<div class="modal-background"></div>
+	<div class="modal-card">
+		<header class="modal-card-head">
+			<p class="modal-card-title">Attach student/staff to module</p>
+			<button class="delete close-modal" aria-label="close"></button>
+		</header>
+		<section class="modal-card-body">
+			<div class="tabs is-toggle is-fullwidth">
+				<ul>
+				    <li class="is-active">
+				      <a id= "attach-to-module-form-tab" class="form-fill-tab attach-to-module-tab">
+				        <span class="icon is-small"><i class="fas fa-align-center" aria-hidden="true"></i></span>
+				        <span>Form fill</span>
+				      </a>
+				    </li>
+				    <li>
+				      <a id="attach-to-module-file-upload-tab" class="file-upload-tab attach-to-module-tab">
+				        <span class="icon is-small"><i class="fas fa-upload" aria-hidden="true"></i></span>
+				        <span>File upload</span>
+				      </a>
+				    </li>
+				    <li>
+				      <a id="attach-to-module-entire-course-tab" class="course-attach-tab attach-to-module-tab">
+				        <span class="icon is-small"><i class="fas fa-upload" aria-hidden="true"></i></span>
+				        <span>Attach entire course</span>
+				      </a>
+				    </li>
+		  		</ul>
+			</div>
+			{%for form in attach_to_module_forms%}
+			<form id= "{{form.form_id}}" action="{{form.action}}" method="post" {%if 'individual not in form.form_name'%}class="hidden" {%endif%} novalidate>
+			{{ form.hidden_tag() }}
+			{%for field in form%}
+			{%if field != form._fields['csrf_token']%}
+				<div class="field">
+					{{field.label}}
+					<!-- https://wtforms.readthedocs.io/en/2.3.x/crash_course/#rendering-fields -->
+					{%if field.type == "SelectField"%}
+					<div class="select add-entity-select">
+						{{ field() }}
+					</div>
+					{%else%}
+					<div class="control">
+						{{ field(size=32, class="input") }}
+					</div>
+					{%endif%}
+					{% for error in field.errors %}
+					<span style="color: red;">[{{ error }}]</span>
+					{% endfor %}
+				</div>
+			{%endif%}
+			{%endfor%}
+			</form>
+			{%endfor%}
+		</section>
+		<footer class="modal-card-foot">
+			<button class="button submit-form is-success">Save changes</button>
+			<button class="button close-modal">Cancel</button>
+		</footer>
+	</div>
+</div>
+<!-- <script type="module" src="{{url_for('static',filename='javascript/admin_dashboard/attach_to_module.js')}}"></script> -->

@@ -75,23 +75,6 @@ function addEntity(tablename){
 		.then(boundFunc => doLater(boundFunc, 5000));
 }
 
-hideModals();
-// For each add-fooin the summary tiles, add an event listener
-// to display the Modal foo
-let adders = document.getElementsByClassName("adder");
-
-for (adder of adders){
-	//Adder id and modal id
-	aid = adder.attributes["id"]["value"];
-	mid = "mod"+aid.slice("add".length);	//Replace "add" from the beginning with "mod"
-	
-	//Bind used to solve the problem discussed in
-	//https://stackoverflow.com/questions/19586137/addeventlistener-using-for-loop-and-passing-values
-	let showM = showModal.bind(null, mid)
-
-	adder.addEventListener("click",showM);
-}
-
 function show_form(formid) {
 	form = document.getElementById(formid);
 	form.classList.remove("hidden");
@@ -112,6 +95,23 @@ function activate_tab_deactivate_other(tab_to_activate, tab_to_deactivate) {
 	tab_to_deactivate.classList.remove("is-active");
 }
 
+// --------------------add_entity.main()-------------------
+hideModals();
+// For each add-fooin the summary tiles, add an event listener
+// to display the Modal foo
+let adders = document.getElementsByClassName("adder");
+
+for (adder of adders){
+	//Adder id and modal id
+	aid = adder.attributes["id"]["value"];
+	mid = "mod"+aid.slice("add".length);	//Replace "add" from the beginning with "mod"
+	
+	//Bind used to solve the problem discussed in
+	//https://stackoverflow.com/questions/19586137/addeventlistener-using-for-loop-and-passing-values
+	let showM = showModal.bind(null, mid)
+
+	adder.addEventListener("click",showM);
+}
 
 //For each modal, add necessary event listeners
 let modals = document.getElementsByClassName("modal")
@@ -122,6 +122,12 @@ for(modal of modals){
 	for (button of close_buttons){
 		button.addEventListener("click",hideModals);
 	}
+}
+
+add_entity_modals = Array.from(modals)
+  				   .filter(modal => modal.classList.contains("adder-modal"))
+
+for (modal of add_entity_modals){
 
 	let tablename=modal.getAttribute('id');
 	tablename = tablename.slice("mod-".length);
@@ -155,4 +161,26 @@ for(modal of modals){
 	form_upload_tab.addEventListener("click", show_form_upload);
 	form_upload_tab.addEventListener("click", activate_form_upload);
 }
+
+
+
+// ----------------attach_to_module.js code----------------------------------
+
+
+// -----------------attach_to_module.main()-----------------------------
+
+// Cause attachers to open the modal
+let att_modal_id = "mod-attach-to-module"; //id of the attacher modal
+let attachers = document.getElementsByClassName("attacher");
+//Bind used to solve the problem discussed in
+//https://stackoverflow.com/questions/19586137/addeventlistener-using-for-loop-and-passing-values
+//Need to learn to add event listener with params. Bind seems clunky
+showM = showModal.bind(null, att_modal_id);
+
+// bind show modal event listener to all attacher buttons
+for (attacher of attachers){
+	attacher.addEventListener("click",showM);
+}
+
+
 

@@ -7,6 +7,13 @@ from nipo.db.utils import get_course_list
 from nipo.db.schema import PrivilegeLevel
 from nipo.conf import session
 
+form_endpoints = {
+	'attach_to_module_individual':'/attach',
+	'attach_to_module_file_upload': '/fattach',
+	'attach_to_module_entire_course':'/cattach'
+}
+
+
 class DictForm(FlaskForm):
 	'''
 	Custom FlaskForm whose instances can be converted to a dict
@@ -36,12 +43,12 @@ class RegistrationForm(FlaskForm):
 	submit = SubmitField('Register')
 
 	def validate_username(self, username):
-		user = session.query(schema.User).filter_by(username=username.data.lower()).first()
+		user = session.query(schema.User).filter_by(username==username.data.lower()).first()
 		if user is not None:
 			raise ValidationError('Invalid username. Please use a different username.')
 
 	def validate_email(self, email):
-		user = session.query(schema.User).filter_by(email=email.data.lower()).first()
+		user = session.query(schema.User).filter_by(email==email.data.lower()).first()
 		if user is not None:
 			raise ValidationError('Invalid email address. Please use a different email address.')
 
@@ -88,35 +95,57 @@ class BulkAddForm(FlaskForm):
 		if csv.data:
 			pass
 
+def add_entity_forms():
+	form = {}
+	form['course'] = AddCourseForm()
+	form['venue'] = AddVenueForm()
+	form['user'] = AddUserForm()
+	form['student'] = AddStudentForm()
+	form['module'] = AddModuleForm()
+	form['file_upload'] = BulkAddForm()
+	return form
 
-# ----------Seems like these arent quite necessary-----------
-# class BulkAddCourseForm(BulkAddForm):
-# 	pass
 
-# class BulkAddVenueForm(FlaskForm):
-# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
+#--------- Attach to module forms--------#
 
-# 	def validate_csv(self, csv):
-# 		if field.data:
-# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+class AttachToModuleForm(FlaskForm):
+	@property
+	def id_text(self):
+		return self.name.replace('_','-')
 
-# class BulkAddModuleForm(FlaskForm):
-# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
 
-# 	def validate_csv(self, csv):
-# 		if field.data:
-# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+class AttachToModuleIndividualForm(AttachToModuleForm):
+	form_name = "attach_to_module_individual"
 
-# class BulkAddUserForm(FlaskForm):
-# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
+	modulecode = StringField('Module code')
+	designation =  SelectField(u'Staff or Student?', choices=[('Student', 'Student'), ('Staff', 'Staff')])
+	emailOrId = StringField('Staff email address OR student ID')
 
-# 	def validate_csv(self, csv):
-# 		if field.data:
-# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+	def validate_modulecode(self, code):
+		try:
+			mod = session.query(schema.Module).filter_by(code==modulecode.data.upper()).one()
+		except:
+			raise ValidationError('Invalid module code. Module code must be upper case')
+	
 
-# class BulkAddStudentForm(FlaskForm):
-# 	csv = FileField(u'Courses csv File', [validators.regexp(u'^[^/\\]\.csv$')])
+class AttachToModuleFileUploadForm(AttachToModuleForm, BulkAddForm):
+	form_name = "attach_to_module_file_upload"
 
-# 	def validate_csv(self, csv):
-# 		if field.data:
-# 			field.data = re.sub(r'[^a-z0-9_.-]', '_', field.data)
+
+class AttachToModuleEntireCourseForm(AttachToModuleForm):
+	form_name = "attach_to_module_entire_course"
+
+	modulecode = StringField('Module code')
+	course_uid = SelectField('Course uid', choices=[(course.uid, course.name) for course in courses])
+
+	def validate_modulecode(self, code):
+		try:
+			mod = session.query(schema.Module).filter_by(code==modulecode.data.upper()).one()
+		except:
+			raise ValidationError('Invalid module code. Module code must be upper case')
+
+
+def attach_to_module_forms():
+	return [AttachToModuleIndividualForm(),\
+		    AttachToModuleFileUploadForm(),\
+		    AttachToModuleEntireCourseForm()]

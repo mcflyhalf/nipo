@@ -10,7 +10,9 @@ from werkzeug.urls import url_parse
 from nipo.db import schema
 from nipo.db.utils import get_student_list, get_module_list, get_course_list, add_entity, add_entities, celery_app
 # from nipo.task_mgr import celery_app 
-from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm, BulkAddForm
+from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm, BulkAddForm,\
+AttachToModuleIndividualForm, AttachToModuleFileUploadForm, AttachToModuleEntireCourseForm, form_endpoints, attach_to_module_forms,\
+add_entity_forms
 import random
 import time
 
@@ -32,16 +34,6 @@ UPLOAD_PATH = os.path.join(tempfile.gettempdir(), "nipo")
 @login_manager.user_loader
 def load_user(user_id):
     return session.query(schema.User).filter(schema.User.id==int(user_id)).one_or_none()
-
-def make_form_dict():
-	form = {}
-	form['course'] = AddCourseForm()
-	form['venue'] = AddVenueForm()
-	form['user'] = AddUserForm()
-	form['student'] = AddStudentForm()
-	form['module'] = AddModuleForm()
-	form['file_upload'] = BulkAddForm()
-	return form
 
 @app.route('/')
 @app.route('/index/')
@@ -139,12 +131,13 @@ def landing():
 			else:
 				student.status= "student-absent"
 
-		return render_template('staff_dashboard.html',dates=formatted_dates,students=students,modules=modules)
+		return render_template('staff_dashboard.html',\
+								dates=formatted_dates,students=students,modules=modules)
 
 	elif current_user.privilege == schema.PrivilegeLevel.admin.name:
 		tables = db.utils.get_tables_data(session)
-		form = make_form_dict()
-		return render_template('admin_dashboard.html', tables=tables, form=form)
+		return render_template('admin_dashboard/admin_dashboard.html',\
+								tables=tables, form=add_entity_forms(), attach_to_module_forms=attach_to_module_forms())
 
 @app.route('/logout')
 @login_required
@@ -332,8 +325,8 @@ def get_module_students():		#Not Yet implemented
 #Potentially change to /modify/entity to allow deleting through this route as well
 @app.route('/add/<entity_type>', methods=['POST'])
 def request_add_entity(entity_type):
-	all_forms = make_form_dict()
-	form = all_forms[entity_type.lower()]
+	all_add_entity_forms =add_entity_forms()
+	form = all_add_entity_forms[entity_type.lower()]
 	if form.validate_on_submit():
 		form_data = form.asDict()
 		form_data.pop('csrf_token')
@@ -349,8 +342,8 @@ def request_add_entity(entity_type):
 #Bulk add entities using a file
 @app.route('/fadd/<entity_type>', methods=['POST'])
 def request_bulk_add_entities_via_file(entity_type):
-	all_forms = make_form_dict()
-	form = all_forms['file_upload']
+	all_add_entity_forms =add_entity_forms()
+	form = all_add_entity_forms['file_upload']
 	if form.validate_on_submit():
 		uploaded_data = request.files[form.csv.name].read()
 		if not os.path.exists(UPLOAD_PATH):
@@ -372,6 +365,47 @@ def request_bulk_add_entities_via_file(entity_type):
 	return jsonify({'status':'FAILURE', 
 					'info':'Invalid file format'})
 
+@app.route(form_endpoints['attach_to_module_individual'],methods=['POST'])
+def request_attach_to_module_individual():
+	form = AttachToModuleIndividualForm()
+	if form.validate_on_submit():
+		# Offload to celery functinon
+		# Get form data
+
+		# Celery func
+
+		return jsonify(response)
+	return jsonify({'status': 'FAILURE', 
+					'info': 'Include Form.errors here'})
+
+@app.route(form_endpoints['attach_to_module_file_upload'],methods=['POST'])
+def request_attach_to_module_file_upload():
+	form = AttachToModuleFileUploadForm()
+	if form.validate_on_submit():
+		# Offload to celery functinon
+		# Get form data
+
+		# Celery func
+
+		return jsonify(response)
+	return jsonify({'status': 'FAILURE', 
+					'info': 'Include Form.errors here'})
+
+@app.route(form_endpoints['attach_to_module_entire_course'],methods=['POST'])
+def request_attach_to_module_entire_course():
+	form = AttachToModuleEntireCourseForm()
+	if form.validate_on_submit():
+		# Offload to celery functinon
+		# Get form data
+
+		# Celery func
+
+		return jsonify(response)
+	return jsonify({'status': 'FAILURE', 
+					'info': 'Include Form.errors here'})
+
+
+
 #Does this require login??
 @app.route('/status/<task_id>')
 def get_task_status(task_id):
@@ -386,4 +420,4 @@ def get_task_status(task_id):
 
 # @app.route('/debug', methods = ['GET','POST'])
 # def get_debugger():
-# 	raise
+# 	raise 
