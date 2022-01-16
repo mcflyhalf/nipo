@@ -116,8 +116,8 @@ production_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/
 	port = os.environ['POSTGRES_PORT'],
 	dbname = os.environ['POSTGRES_NIPO_DBNAME']))
 
-Session = sessionmaker(bind=production_engine)
-production_session = Session()
+ProductionSession = sessionmaker(bind=production_engine)
+production_session = ProductionSession()
 
 test_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbname}'.format(\
 	dbuser = os.environ['POSTGRES_USER'] ,
@@ -129,8 +129,10 @@ test_engine = create_engine('postgresql://{dbuser}:{passwd}@{host}:{port}/{dbnam
 
 TestSession = sessionmaker(bind=test_engine)
 test_session = TestSession()
-if os.environ['FLASK_ENV'] == 'production':		
+if os.environ['FLASK_ENV'] == 'production':
+	Session = ProductionSession	
 	session = production_session
 else:
-	session = test_session		 
+	Session = TestSession 
+	session = test_session
 
