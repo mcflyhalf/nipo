@@ -1,7 +1,7 @@
 import pandas
 import os
 from celery.exceptions import Ignore
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound, MultipleResultsFound
 from nipo.db.schema import User, Venue, Course, Student, Module
 from nipo.db import schema, get_tables_metadata
 from nipo.task_mgr import get_celery_app
@@ -201,6 +201,41 @@ def add_entities(self, entity_type, filepath):
 			
 	#TODO: Convert to log
 	print('entities added by celery worker')
+
+	
+@celery_app.task(bind=True, throws=(ValueError, MultipleResultsFound, NoResultFound))
+def attach_individual(self, designation, modulecode, emailOrId):
+	'''
+	attaches a single student or member of staff to a module
+	:param designation : staff or student
+	:param modulecode : module cde for the module where stff/student is to be attached 
+	:param emailOrId : email address (for staff) Or Id (for student). Must match the designation 
+	'''
+	with Session() as session:
+		with session.begin():
+			module = session.query(Module).filter(Module.code==modulecode.upper()).one()
+
+			try:
+					# Attach the individual to the module then commit
+					if designation.lower() == 'staff':
+						staff_user = session.query(User).filter(User.email==emailOrId).one()
+						module.addStaff(staff_user)
+						desig_id = 'email'
+					elif designation.lower() == 'student':
+						stud_user = session.query(Student).filter(Student.id==emailOrId).one()
+						module.addStudent(stud_user)
+						desig_id = 'id'
+					else:
+						raise ValueError("Invalid designation. Designation must be 'student' or 'staff'")
+			except MultipleResultsFound as e:
+				raise e("Non-unique staff email {} in use. Contact admin immediately!".format(emailOrId))
+
+			except NoResultFound as e:
+				raise e("Invalid {} {}:\t{}".format(designation, design_id, emailOrId))
+
+
+
+
 
 @celery_app.task(ignore_result=True)
 def remove_file(filepath):

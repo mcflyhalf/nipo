@@ -10,19 +10,19 @@
 			<div class="tabs is-toggle is-fullwidth">
 				<ul>
 				    <li class="is-active">
-				      <a id= "attach-to-module-form-tab" class="form-fill-tab attach-to-module-tab">
+				      <a id= "attach-to-module-form-tab" class="individual-attach-tab attach-to-module-tab">
 				        <span class="icon is-small"><i class="fas fa-align-center" aria-hidden="true"></i></span>
 				        <span>Form fill</span>
 				      </a>
 				    </li>
 				    <li>
-				      <a id="attach-to-module-file-upload-tab" class="file-upload-tab attach-to-module-tab">
+				      <a id="attach-to-module-file-upload-tab" class="file-attach-tab attach-to-module-tab">
 				        <span class="icon is-small"><i class="fas fa-upload" aria-hidden="true"></i></span>
 				        <span>File upload</span>
 				      </a>
 				    </li>
 				    <li>
-				      <a id="attach-to-module-entire-course-tab" class="course-attach-tab attach-to-module-tab">
+				      <a id="attach-to-module-entire-course-tab" class="entire-course-attach-tab attach-to-module-tab">
 				        <span class="icon is-small"><i class="fas fa-upload" aria-hidden="true"></i></span>
 				        <span>Attach entire course</span>
 				      </a>
@@ -30,7 +30,7 @@
 		  		</ul>
 			</div>
 			{%for form in attach_to_module_forms%}
-			<form id= "{{form.form_id}}" action="{{form.action}}" method="post" {%if 'individual not in form.form_name'%}class="hidden" {%endif%} novalidate>
+			<form id= "{{form.id_text}}" action="{{form.action}}" method="post" class = "attach-to-module-form {%if 'individual' not in form.form_name%} hidden {%endif%}" novalidate>
 			{{ form.hidden_tag() }}
 			{%for field in form%}
 			{%if field != form._fields['csrf_token']%}

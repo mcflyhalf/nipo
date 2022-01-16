@@ -8,7 +8,8 @@ from flask import Flask, flash, request, render_template, jsonify, redirect, url
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from nipo.db import schema
-from nipo.db.utils import get_student_list, get_module_list, get_course_list, add_entity, add_entities, celery_app
+from nipo.db.utils import get_student_list, get_module_list, get_course_list, add_entity, add_entities,\
+celery_app, attach_individual
 # from nipo.task_mgr import celery_app 
 from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm, BulkAddForm,\
 AttachToModuleIndividualForm, AttachToModuleFileUploadForm, AttachToModuleEntireCourseForm, form_endpoints, attach_to_module_forms,\
@@ -187,7 +188,7 @@ def login():
 
 #The following registration flow has several steps
 #But makes the most sense for an academic institution
-#Will only be implemented if some academic institution is interested
+#Will only be corrected if some academic institution is interested
 #Only an admin should register students. 
 #Current implementation idea, admin registers email via admin landing
 #(creates a passwordless account that cannot login)
@@ -386,12 +387,18 @@ def request_attach_to_module_individual():
 	if form.validate_on_submit():
 		# Offload to celery functinon
 		# Get form data
+		designation = form.designation.data.lower()
+		modulecode = form.modulecode.data.upper()
+		emailOrId = form.emailOrId.data.lower()
 
 		# Celery func
-
+		task_info = attach_individual.delay(designation,modulecode,emailOrId)
+		response = {}
+		response['request-id']= task_info.id
+		response['status']= task_info.status
 		return jsonify(response)
 	return jsonify({'status': 'FAILURE', 
-					'info': 'Include Form.errors here'})
+					'info': form.errors})
 
 @app.route(form_endpoints['attach_to_module_file_upload'],methods=['POST'])
 def request_attach_to_module_file_upload():

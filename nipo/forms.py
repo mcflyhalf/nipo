@@ -2,6 +2,7 @@ import re
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField, FileField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, Regexp
+from sqlalchemy.exc import NoResultFound
 from nipo.db import schema
 from nipo.db.utils import get_course_list
 from nipo.db.schema import PrivilegeLevel
@@ -43,12 +44,12 @@ class RegistrationForm(FlaskForm):
 	submit = SubmitField('Register')
 
 	def validate_username(self, username):
-		user = session.query(schema.User).filter_by(username==username.data.lower()).first()
+		user = session.query(schema.User).filter(schema.User.username==username.data.lower()).first()
 		if user is not None:
 			raise ValidationError('Invalid username. Please use a different username.')
 
 	def validate_email(self, email):
-		user = session.query(schema.User).filter_by(email==email.data.lower()).first()
+		user = session.query(schema.User).filter(schema.User.email==email.data.lower()).first()
 		if user is not None:
 			raise ValidationError('Invalid email address. Please use a different email address.')
 
@@ -111,11 +112,12 @@ def add_entity_forms():
 class AttachToModuleForm(FlaskForm):
 	@property
 	def id_text(self):
-		return self.name.replace('_','-')
+		return self.form_name.replace('_','-')
 
 
 class AttachToModuleIndividualForm(AttachToModuleForm):
-	form_name = "attach_to_module_individual"
+	form_name = "attach_to_module_individual_form"
+	action = form_endpoints['attach_to_module_individual']
 
 	modulecode = StringField('Module code')
 	designation =  SelectField(u'Staff or Student?', choices=[('Student', 'Student'), ('Staff', 'Staff')])
@@ -123,24 +125,47 @@ class AttachToModuleIndividualForm(AttachToModuleForm):
 
 	def validate_modulecode(self, code):
 		try:
-			mod = session.query(schema.Module).filter_by(code==modulecode.data.upper()).one()
+			# Modulecode Must be upppercase
+			mod = session.query(schema.Module).filter(schema.Module.code==code.data.upper()).one()
+		except NoResultFound:
+			raise ValidationError('Invalid module code {}. Module code must be upper case'
+					.format(code.data.upper()))
 		except:
-			raise ValidationError('Invalid module code. Module code must be upper case')
+			raise ValidationError("OtherError")
+
+	def validate_emailOrId(self, emailOrId):
+		id_desig_mismatch_notice= \
+		'Student ID must be integer, staff email must be valid email address\
+		Invalid email or ID for: \t{}'.\
+		format(emailOrId.data)
+
+		if self.designation.data.lower() == 'student':
+			try:
+				int(emailOrId.data)
+			except ValueError:
+				raise ValidationError(id_desig_mismatch_notice)
+
+		if self.designation.data.lower() == 'staff':
+			email_validator = Email(message = id_desig_mismatch_notice)
+			email_validator(self, self.designation)
 	
 
 class AttachToModuleFileUploadForm(AttachToModuleForm, BulkAddForm):
-	form_name = "attach_to_module_file_upload"
+	form_name = "attach_to_module_file_upload_form"
+
+	action = form_endpoints['attach_to_module_file_upload']
 
 
 class AttachToModuleEntireCourseForm(AttachToModuleForm):
-	form_name = "attach_to_module_entire_course"
+	form_name = "attach_to_module_entire_course_form"
 
 	modulecode = StringField('Module code')
 	course_uid = SelectField('Course uid', choices=[(course.uid, course.name) for course in courses])
+	action = form_endpoints['attach_to_module_entire_course']
 
 	def validate_modulecode(self, code):
 		try:
-			mod = session.query(schema.Module).filter_by(code==modulecode.data.upper()).one()
+			mod = session.query(schema.Module).filter(code==modulecode.data.upper()).one()
 		except:
 			raise ValidationError('Invalid module code. Module code must be upper case')
 

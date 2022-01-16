@@ -50,6 +50,7 @@ class UserModule(Base):
 class Module(Base):
 	__tablename__ = "module"
 
+	# Constrain module code to contain only upper case letters (it may also contain digits)
 	code = Column(String, primary_key=True)
 	name = Column(String, nullable=False)
 	venue_code = Column(String, ForeignKey("venue.code"))	#Relate this to the venue pri key see https://overiq.com/sqlalchemy-101/defining-schema-in-sqlalchemy-orm/

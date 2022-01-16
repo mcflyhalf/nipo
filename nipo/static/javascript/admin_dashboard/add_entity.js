@@ -85,14 +85,18 @@ function hide_form(formid) {
 	form.classList.add("hidden");
 }
 
-function show_form_hide_other(form_to_show_id, form_to_hide_id) {
-	hide_form(form_to_hide_id);
+function show_form_hide_others(form_to_show_id, forms_to_hide_ids) {
+	for (id of forms_to_hide_ids){ 
+		hide_form(id);
+	}
 	show_form(form_to_show_id);
 }
 
-function activate_tab_deactivate_other(tab_to_activate, tab_to_deactivate) {
+function activate_tab_deactivate_others(tab_to_activate, tabs_to_deactivate) {
+	for (tab of tabs_to_deactivate){
+		tab.classList.remove("is-active");		
+	}
 	tab_to_activate.classList.add("is-active");
-	tab_to_deactivate.classList.remove("is-active");
 }
 
 // --------------------add_entity.main()-------------------
@@ -151,10 +155,10 @@ for (modal of add_entity_modals){
 	file_upload_form_id = tablename + "-file-upload"
 	form_upload_form_id = tablename + "-record-upload"
 
-	show_file_upload = show_form_hide_other.bind(null, file_upload_form_id, form_upload_form_id);
-	show_form_upload = show_form_hide_other.bind(null, form_upload_form_id, file_upload_form_id);
-	activate_file_upload = activate_tab_deactivate_other.bind(null, file_upload_activator, form_upload_activator);
-	activate_form_upload = activate_tab_deactivate_other.bind(null, form_upload_activator, file_upload_activator);
+	show_file_upload = show_form_hide_others.bind(null, file_upload_form_id, [form_upload_form_id]);
+	show_form_upload = show_form_hide_others.bind(null, form_upload_form_id, [file_upload_form_id]);
+	activate_file_upload = activate_tab_deactivate_others.bind(null, file_upload_activator, [form_upload_activator]);
+	activate_form_upload = activate_tab_deactivate_others.bind(null, form_upload_activator, [file_upload_activator]);
 
 	file_upload_tab.addEventListener("click", show_file_upload);
 	file_upload_tab.addEventListener("click", activate_file_upload);
@@ -165,7 +169,38 @@ for (modal of add_entity_modals){
 
 
 // ----------------attach_to_module.js code----------------------------------
+function attachToModuleFormSubmit(){
+	// submit the appropriate(visible) attach to module form
+	atm_forms = document.getElementsByClassName("attach-to-module-form")
+	form = 	Array.from(atm_forms)
+  				 .filter(form => !form.classList.contains("hidden"))
 
+  	form = form[0]
+
+	if (form.id.includes("file-upload")){
+		const headers = {
+		'Content-Type': 'multipart/form-data'
+		}
+	} else {
+		//Single record upload
+		const headers = {
+		'Content-Type': 'application/x-www-form-urlencoded'
+		}
+	}
+	form.submit();
+	// const formdata = new FormData(modal_form);
+
+	// const options = {
+	// 	method: 'POST',
+	// 	body: formdata,
+	// };
+	// url = form.action;
+
+	// fetch(url,options)
+	// 	.then(res => res.json())
+	// 	.then(res => checkStatus.bind(null,res["request-id"]))
+	// 	.then(boundFunc => doLater(boundFunc, 5000));
+}
 
 // -----------------attach_to_module.main()-----------------------------
 
@@ -180,6 +215,50 @@ showM = showModal.bind(null, att_modal_id);
 // bind show modal event listener to all attacher buttons
 for (attacher of attachers){
 	attacher.addEventListener("click",showM);
+}
+
+attacher_modals = Array.from(modals)
+  				   .filter(modal => modal.classList.contains("attacher-modal"))
+
+for (modal of attacher_modals){
+	
+
+	let submit_btn = modal.getElementsByClassName("submit-form");
+
+	for (btn of submit_btn){
+		btn.addEventListener("click", attachToModuleFormSubmit);
+	}
+
+	tab_buttons = modal.getElementsByClassName("attach-to-module-tab");
+
+	file_upload_tab = modal.getElementsByClassName("file-attach-tab");
+	form_upload_tab = modal.getElementsByClassName("individual-attach-tab");
+	entire_course_attach_tab = modal.getElementsByClassName("entire-course-attach-tab");
+	file_upload_tab = file_upload_tab[0];
+	form_upload_tab = form_upload_tab[0];
+	entire_course_attach_tab = entire_course_attach_tab[0];
+	file_upload_activator = file_upload_tab.parentElement;
+	form_upload_activator = form_upload_tab.parentElement;
+	entire_course_attach_activator = entire_course_attach_tab.parentElement;
+
+	file_upload_form_id = "attach-to-module-file-upload-form"
+	form_upload_form_id = "attach-to-module-individual-form"
+	entire_course_attach_form_id = "attach-to-module-entire-course-form"
+
+	show_file_upload = show_form_hide_others.bind(null, file_upload_form_id, [entire_course_attach_form_id,form_upload_form_id]);
+	show_form_upload = show_form_hide_others.bind(null, form_upload_form_id, [entire_course_attach_form_id,file_upload_form_id]);
+	show_entire_course_attach = show_form_hide_others.bind(null, entire_course_attach_form_id, [form_upload_form_id, file_upload_form_id]);
+	activate_file_upload = activate_tab_deactivate_others.bind(null, file_upload_activator, [entire_course_attach_activator, form_upload_activator]);
+	activate_form_upload = activate_tab_deactivate_others.bind(null, form_upload_activator, [entire_course_attach_activator, file_upload_activator]);
+	activate_entire_course_attach = activate_tab_deactivate_others.bind(null, entire_course_attach_activator, [form_upload_activator, file_upload_activator]);
+
+	file_upload_tab.addEventListener("click", show_file_upload);
+	file_upload_tab.addEventListener("click", activate_file_upload);
+	form_upload_tab.addEventListener("click", show_form_upload);
+	form_upload_tab.addEventListener("click", activate_form_upload);
+	entire_course_attach_tab.addEventListener("click", show_entire_course_attach);
+	entire_course_attach_tab.addEventListener("click", activate_entire_course_attach);
+
 }
 
 
