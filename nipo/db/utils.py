@@ -221,11 +221,11 @@ def attach_individual(self, designation, modulecode, emailOrId):
 				# Attach the individual to the module then commit
 				if designation.lower() == 'staff':
 					staff_user = session.query(User).filter(User.email==emailOrId).one()
-					module.addStaff(staff_user)
+					module.attachStaff(staff_user)
 					desig_id = 'email'
 				elif designation.lower() == 'student':
 					stud_user = session.query(Student).filter(Student.id==emailOrId).one()
-					module.addStudent(stud_user)
+					module.attachStudent(stud_user)
 					desig_id = 'id'
 				else:
 					raise ValueError("Invalid designation. Designation must be 'student' or 'staff'")
@@ -268,10 +268,10 @@ def attach_to_module_from_file_upload(self, filepath):
 
 						if designation.lower() == 'staff':
 							staff_user = session.query(User).filter(User.email==emailOrId).one()
-							module.addStaff(staff_user)
+							module.attachStaff(staff_user)
 						elif designation.lower() == 'student':
 							stud_user = session.query(Student).filter(Student.id==emailOrId).one()
-							module.addStudent(stud_user)
+							module.attachStudent(stud_user)
 						else:
 							raise ValueError("Invalid designation. Designation must be 'student' or 'staff'")
 			except:
@@ -291,7 +291,7 @@ def attach_to_module_entire_course(self, modulecode, courseuid):
 		with session.begin():
 			module = session.query(Module).filter(Module.code==modulecode).one()
 			students = session.query(Student).filter(Student.course_uid==courseuid).all()
-			module.addStudent(students)
+			module.attachStudent(students)
 
 	print("Students from course >>{}<< attached to module>>{}<<".format(courseuid, modulecode))
 

@@ -35,26 +35,26 @@ class TestModule:
 	2. Adding staff
 	'''
 
-	def test_add_student_to_module(self, testmod, new_test_stud):
+	def test_attach_student_to_module(self, testmod, new_test_stud):
 		module = testmod.module
 		assert new_test_stud not in module.students
-		module.addStudent(new_test_stud)
+		module.attachStudent(new_test_stud)
 		assert new_test_stud in module.students
 
-	def test_add_staff_to_module(self, testmod, new_test_staff):
+	def test_attach_staff_to_module(self, testmod, new_test_staff):
 		module = testmod.module
 		assert new_test_staff not in module.staff
-		module.addStaff(new_test_staff)
+		module.attachStaff(new_test_staff)
 		assert new_test_staff in module.staff
 
-	def test_add_student_as_staff_to_module(self, testmod, new_test_stud):
+	def test_attach_student_as_staff_to_module(self, testmod, new_test_stud):
 		module = testmod.module
 		notstaff = new_test_stud
 		with pytest.raises(TypeError):
-			module.addStaff(notstaff)
+			module.attachStaff(notstaff)
 
-	def test_add_staff_as_student_to_module(self, testmod, new_test_staff):	
+	def test_attach_staff_as_student_to_module(self, testmod, new_test_staff):	
 		module = testmod.module
 		notstudent = new_test_staff
 		with pytest.raises(TypeError):
-			module.addStudent(notstudent)
+			module.attachStudent(notstudent)
