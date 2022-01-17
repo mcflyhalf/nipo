@@ -1,5 +1,6 @@
 import pandas
 import os
+import csv
 from celery.exceptions import Ignore
 from sqlalchemy.exc import IntegrityError, NoResultFound, MultipleResultsFound
 from nipo.db.schema import User, Venue, Course, Student, Module
@@ -8,6 +9,7 @@ from nipo.task_mgr import get_celery_app
 from nipo.conf import Session
 
 celery_app= get_celery_app()
+UPLOAD_FILE_LIFETIME = 5*60*60 #5 Hours
 
 def get_course_list(session, max=10):
 	courses = session.query(Course).\
@@ -146,7 +148,7 @@ def add_entities(self, entity_type, filepath):
 	tablename = entity_type.lower()
 	entities_df = pandas.read_csv(filepath)
 	#Mark file for deletion in 24 hours
-	remove_file.apply_async((filepath,), countdown=24*60*60)
+	remove_file.apply_async((filepath,), countdown=UPLOAD_FILE_LIFETIME)
 	col_rename_mapper = {}
 
 	for column in entities_df.columns:
@@ -216,17 +218,17 @@ def attach_individual(self, designation, modulecode, emailOrId):
 			module = session.query(Module).filter(Module.code==modulecode.upper()).one()
 
 			try:
-					# Attach the individual to the module then commit
-					if designation.lower() == 'staff':
-						staff_user = session.query(User).filter(User.email==emailOrId).one()
-						module.addStaff(staff_user)
-						desig_id = 'email'
-					elif designation.lower() == 'student':
-						stud_user = session.query(Student).filter(Student.id==emailOrId).one()
-						module.addStudent(stud_user)
-						desig_id = 'id'
-					else:
-						raise ValueError("Invalid designation. Designation must be 'student' or 'staff'")
+				# Attach the individual to the module then commit
+				if designation.lower() == 'staff':
+					staff_user = session.query(User).filter(User.email==emailOrId).one()
+					module.addStaff(staff_user)
+					desig_id = 'email'
+				elif designation.lower() == 'student':
+					stud_user = session.query(Student).filter(Student.id==emailOrId).one()
+					module.addStudent(stud_user)
+					desig_id = 'id'
+				else:
+					raise ValueError("Invalid designation. Designation must be 'student' or 'staff'")
 			except MultipleResultsFound as e:
 				raise e("Non-unique staff email {} in use. Contact admin immediately!".format(emailOrId))
 
@@ -234,8 +236,49 @@ def attach_individual(self, designation, modulecode, emailOrId):
 				raise e("Invalid {} {}:\t{}".format(designation, design_id, emailOrId))
 
 
+	
+@celery_app.task(bind=True, throws=(ValueError, MultipleResultsFound, NoResultFound))
+def attach_to_module_from_file_upload(self, filepath):
+	'''
+	attach several students and/or members of staff to a module as designated by a file
 
+	file should be csv with each row in the format:
+	deignation, modulecode, emailOrId
+	where 	designation = 'student' or 'staff'
+			modulecode = modulecode in question e.g. 'ETI002'
+			emailOrId = an integer student ID for a student e.g. 23 or an email address for staff member e.g. 'ciku@mail.com' 
+	:param filepath : path to the csv file containing the info 
+	'''
+	remove_file.apply_async((filepath,), countdown=UPLOAD_FILE_LIFETIME)
+	with open(filepath) as csvfile:
+		records = csv.DictReader(csvfile,fieldnames=['designation','modulecode','emailorid'])
+		# Convert to iterator in order to skip first record (header row)
+		records = iter(records)
+		next(records)
+		with Session() as session:
+			try:
+				with session.begin():
+					for record in records:
+						designation = record['designation']
+						modulecode = record['modulecode']
+						emailOrId = record['emailorid']
 
+						#If exception comes from this next line, nonexistent module code may be the issue
+						module = session.query(Module).filter(Module.code==modulecode.upper()).one()
+
+						if designation.lower() == 'staff':
+							staff_user = session.query(User).filter(User.email==emailOrId).one()
+							module.addStaff(staff_user)
+						elif designation.lower() == 'student':
+							stud_user = session.query(Student).filter(Student.id==emailOrId).one()
+							module.addStudent(stud_user)
+						else:
+							raise ValueError("Invalid designation. Designation must be 'student' or 'staff'")
+			except:
+				# Reserved for future use
+				raise
+	print('All students/staff attached')
+			
 
 @celery_app.task(ignore_result=True)
 def remove_file(filepath):

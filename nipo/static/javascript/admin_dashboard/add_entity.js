@@ -187,19 +187,19 @@ function attachToModuleFormSubmit(){
 		'Content-Type': 'application/x-www-form-urlencoded'
 		}
 	}
-	form.submit();
-	// const formdata = new FormData(modal_form);
+	// form.submit();
+	const formdata = new FormData(form);
 
-	// const options = {
-	// 	method: 'POST',
-	// 	body: formdata,
-	// };
-	// url = form.action;
+	const options = {
+		method: 'POST',
+		body: formdata,
+	};
+	url = form.action;
 
-	// fetch(url,options)
-	// 	.then(res => res.json())
-	// 	.then(res => checkStatus.bind(null,res["request-id"]))
-	// 	.then(boundFunc => doLater(boundFunc, 5000));
+	fetch(url,options)
+		.then(res => res.json())
+		.then(res => checkStatus.bind(null,res["request-id"]))
+		.then(boundFunc => doLater(boundFunc, 5000));
 }
 
 // -----------------attach_to_module.main()-----------------------------

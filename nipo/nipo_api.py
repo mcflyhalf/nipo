@@ -9,7 +9,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from werkzeug.urls import url_parse
 from nipo.db import schema
 from nipo.db.utils import get_student_list, get_module_list, get_course_list, add_entity, add_entities,\
-celery_app, attach_individual
+celery_app, attach_individual, attach_to_module_from_file_upload
 # from nipo.task_mgr import celery_app 
 from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm, BulkAddForm,\
 AttachToModuleIndividualForm, AttachToModuleFileUploadForm, AttachToModuleEntireCourseForm, form_endpoints, attach_to_module_forms,\
@@ -50,6 +50,11 @@ def make_form_dict():
 	form['file_upload'] = BulkAddForm()
 	return form
 
+def capture_upload_file(request, infile_name, upload_file):
+	uploaded_data = request.files[infile_name].read()
+	
+	with open(upload_file.name, 'w') as f:
+		f.write(uploaded_data.decode('utf-8'))
 
 @app.route('/')
 @app.route('/index/')
@@ -406,12 +411,23 @@ def request_attach_to_module_file_upload():
 	if form.validate_on_submit():
 		# Offload to celery functinon
 		# Get form data
-
-		# Celery func
-
+		uploaded_data = request.files[form.csv.name].read()
+		if not os.path.exists(UPLOAD_PATH):
+			os.makedirs(UPLOAD_PATH)
+		tmp_file = tempfile.NamedTemporaryFile(
+									suffix='.csv',
+									prefix='nipo_fupload_',
+									dir=UPLOAD_PATH,
+									delete=False)
+		with open(tmp_file.name, 'w') as f:
+			f.write(uploaded_data.decode('utf-8'))
+		task_info = attach_to_module_from_file_upload.delay(tmp_file.name)
+		response = {}
+		response['request-id']= task_info.id
+		response['status']= task_info.status
 		return jsonify(response)
 	return jsonify({'status': 'FAILURE', 
-					'info': 'Include Form.errors here'})
+					'info': form.errors})
 
 @app.route(form_endpoints['attach_to_module_entire_course'],methods=['POST'])
 def request_attach_to_module_entire_course():
@@ -419,7 +435,7 @@ def request_attach_to_module_entire_course():
 	if form.validate_on_submit():
 		# Offload to celery functinon
 		# Get form data
-
+		
 		# Celery func
 
 		return jsonify(response)
