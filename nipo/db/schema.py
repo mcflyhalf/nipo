@@ -50,6 +50,7 @@ class UserModule(Base):
 class Module(Base):
 	__tablename__ = "module"
 
+	# Constrain module code to contain only upper case letters (it may also contain digits)
 	code = Column(String, primary_key=True)
 	name = Column(String, nullable=False)
 	venue_code = Column(String, ForeignKey("venue.code"))	#Relate this to the venue pri key see https://overiq.com/sqlalchemy-101/defining-schema-in-sqlalchemy-orm/
@@ -61,7 +62,7 @@ class Module(Base):
 	students = relationship("Student", secondary=StudentModule.__tablename__, backref="modules")
 	staff = relationship("User", secondary=UserModule.__tablename__, backref="modules")
 
-	def _addStaffObj(self, staffUserObj):
+	def _attachStaffObj(self, staffUserObj):
 		'''
 		Fxn checks for the type of the user before adding them as staff
 		'''
@@ -75,7 +76,7 @@ class Module(Base):
 
 		self.staff.append(staffUserObj)
 
-	def _addStudentObj(self, studentObj):
+	def _attachStudentObj(self, studentObj):
 		'''
 		Fxn checks to confirm object is a student before adding them to module
 		'''
@@ -86,7 +87,7 @@ class Module(Base):
 		self.students.append(studentObj)
 
 
-	def addStaff(self, staffUser):
+	def attachStaff(self, staffUser):
 		'''
 		Attach staff member(s) to a module
 		:param staffUser: User object (or list of User objects) containing staff members
@@ -97,11 +98,11 @@ class Module(Base):
 			#Iterate over the list instead of using list.extend in order to check each object in turn for type correctness
 			assert len(staffUser) > 0
 			for su in staffUser:
-				self._addStaffObj(su)
+				self._attachStaffObj(su)
 		else:
-			self._addStaffObj(staffUser)
+			self._attachStaffObj(staffUser)
 
-	def addStudent(self, student):
+	def attachStudent(self, student):
 		'''
 		Attach student(s) to a module
 		:param student: Student object (or list of Student objects) containing students
@@ -112,9 +113,9 @@ class Module(Base):
 			#Iterate over the list instead of using list.extend in order to check each object in turn for type correctness
 			assert len(student) > 0
 			for stud in student:
-				self._addStudentObj(stud)
+				self._attachStudentObj(stud)
 		else:
-			self._addStudentObj(student)
+			self._attachStudentObj(student)
 
 	def __repr__(self):
 		return "Module {} held at {}".format(self.name, self.venue_code)
@@ -205,6 +206,10 @@ class User(Base):
 	password_hash = Column(String, nullable=False)
 
 	annonymous = False
+
+	def __repr__(self):
+		return "Nipo user=> username: >>{}<<, Name: >>{}<<, email >>{}<<, user type >>{}<< ".\
+		format(self.username, self.name, self.email, self.privilege)
 
 # See comment at https://realpython.com/using-flask-login-for-user-management-with-flask/ about login and logout
 	def is_authenticated(self):

@@ -38,7 +38,7 @@ class TestModuleAttendance:
 
 	def test_CreateAttendance(self,test_stud_id,testmod):
 		test_student = test_session.query(Student).filter(Student.id==test_stud_id).one()
-		testmod.module.addStudent(test_student)
+		testmod.module.attachStudent(test_student)
 		test_attendance = testmod.createAttendance(force=True)
 		assert type(test_attendance) is pd.DataFrame
 		assert 'Student_ID' in test_attendance.columns

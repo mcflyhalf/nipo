@@ -1,0 +1,23 @@
+/*menu-bar => menu-toplevel
+mega-menu => sub-menu*/
+
+.sub-menu {
+	flex-direction: column;
+	display:  none;
+}
+
+li.menu-item:hover .sub-menu {
+	display: inherit;
+}
+
+.sub-menu > li {
+	border-bottom-color: white;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+}
+
+/*Dont know how to also apply this to the child a tag during hover*/
+.sub-menu > li:hover {
+	background-color: ivory;
+	color:  midnightblue;
+}

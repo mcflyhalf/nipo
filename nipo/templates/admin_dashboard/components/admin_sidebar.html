@@ -1,0 +1,47 @@
+<style>
+    @import url("{{url_for('static', filename='css/admin_dashboard_styles.css') }}");
+</style>
+<ul class ="side-panel-menu admin-db-side-panel menu-toplevel menu wrapper-f">
+	<li class="menu-item">
+		<a href="#"><i class="fas fa-graduation-cap"></i>
+					Students</a>
+	</li>
+	<li class="menu-item">
+		<a href="#"><i class="fas fa-book-open"></i>
+					Modules</a>
+		<ul class="sub-menu">
+			<li><a class="attacher" href="#">
+				Attach student(s) to module(s) 
+			</a></li>
+			<li><a class="attacher" href="#">
+				Attach staff to module(s) 
+			</a></li>
+			<li><a href="#">
+				Download/view module student list 
+			</a></li>
+			<li><a href="#">
+				Download/view module staff list 
+			</a></li>
+		</ul>
+	</li>
+	<li class="menu-item">
+		<a href="#"><i class="user-image fas fa-user-cog"></i>
+					Users</a>
+	</li>
+	<li class="menu-item">
+		<a href="#"><i class="user-image fas fa-home"></i>
+					Venues</a>
+	</li>
+	<li class="menu-item">
+		<a href="#"><i class="user-image fas fa-university"></i>
+					Courses</a>
+		<ul class="sub-menu">
+			<li><a class="attacher" href="#">
+				Attach student(s) to course 
+			</a></li>
+			<li><a href="#">
+				Download/view course student list 
+			</a></li>
+		</ul>
+	</li>
+</ul>
