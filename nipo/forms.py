@@ -164,9 +164,8 @@ class AttachToModuleEntireCourseForm(AttachToModuleForm):
 	action = form_endpoints['attach_to_module_entire_course']
 
 	def validate_modulecode(self, code):
-		try:
-			mod = session.query(schema.Module).filter(code==modulecode.data.upper()).one()
-		except:
+		mod = session.query(schema.Module).filter(schema.Module.code==code.data.upper()).one_or_none()
+		if mod is None:
 			raise ValidationError('Invalid module code. Module code must be upper case')
 
 

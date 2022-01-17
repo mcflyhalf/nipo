@@ -210,12 +210,12 @@ def attach_individual(self, designation, modulecode, emailOrId):
 	'''
 	attaches a single student or member of staff to a module
 	:param designation : staff or student
-	:param modulecode : module cde for the module where stff/student is to be attached 
+	:param modulecode : module code for the module where stff/student is to be attached 
 	:param emailOrId : email address (for staff) Or Id (for student). Must match the designation 
 	'''
 	with Session() as session:
 		with session.begin():
-			module = session.query(Module).filter(Module.code==modulecode.upper()).one()
+			module = session.query(Module).filter(Module.code==modulecode).one()
 
 			try:
 				# Attach the individual to the module then commit
@@ -264,7 +264,7 @@ def attach_to_module_from_file_upload(self, filepath):
 						emailOrId = record['emailorid']
 
 						#If exception comes from this next line, nonexistent module code may be the issue
-						module = session.query(Module).filter(Module.code==modulecode.upper()).one()
+						module = session.query(Module).filter(Module.code==modulecode).one()
 
 						if designation.lower() == 'staff':
 							staff_user = session.query(User).filter(User.email==emailOrId).one()
@@ -279,6 +279,24 @@ def attach_to_module_from_file_upload(self, filepath):
 				raise
 	print('All students/staff attached')
 			
+
+@celery_app.task(bind=True, throws=(ValueError, NoResultFound))
+def attach_to_module_entire_course(self, modulecode, courseuid):
+	'''
+	attaches all students registered to a course to a module
+	:param modulecode : module code for the module where course students are to be attached 
+	:param courseuid : uid of course whose students are to be attached 
+	'''
+	with Session() as session:
+		with session.begin():
+			module = session.query(Module).filter(Module.code==modulecode).one()
+			students = session.query(Student).filter(Student.course_uid==courseuid).all()
+			module.addStudent(students)
+
+	print("Students from course >>{}<< attached to module>>{}<<".format(courseuid, modulecode))
+
+
+
 
 @celery_app.task(ignore_result=True)
 def remove_file(filepath):

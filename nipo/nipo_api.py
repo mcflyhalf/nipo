@@ -9,7 +9,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from werkzeug.urls import url_parse
 from nipo.db import schema
 from nipo.db.utils import get_student_list, get_module_list, get_course_list, add_entity, add_entities,\
-celery_app, attach_individual, attach_to_module_from_file_upload
+celery_app, attach_individual, attach_to_module_from_file_upload, attach_to_module_entire_course
 # from nipo.task_mgr import celery_app 
 from nipo.forms import LoginForm, RegistrationForm, AddCourseForm, AddVenueForm, AddUserForm, AddStudentForm, AddModuleForm, BulkAddForm,\
 AttachToModuleIndividualForm, AttachToModuleFileUploadForm, AttachToModuleEntireCourseForm, form_endpoints, attach_to_module_forms,\
@@ -435,12 +435,22 @@ def request_attach_to_module_entire_course():
 	if form.validate_on_submit():
 		# Offload to celery functinon
 		# Get form data
+		modulecode = form.modulecode.data.upper()
+		course_uid = form.course_uid.data.upper()
+
+		task_info = attach_to_module_entire_course.delay(modulecode, course_uid)
+
+		response = {}
+		response['request-id']= task_info.id
+		response['status']= task_info.status
+		return jsonify(response)
+
 		
 		# Celery func
 
 		return jsonify(response)
 	return jsonify({'status': 'FAILURE', 
-					'info': 'Include Form.errors here'})
+					'info': form.errors})
 
 
 

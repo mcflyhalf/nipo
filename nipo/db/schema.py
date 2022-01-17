@@ -207,6 +207,10 @@ class User(Base):
 
 	annonymous = False
 
+	def __repr__(self):
+		return "Nipo user=> username: >>{}<<, Name: >>{}<<, email >>{}<<, user type >>{}<< ".\
+		format(self.username, self.name, self.email, self.privilege)
+
 # See comment at https://realpython.com/using-flask-login-for-user-management-with-flask/ about login and logout
 	def is_authenticated(self):
 		return self.authenticated
