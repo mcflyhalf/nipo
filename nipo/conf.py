@@ -1,6 +1,7 @@
 import os
 import logging
 import configparser
+import tempfile
 from logging.handlers import RotatingFileHandler
 from nipo.db.schema import Base
 from nipo.db import get_tables_metadata
@@ -11,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 CONFIG_FILENAME = CONFIG_FILE_NAME
+UPLOAD_PATH = os.path.join(tempfile.gettempdir(), "nipo")
 
 def get_configs(profile = 'DEFAULT'):
 	
