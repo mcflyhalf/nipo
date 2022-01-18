@@ -13,6 +13,7 @@ from datetime import datetime
 from numpy import uintc
 import pandas as pd
 import pickle
+from sqlalchemy.exc import NoResultFound
 
 
 
@@ -145,6 +146,36 @@ class ModuleAttendance:
 			currentAttendance[sessiondate][currentAttendance.Student_ID == studentid] = 0
 
 		self.persistAttendance(currentAttendance)
+
+	# This function is completely untested
+	def addStudent(self, studentid, mark=0):
+		'''
+		Adds a student to the module's attendance record. 
+		If param mark is not exactly 1, student is marked absent for all session.
+		'''
+		try:
+			student = self.session.query(Student).filter(Student.id==studentid).one()
+		except NoResultFound:
+			raise ValueError("Invalid student id {}".format(studentid))
+
+		attendance_sheet = self.getAttendance()
+
+		if studentid in attendance_sheet['Student_ID'].tolist(): #Somehow without tolist, search doesnt work
+			#Student already has att record. However, they may be lacking actual data?? Possible? Resolve later
+			raise ValueError("Student with ID {} already present in attendance record".format(studentid))
+
+		if mark != 1:
+			mark = 0
+		att_dict={}
+		for col in attendance_sheet.columns:
+			if col == 'Student_ID':
+				att_dict[col] = int(studentid)
+			else:
+				att_dict[col] = mark
+
+		attendance_sheet.append(att_dict, ignore_index=True)
+		self.persistAttendance(attendance_sheet)
+
 
 	@property
 	def students(self):

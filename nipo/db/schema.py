@@ -85,6 +85,9 @@ class Module(Base):
 				Attempted to add object of type {}".format("Student", type(studentObj)))
 
 		self.students.append(studentObj)
+		# Add student to module attendance record
+		# Unable to figure out where to plce this code at the moment
+ 
 
 
 	def attachStaff(self, staffUser):

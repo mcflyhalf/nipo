@@ -58,3 +58,18 @@ class TestModule:
 		notstudent = new_test_staff
 		with pytest.raises(TypeError):
 			module.attachStudent(notstudent)
+
+
+	# This test is incomplete. Waiting for attachStudent implementation to include attachment to attendance record
+	def test_attached_student_has_attendance_record(self, testmod, new_test_stud):
+		assert new_test_stud not in testmod.students #check student isnt already in the module
+		#check module has an attendance record
+		#confirm this attendance record does not include this student
+
+		testmod.addStudent(new_test_stud.id)
+
+		#Check that after attachment, the attendance record does contain the student
+
+	def test_detached_student_has_no_attendance_record(self, testmod, new_test_stud):
+		pass
+
