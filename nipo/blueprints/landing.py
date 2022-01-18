@@ -1,10 +1,11 @@
 import datetime
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template, flash, url_for, redirect
 from flask_login import LoginManager, login_required, current_user
-from nipo import db
-from nipo.db import get_db_sessin
+from nipo import db, get_db_session
+from nipo.db import schema
+from nipo.forms import add_entity_forms, attach_to_module_forms
 from nipo.db.utils import get_student_list, get_module_list, get_course_list
-from nipo.attendance import ModuleAttendance
+from nipo.attendance import ModuleAttendance, StudentAttendance
 
 bp = Blueprint('landing', __name__, url_prefix='')
 
@@ -44,12 +45,12 @@ def landing():
 			if selectedModule not in current_user.modules:
 				# User not enrolled in this module
 				flash("Invalid module selection")
-				return redirect(url_for('landing'))
+				return redirect(url_for('landing.landing'))
 
 			dates += mod_attendance.dates
 			if len(dates) == 0:
 				flash("selected module has no registered class sessions")
-				return redirect(url_for('landing'))
+				return redirect(url_for('landing.landing'))
 			selectedDate = dates[0]
 
 		elif mod_code is not None and session_date is not None:
@@ -61,7 +62,7 @@ def landing():
 			if selectedModule not in current_user.modules or selectedDate not in dates:
 				# User not enrolled in this module or module has no session on this date
 				flash("Invalid module or date selection")
-				return redirect(url_for('landing'))
+				return redirect(url_for('landing.landing'))
 
 		else:
 			#Default scenario, fresh login

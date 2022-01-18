@@ -1,6 +1,10 @@
+import os
 import tempfile
-from flask import Blueprint, jsonify, request, redirect, url_for
-from nipo import attendance
+import datetime
+from flask import Blueprint, jsonify, request, redirect, url_for, redirect
+from flask_login import login_required, current_user
+from nipo import attendance, get_db_session
+from nipo.attendance import StudentAttendance
 from nipo.forms import add_entity_forms, AttachToModuleIndividualForm, AttachToModuleFileUploadForm,\
 AttachToModuleEntireCourseForm, form_endpoints
 from nipo.db.utils import add_entity, add_entities, celery_app, attach_individual,\
@@ -43,6 +47,7 @@ def get_user_details():
 @bp.route('/student', methods = ['POST'])
 def get_student_attendance():	#For all modules
 	studentID = request.form.get('studentID')
+	session = get_db_session()
 	student = attendance.StudentAttendance(studentID,session)
 	student_modules = student.modules
 
@@ -83,6 +88,7 @@ def set_student_module_attendance():
 		else:
 			status = False
 
+		session = get_db_session()
 		mod_attendance = attendance.ModuleAttendance(modulecode, session)
 
 		try:
@@ -91,7 +97,7 @@ def set_student_module_attendance():
 			return "The date >>{}<< does not have a class session for the module with code >>{}<<".format(sess_date.isoformat(), modulecode)
 
 		#redirect to show student's attendance for the module. Preserve the POST parameters
-		return redirect(url_for('get_student_module_attendance'), code=307)
+		return redirect(url_for('api.get_student_module_attendance'), code=307)
 
 
 # Return attendance record for the student logged in for the specified module
@@ -102,6 +108,7 @@ def get_student_module_attendance():
 	modulecode = req['modulecode']
 	isoDate = req['SessionDate']
 	sessiondate = datetime.datetime.fromisoformat(isoDate)
+	session = get_db_session()
 	student_attendance = StudentAttendance(studentID, session)
 	session_attendance = student_attendance.get_session_attendance(modulecode, sessiondate)
 	resp = session_attendance
@@ -117,6 +124,7 @@ def get_module_attendance_student():	#Not Yet implemented
 @bp.route('/students', methods = ['POST'])
 def get_module_students():		#Not Yet implemented. Looks incomplete
 	modulecode = request.form.get('modulecode')
+	session = get_db_session()
 	module = attendance.ModuleAttendance(modulecode, session)
 
 	mod_students = module.students
