@@ -1,4 +1,5 @@
-
+// This file is simply broken. Needs to be entirely redone
+// Student functionality in this project is miserable!
 function getAttendance(){
 	
 	const url = '/module/attendance'
@@ -106,11 +107,14 @@ let pie_chart_canvas = document.getElementById('attSum');
 let course_select = document.getElementById('courseList');
 let body = document.body;
 
+// var user_details;
+// fetch('/userdetails')
+// .then((resp) => resp.json())
+// .then(function(data){ user_details = data});
+
 var user_details;
-fetch('/userdetails')
-.then((resp) => resp.json())
-.then(function(data){ user_details = data});
-
-
-course_select.addEventListener("change", getAttendance);
+	fetch('/userdetails')
+	.then((resp) => resp.json())
+	.then(function(data){ user_details = data})
+	.then(course_select.addEventListener("change", getAttendance));
 //body.addEventListener("load", getAttendance);

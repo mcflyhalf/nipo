@@ -9,11 +9,11 @@ from nipo.conf import NipoConfig, get_logger
 
 setup(
 	name = "nipo",
-	version = "0.6.3",
+	version = "0.7.0",
 	author = "Mcflyhalf",
 	author_email = "mcflyhalf@live.com",
 	description = ("An implementation of classroom attendance monitoring"),
-	keywords = "facial recognition classroom attendance",
+	keywords = "classroom attendance school admin",
 	packages= find_packages(),
 	package_data={
         # For nipo_config file:

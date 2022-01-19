@@ -50,7 +50,7 @@ jobs:
 
       - name: Install nipo and Test with pytest
         run: |
-          pip install --use-feature=in-tree-build .
+          pip install .
           cd nipo
           pytest
 

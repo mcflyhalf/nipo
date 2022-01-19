@@ -64,7 +64,7 @@ class Module(Base):
 
 	def _attachStaffObj(self, staffUserObj):
 		'''
-		Fxn checks for the type of the user before adding them as staff
+		Fxn checks for the type of the user before attachinging them as staff
 		'''
 		if type(staffUserObj) is not User:
 			raise TypeError("Staff to be added to module must be of type {}.\
@@ -76,15 +76,35 @@ class Module(Base):
 
 		self.staff.append(staffUserObj)
 
-	def _attachStudentObj(self, studentObj):
+	def _attachStudentObj(self, studentObj, modattendanceobj):
 		'''
-		Fxn checks to confirm object is a student before adding them to module
+		Fxn checks to confirm object is a student before attaching them to module
+		Also uses ModuleAttendance object to add them to the attendance record
 		'''
 		if type(studentObj) is not Student:
 			raise TypeError("Student to be added to module must be of type {}.\
 				Attempted to add object of type {}".format("Student", type(studentObj)))
 
 		self.students.append(studentObj)
+		# Add student to module attendance record
+		modattendanceobj.addStudent(studentObj.id, mark=0)
+
+	def _detachStudentObj(self, studentObj, modattendanceobj):
+		'''
+		Fxn checks to confirm object is a student before detaching them from module
+		Also uses ModuleAttendance object to delete them from the attendance record
+		'''
+		if type(studentObj) is not Student:
+			raise TypeError("Student to be added to module must be of type {}.\
+				Attempted to add object of type {}".format("Student", type(studentObj)))
+
+		if studentObj not in self.students:
+			raise ValueError("The student with id {} is not attached to module code {}"\
+							.format(studentObj.id, self.code))
+		# Remove student from module attendance record
+		modattendanceobj.removeStudent(studentObj.id)
+		self.students.remove(studentObj)
+ 
 
 
 	def attachStaff(self, staffUser):
@@ -102,7 +122,7 @@ class Module(Base):
 		else:
 			self._attachStaffObj(staffUser)
 
-	def attachStudent(self, student):
+	def attachStudent(self, student, modattendanceobj):
 		'''
 		Attach student(s) to a module
 		:param student: Student object (or list of Student objects) containing students
@@ -113,9 +133,27 @@ class Module(Base):
 			#Iterate over the list instead of using list.extend in order to check each object in turn for type correctness
 			assert len(student) > 0
 			for stud in student:
-				self._attachStudentObj(stud)
+				self._attachStudentObj(stud, modattendanceobj)
 		else:
-			self._attachStudentObj(student)
+			self._attachStudentObj(student, modattendanceobj)
+
+	def __repr__(self):
+		return "Module {} held at {}".format(self.name, self.venue_code)
+
+	def detachStudent(self, student, modattendanceobj):
+		'''
+		Detach student(s) from a module
+		:param student: Student object (or list of Student objects)
+
+		:throws TypeError: If student is not actually of type Student
+		'''
+		if type(student) is list:
+			#Iterate over the list instead of using list.extend in order to check each object in turn for type correctness
+			assert len(student) > 0
+			for stud in student:
+				self._detachStudentObj(stud, modattendanceobj)
+		else:
+			self._detachStudentObj(student, modattendanceobj)
 
 	def __repr__(self):
 		return "Module {} held at {}".format(self.name, self.venue_code)

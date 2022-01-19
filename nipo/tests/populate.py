@@ -155,15 +155,16 @@ def populate_testdb():
 
 	#------------------Attach students to modules------------------#
 	for i, module in enumerate(modules, start=1):
+		ma = ModuleAttendance(module.code, session)
 		if i == 1:
 			#For the first module, include all students (and staff)
-			module.attachStudent(students)
+			module.attachStudent(students, ma)
 		elif i%2 == 0:
 			#For even numbered modules exclude first 2 students
-			module.attachStudent(students[2:])
+			module.attachStudent(students[2:], ma)
 		else:
 			#For odd numbered modules exclude last 3 students
-			module.attachStudent(students[:-3])
+			module.attachStudent(students[:-3], ma)
 
 
 	logger.info("Persisted all dummy data for DB >>{}<<  for integration testing. ".format(conn_details))
