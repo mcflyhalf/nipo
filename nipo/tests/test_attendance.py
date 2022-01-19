@@ -17,7 +17,29 @@ def test_stud_id():
 @pytest.fixture(scope = 'function')
 def testmod():
 	#Requires using the first module as it has all students and staff assigned
-	return ModuleAttendance(module_code[0], test_session)
+	mod = ModuleAttendance(module_code[0], test_session)
+	attendance_record = mod.getAttendance()
+	mod_stud_ids = attendance_record['Student_ID'].tolist()
+	original_mod_students = mod.module.students
+	original_mod_staff = mod.module.staff
+	yield mod
+
+	# Ensure only the original students remain in ModuleAttendance and in module
+	attendance_record = attendance_record.query('Student_ID in {}'.format(mod_stud_ids))
+	mod.persistAttendance(attendance_record)
+	# remove any students that were added during testing
+	new_mod_students = mod.module.students
+	for s in new_mod_students:
+		if s not in original_mod_students:
+			mod.module.students.remove(s)
+
+	# remove any staff that were added during testing
+	new_mod_staff = mod.module.staff
+	for s in new_mod_staff:
+		if s not in original_mod_staff:
+			mod.module.staff.remove(s)
+
+
 
 @pytest.fixture
 def test_stud_att():
@@ -38,7 +60,8 @@ class TestModuleAttendance:
 
 	def test_CreateAttendance(self,test_stud_id,testmod):
 		test_student = test_session.query(Student).filter(Student.id==test_stud_id).one()
-		testmod.module.attachStudent(test_student)
+		# testmod.module.attachStudent(test_student, testmod)
+		testmod.module.students.append(test_student)	#Using the non-recommended method of adding students so the createAttendance function is actually tested
 		test_attendance = testmod.createAttendance(force=True)
 		assert type(test_attendance) is pd.DataFrame
 		assert 'Student_ID' in test_attendance.columns

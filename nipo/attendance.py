@@ -173,7 +173,28 @@ class ModuleAttendance:
 			else:
 				att_dict[col] = mark
 
-		attendance_sheet.append(att_dict, ignore_index=True)
+		attendance_sheet = attendance_sheet.append(att_dict, ignore_index=True)
+		self.persistAttendance(attendance_sheet)
+
+	def removeStudent(self, studentid):
+		'''
+		Removes a student from the module's attendance record.
+		Does not remove the student from the module.
+		It is expected that this function would be called from another function that actually
+		detaches a student from the module 
+		'''
+		# try:
+		# 	student = self.session.query(Student).filter(Student.id==studentid).one()
+		# except NoResultFound:
+		# 	raise ValueError("Invalid student id {}".format(studentid))
+
+		attendance_sheet = self.getAttendance()
+
+		if studentid not in attendance_sheet['Student_ID'].tolist(): #Somehow without tolist, search doesnt work
+			#Student not in attendance record to begin with
+			raise ValueError("Student with ID {} not present in attendance record".format(studentid))
+
+		attendance_sheet = attendance_sheet.query('Student_ID != {}'.format(studentid))
 		self.persistAttendance(attendance_sheet)
 
 
