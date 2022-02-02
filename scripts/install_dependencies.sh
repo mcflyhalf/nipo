@@ -6,3 +6,5 @@ source nipo_prod_env.sh
 
 # pip install nipo (not editable)
 /home/ubuntu/projects/nipo/bin/python -m pip install .
+chown -R ubuntu:www-data .
+chmod -R 774 .
