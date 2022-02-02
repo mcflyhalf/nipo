@@ -4,6 +4,11 @@ files:
   - source: /
     destination: /home/ubuntu/projects/nipo
 file_exists_behavior: OVERWRITE
+permissions:
+  - object: /home/ubuntu/projects/nipo
+    owner: ubuntu
+    group: www-data
+    mode: 774
 hooks:
   BeforeInstall:
     - location: scripts/stop_server.sh
